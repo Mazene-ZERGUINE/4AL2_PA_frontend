@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+.gitignore
+.prettierignore
+.angular/
+
+node_modules/
+
+dist/
+build/
