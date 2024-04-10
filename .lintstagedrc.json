@@ -1,0 +1,15 @@
+{
+  "src/**/*.html": [
+    "prettier --write",
+    "npx htmlhint"
+  ],
+  "src/**/*.{css,scss}": [
+    "prettier --write",
+    "stylelint"
+  ],
+  "src/**/*.ts": [
+    "eslint --fix",
+    "prettier --write",
+    "eslint"
+  ]
+}
