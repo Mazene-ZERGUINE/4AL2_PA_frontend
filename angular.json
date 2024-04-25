@@ -8,6 +8,9 @@
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss"
+        },
+        "@schematics/angular:interceptor": {
+          "skipTests": false
         }
       },
       "root": "",
