@@ -6,6 +6,9 @@ import { AppComponent } from './app.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RequestInterceptor } from './core/interceptors/request.interceptor';
 import { DefaultUrlSerializer, UrlSerializer, UrlTree } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 class LowerCaseUrlSerializer extends DefaultUrlSerializer {
   override parse(url: string): UrlTree {
@@ -15,7 +18,13 @@ class LowerCaseUrlSerializer extends DefaultUrlSerializer {
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, AppRoutingModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
   providers: [
     {
       provide: UrlSerializer,
