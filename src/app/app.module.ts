@@ -9,7 +9,7 @@ import { DefaultUrlSerializer, UrlSerializer, UrlTree } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-
+import { CoreModule } from './core/core.module';
 class LowerCaseUrlSerializer extends DefaultUrlSerializer {
   override parse(url: string): UrlTree {
     return super.parse(url.toLowerCase());
@@ -24,6 +24,7 @@ class LowerCaseUrlSerializer extends DefaultUrlSerializer {
     BrowserAnimationsModule,
     MatIconModule,
     MatButtonModule,
+    CoreModule,
   ],
   providers: [
     {
