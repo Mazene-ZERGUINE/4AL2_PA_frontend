@@ -62,6 +62,10 @@ export class ApiService {
     return this.httpClient.post<void>(this.getPath(path), payload);
   }
 
+  postRequest<T, R>(path: string, payload: T): Observable<R> {
+    return this.httpClient.post<R>(this.getPath(path), payload);
+  }
+
   //#endregion  UPDATE methods
 
   private getPath(_path: string, id?: number | string): string {
