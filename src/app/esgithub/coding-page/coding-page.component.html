@@ -1,10 +1,21 @@
-<div class="relative top-28">
+<div class="relative top-12">
   <div
-    class="flex flex-col w-[90%] relative left-[5%] border p-8 border-gray-300 bg-gray-200"
+    class="flex flex-col w-[90%] relative left-[5%] border p-4 rounded-lg border-gray-300 bg-gray-200"
   >
     <div class="flex justify-between mb-2">
       <div class="relative top-8">
-        <button class="bg-black text-white font-bold py-1 px-4 rounded">
+        <input
+          type="file"
+          #fileInput
+          style="display: none"
+          (change)="onFileSelected($event)"
+          accept=".py,.js"
+        />
+
+        <button
+          class="bg-black text-white font-bold py-1 px-4 rounded"
+          (click)="fileInput.click()"
+        >
           <mat-icon>file_upload</mat-icon>
           <span class="relative p-2 bottom-1.5 italic">Upload from file</span>
         </button>
@@ -59,14 +70,31 @@
     </div>
   </div>
 
-  <button class="mt-4 relative left-[5%] bg-black text-white font-bold py-1 px-4 rounded">
+  <button
+    class="mt-4 relative left-[5%] bg-black text-white font-bold py-1 px-4 rounded"
+    (click)="onRunCodeClick()"
+  >
     <mat-icon>play_arrow</mat-icon>
     <span class="relative p-2 bottom-1.5 italic">Run code</span>
   </button>
 
   <div
-    class="flex flex-col w-[90%] mt-1 relative left-[5%] border p-8 border-gray-300 bg-gray-200"
+    class="flex flex-col w-[90%] mt-1 relative left-[5%] border p-8 border-gray-300 bg-gray-200 rounded-lg"
   >
-    <div class="h-48 max-h-96 overflow-y-auto"></div>
+    <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
+    <textarea
+      disabled
+      *ngIf="codeOutput && codeOutput.status === 0"
+      class="h-48 max-h-96 overflow-y-auto"
+    >
+      {{ codeOutput.output }}
+    </textarea>
+    <textarea
+      disabled
+      *ngIf="codeOutput && codeOutput.status !== 0"
+      class="h-48 max-h-96 overflow-y-auto text-red-600"
+    >
+      {{ codeOutput.output }}
+    </textarea>
   </div>
 </div>
