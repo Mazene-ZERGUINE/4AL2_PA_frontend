@@ -1,0 +1,60 @@
+<section class="flex gap-6">
+  <div
+    [ngClass]="{ 'w-72': open, 'w-16': !open }"
+    class="bg-gray-700 min-h-screen duration-500 text-gray-100 px-4"
+  >
+    <div class="py-3 flex justify-end mt-5">
+      <button class="hidden sm:inline-block" (click)="toggleOpen()">
+        <div *ngIf="!open">
+          <mat-icon>menu</mat-icon>
+        </div>
+
+        <div *ngIf="open">
+          <mat-icon>close</mat-icon>
+        </div>
+      </button>
+    </div>
+    <h1
+      class="text-green-200 ml-4 italic text-2xl"
+      style="font-weight: bolder"
+      *ngIf="open"
+      [@fadeIn]
+    >
+      ESGithub
+    </h1>
+    <div class="mt-4 flex flex-col gap-4 relative mt-24">
+      <a
+        *ngFor="let menu of menus; let i = index"
+        (click)="navigateToUrl(menu.link)"
+        class="group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-gray-800 rounded-md py-4"
+      >
+        <div style="margin-top: -17px">
+          <mat-icon> {{ menu.icon }} </mat-icon>
+        </div>
+        <h2
+          style="margin-top: -20px"
+          [style.transitionDelay]="i + 3 + '00ms'"
+          [ngClass]="{ 'opacity-0 translate-x-28 overflow-hidden': !open }"
+          class="whitespace-pre duration-500"
+        >
+          {{ menu.name }}
+        </h2>
+      </a>
+    </div>
+    <div class="mt-4 flex flex-col gap-4 relative mt-24">
+      <a
+        class="group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-gray-800 rounded-md py-4"
+      >
+        <div style="margin-top: -17px"><mat-icon>logout</mat-icon></div>
+        <h2
+          style="margin-top: -20px"
+          [style.transitionDelay]="9 + '00ms'"
+          [ngClass]="{ 'opacity-0 translate-x-28 overflow-hidden': !open }"
+          class="whitespace-pre duration-500"
+        >
+          Logout
+        </h2>
+      </a>
+    </div>
+  </div>
+</section>

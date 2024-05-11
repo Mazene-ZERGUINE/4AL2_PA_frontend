@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   declarations: [CodingPageComponent],
@@ -19,6 +20,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     MatSelectModule,
     FormsModule,
     MatProgressBarModule,
+    SharedModule,
   ],
 })
 export class EsgithubModule {}
