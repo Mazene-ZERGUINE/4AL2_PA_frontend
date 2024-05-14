@@ -18,6 +18,7 @@ import { filter, Subscription, switchMap, tap } from 'rxjs';
 import { ModalService } from '../../core/services/modal.service';
 import { ShareCodeModalComponent } from '../../core/modals/share-code-modal/share-code-modal.component';
 import { CreateProgramDto } from './models/CreateProgramDto';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-coding-page',
@@ -37,6 +38,7 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
     private readonly codeProcessorService: CodingProcessorService,
     private readonly notifier: NotifierService,
     private readonly modalService: ModalService,
+    private readonly router: Router,
   ) {}
 
   ngAfterViewInit(): void {
@@ -142,6 +144,7 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
         }),
         tap(() => {
           this.notifier.showSuccess('your program has been published');
+          this.router.navigate(['home']);
         }),
       )
       .subscribe();
