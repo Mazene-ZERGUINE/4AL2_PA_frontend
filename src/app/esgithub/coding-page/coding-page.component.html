@@ -25,7 +25,10 @@
               <mat-icon>file_upload</mat-icon>
               <span class="relative p-2 bottom-1.5 italic">Upload from file</span>
             </button>
-            <button class="bg-black text-white font-bold py-1 px-4 rounded ml-2">
+            <button
+              (click)="onShareClick()"
+              class="bg-black text-white font-bold py-1 px-4 rounded ml-2"
+            >
               <mat-icon>share</mat-icon>
               <span class="relative p-2 bottom-1.5 italic">Share</span>
             </button>
