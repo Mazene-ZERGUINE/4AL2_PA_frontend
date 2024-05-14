@@ -10,9 +10,10 @@ import { FormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { SharedModule } from '../shared/shared.module';
 import { CoreModule } from '../core/core.module';
+import { HomePageComponent } from './home-page/home-page.component';
 
 @NgModule({
-  declarations: [CodingPageComponent],
+  declarations: [CodingPageComponent, HomePageComponent],
   imports: [
     CommonModule,
     EsgithubRoutingModule,
