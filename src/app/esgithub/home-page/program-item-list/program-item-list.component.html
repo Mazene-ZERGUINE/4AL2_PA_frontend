@@ -1,0 +1,70 @@
+<div class="bg-gray-800 p-4 rounded-lg w-[80%] mx-auto text-white">
+  <div class="flex items-center justify-between mb-2">
+    <div class="flex items-center">
+      <img
+        src="assets/images/icons/python-svgrepo-com.svg"
+        class="w-6 h-6 rounded-full border border-white"
+      />
+      <a class="ml-4 font-bold italic text-md">UserName</a>
+    </div>
+  </div>
+  <div class="w-full h-24 overflow-auto p-4 border bg-white bg-opacity-30 rounded-md">
+    <p class="text-gray-800 text-sm z-50">{{ description }}</p>
+  </div>
+  <div
+    class="w-full h-32 overflow-auto p-4 border bg-white bg-opacity-30 rounded-md mt-2"
+  >
+    <textarea
+      disabled
+      class="text-black font-bold text-md z-50 w-full h-full border-0 bg-transparent"
+      >{{ sourceCode }}</textarea
+    >
+  </div>
+  <div class="flex mt-4 ml-4">
+    <img
+      *ngIf="programmingLanguage === 'javascript'"
+      src="assets/images/icons/javascript-svgrepo-com.svg"
+      class="w-4 h-4 rounded-full border border-white"
+    />
+    <img
+      *ngIf="programmingLanguage === 'python'"
+      src="assets/images/icons/python-svgrepo-com.svg"
+      class="w-4 h-4 rounded-full border border-white"
+    />
+    <div style="margin-top: -1px" class="text-blue-400 text-xs mt-2 ml-4">
+      {{ programmingLanguage }}
+    </div>
+  </div>
+
+  <div class="flex mt-4 ml-4" *ngIf="inputTypes?.length">
+    <div class="w-[10%] text-sm font-bold italic mr-4">Entry files:</div>
+    <div
+      class="bg-green-400 rounded-md px-4 ml-2 text-sm"
+      *ngFor="let file of inputTypes"
+    >
+      {{ file }}
+    </div>
+  </div>
+
+  <div class="flex mt-4 ml-4" *ngIf="outputTypes?.length">
+    <div class="w-[10%] text-sm font-bold italic mr-4">Exit files:</div>
+    <div class="bg-red-400 rounded-md px-4 ml-2 text-sm" *ngFor="let file of outputTypes">
+      {{ file }}
+    </div>
+  </div>
+
+  <div class="flex mt-4" *ngIf="outputTypes?.length">
+    <button class="bg-black text-white font-bold py-1 px-4 rounded opacity-50 ml-2">
+      <i class="material-icons">thumb_up_off_alt</i>
+      <span class="relative p-2 bottom-1.5 italic">liked</span>
+    </button>
+    <button class="bg-black text-white font-bold py-1 px-4 rounded opacity-50 ml-2">
+      <i class="material-icons">thumb_down_off_alt</i>
+      <span class="relative p-2 bottom-1.5 italic">disliked</span>
+    </button>
+    <button class="bg-black text-white font-bold py-1 px-4 rounded opacity-80 ml-2">
+      <i class="material-icons">remove_red_eye</i>
+      <span class="relative p-2 bottom-1.5 italic">view</span>
+    </button>
+  </div>
+</div>
