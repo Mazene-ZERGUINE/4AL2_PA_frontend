@@ -8,6 +8,7 @@ import { FormControl } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
+  @Input() isLogin!: boolean;
   @Input() emailFormControl!: FormControl<string>;
 
   @Input() passwordFormControl!: FormControl<string>;
