@@ -1,0 +1,11 @@
+<div class="w-[466px]" *ngIf="submissionType === 'join'">
+  <p class="text-[#E2E2E2]">Confirm your password:</p>
+  <mat-form-field appearance="outline" color="primary" class="w-[100%]">
+    <input
+      [formControl]="confirmPasswordControl"
+      matInput
+      placeholder="************"
+      required
+    />
+  </mat-form-field>
+</div>

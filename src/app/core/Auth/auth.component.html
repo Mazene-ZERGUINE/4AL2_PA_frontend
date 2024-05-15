@@ -1,0 +1,39 @@
+<div class="bg-[#313234] flex flex-col items-center h-[100vh]">
+  <h1 mat-dialog-title class="text-white mt-[99px] text-6xl">RS code</h1>
+  <p class="mt-[21px] text-3xl text-[#AAAAAA]">Sign in to your account</p>
+  <p class="text-[#6C6C6C] mt-[31px] mb-[54px]">Please enter your details</p>
+  <form
+    class="flex flex-col justify-center items-center w-[643px] rounded-lg h-[545px] bg-[#424244]"
+  >
+    <app-login
+      [emailFormControl]="authForm.controls.email"
+      [passwordFormControl]="authForm.controls.password"
+    ></app-login>
+
+    <app-join
+      [submissionType]="submissionType"
+      [confirmPasswordControl]="authForm.controls.confirmPassword"
+    ></app-join>
+
+    <div class="text-[#6C6C6C] mb-[36px]">
+      <p *ngIf="isLogin">
+        Forgot your password ?
+        <a href="#" class="underline">Click here.</a>
+      </p>
+
+      <span *ngIf="isLogin">New to Rs Code</span>
+      <span *ngIf="!isLogin">Already on Rs Code ? </span>
+
+      <span class="underline" (click)="onToggleSubmissionType()">
+        {{ isLogin ? 'Join us' : 'login' }}
+      </span>
+    </div>
+
+    <button
+      class="text-[#E2E2E2] bg-[#6C6C6C] text-xl py-[27px] w-[466px] rounded-lg"
+      (click)="onSubmit()"
+    >
+      <span>Sign In</span>
+    </button>
+  </form>
+</div>

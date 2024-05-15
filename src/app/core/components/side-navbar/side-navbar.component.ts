@@ -29,6 +29,7 @@ export class SideNavbarComponent implements OnInit {
     private readonly router: Router,
     private readonly navService: NavService,
   ) {}
+
   ngOnInit() {
     this.open = this.navService.navBarState;
   }
