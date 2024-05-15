@@ -1,5 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { CreateUserDto } from './models/create-user.dto';
+import { omit } from 'lodash';
+import { AuthService } from './auth.service';
+import { NotifierService } from '../services/notifier.service';
+import { Router } from '@angular/router';
+import { LoginDto } from './models/login.dto';
 
 export type AuthFormType = {
   firstName: FormControl<string | null>;
@@ -34,6 +45,13 @@ export class AuthComponent implements OnInit {
     confirmPassword: new FormControl<string | null>(null),
   });
 
+  constructor(
+    private readonly authService: AuthService,
+    private readonly notifierService: NotifierService,
+    private readonly router: Router,
+    private readonly cdRef: ChangeDetectorRef,
+  ) {}
+
   ngOnInit(): void {
     this.updateValidators();
   }
@@ -50,7 +68,6 @@ export class AuthComponent implements OnInit {
       this.authForm.controls.userName.clearValidators();
       this.authForm.controls.confirmPassword.clearValidators();
 
-      // Reset values to null when in login mode
       this.authForm.controls.firstName.setValue(null);
       this.authForm.controls.lastName.setValue(null);
       this.authForm.controls.userName.setValue(null);
@@ -69,9 +86,31 @@ export class AuthComponent implements OnInit {
 
   onSubmit(): void {
     if (this.authForm.valid) {
-      console.log('Form Submitted', this.authForm.value);
+      const formValues = this.authForm.value;
+
+      if (!this.isLogin) {
+        const payload: CreateUserDto = omit(formValues, [
+          'confirmPassword',
+        ]) as CreateUserDto;
+        this.authService.register(payload).subscribe(() => {
+          this.notifierService.showSuccess('Your account has been created successfully');
+          this.isLogin = !this.isLogin;
+          this.updateValidators();
+          this.cdRef.markForCheck();
+        });
+      } else {
+        const payload: LoginDto = omit(formValues, [
+          'confirmPassword',
+          'firstName',
+          'lastName',
+          'userName',
+        ]) as LoginDto;
+        this.authService.login(payload).subscribe(() => {
+          this.notifierService.showSuccess('Login successful');
+          this.router.navigate(['home']);
+        });
+      }
     } else {
-      console.log('Form Invalid');
       this.authForm.markAllAsTouched();
     }
   }
