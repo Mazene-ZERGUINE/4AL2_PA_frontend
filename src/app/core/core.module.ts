@@ -8,6 +8,7 @@ import { RequestInterceptor } from './interceptors/request.interceptor';
 import { CustomSnackbarComponent } from './components/custom-snackbar/custom-snackbar.component';
 import { SideNavbarComponent } from './components/side-navbar/side-navbar.component';
 import { AuthModule } from './Auth/auth.module';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 @NgModule({
   declarations: [CustomSnackbarComponent, SideNavbarComponent],
@@ -16,6 +17,11 @@ import { AuthModule } from './Auth/auth.module';
     {
       provide: HTTP_INTERCEPTORS,
       useClass: RequestInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
       multi: true,
     },
   ],
