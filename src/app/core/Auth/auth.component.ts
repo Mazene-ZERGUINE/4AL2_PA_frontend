@@ -105,9 +105,10 @@ export class AuthComponent implements OnInit {
           'lastName',
           'userName',
         ]) as LoginDto;
-        this.authService.login(payload).subscribe(() => {
-          this.notifierService.showSuccess('Login successful');
-          this.router.navigate(['home']);
+        this.authService.login(payload).subscribe((response) => {
+          localStorage.setItem('token', response.accessToken);
+          this.notifierService.showSuccess(`welcome ${formValues.userName} 💩`);
+          // todo: redirect to the homePage
         });
       }
     } else {

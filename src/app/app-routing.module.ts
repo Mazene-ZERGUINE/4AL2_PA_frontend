@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
-    path: 'app',
+    path: '',
     loadChildren: () =>
       import('./esgithub/esgithub.module').then((m) => m.EsgithubModule),
   },
