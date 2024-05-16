@@ -6,6 +6,8 @@ import { AuthComponent } from './auth.component';
 import { LoginComponent } from './login/login.component';
 import { JoinComponent } from './join/join.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
   declarations: [AuthComponent, LoginComponent, JoinComponent],
@@ -15,6 +17,8 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     SharedModule,
     ReactiveFormsModule,
     FormsModule,
+    MatInputModule,
+    MatSnackBarModule,
   ],
 })
 export class AuthModule {}

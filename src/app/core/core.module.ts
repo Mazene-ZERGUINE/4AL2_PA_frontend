@@ -9,10 +9,18 @@ import { CustomSnackbarComponent } from './components/custom-snackbar/custom-sna
 import { SideNavbarComponent } from './components/side-navbar/side-navbar.component';
 import { AuthModule } from './Auth/auth.module';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { MaterialModule } from '../shared/material.module';
 
 @NgModule({
   declarations: [CustomSnackbarComponent, SideNavbarComponent],
-  imports: [CommonModule, SharedModule, RouterModule, HttpClientModule, AuthModule],
+  imports: [
+    CommonModule,
+    SharedModule,
+    RouterModule,
+    HttpClientModule,
+    AuthModule,
+    MaterialModule,
+  ],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,

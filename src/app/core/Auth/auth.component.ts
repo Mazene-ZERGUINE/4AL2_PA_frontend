@@ -107,8 +107,8 @@ export class AuthComponent implements OnInit {
         ]) as LoginDto;
         this.authService.login(payload).subscribe((response) => {
           localStorage.setItem('token', response.accessToken);
-          this.notifierService.showSuccess(`welcome ${formValues.userName} 💩`);
-          // todo: redirect to the homePage
+          this.notifierService.showSuccess(`welcome 💩`);
+          this.router.navigate(['home']);
         });
       }
     } else {

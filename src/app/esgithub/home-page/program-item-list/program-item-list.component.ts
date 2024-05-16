@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { FileTypesEnum } from '../../../shared/enums/FileTypesEnum';
+import { UserDataModel } from '../../../core/models/user-data.model';
 
 @Component({
   selector: 'app-program-item-list',
@@ -16,4 +17,5 @@ export class ProgramItemListComponent {
   @Input() inputTypes!: FileTypesEnum[];
 
   @Input() outputTypes!: FileTypesEnum[];
+  @Input() user!: UserDataModel;
 }

@@ -1,4 +1,5 @@
 import { FileTypesEnum } from '../../shared/enums/FileTypesEnum';
+import { UserDataModel } from './user-data.model';
 
 export class ProgramModel {
   programId!: string;
@@ -8,6 +9,7 @@ export class ProgramModel {
   visibility!: string;
   inputTypes!: FileTypesEnum[];
   outputTypes!: FileTypesEnum[];
+  user!: UserDataModel;
   userId!: string;
   createdAt!: Date;
   updatedAt!: Date;

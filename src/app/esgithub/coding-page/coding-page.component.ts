@@ -19,6 +19,8 @@ import { ModalService } from '../../core/services/modal.service';
 import { ShareCodeModalComponent } from '../../core/modals/share-code-modal/share-code-modal.component';
 import { CreateProgramDto } from './models/CreateProgramDto';
 import { Router } from '@angular/router';
+import { AuthService } from '../../core/Auth/auth.service';
+import { UserDataModel } from '../../core/models/user-data.model';
 
 @Component({
   selector: 'app-coding-page',
@@ -32,16 +34,24 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
   selectedLanguage = 'javascript';
   isLoading = false;
   codeOutput!: { output: string; status: number };
+  private userId!: string;
   private runCodeSubscription = new Subscription();
+  private getUserDataSubscription = new Subscription();
 
   constructor(
     private readonly codeProcessorService: CodingProcessorService,
     private readonly notifier: NotifierService,
     private readonly modalService: ModalService,
     private readonly router: Router,
+    private readonly authService: AuthService,
   ) {}
 
   ngAfterViewInit(): void {
+    this.getUserDataSubscription = this.authService
+      .getUserData()
+      .subscribe((user: UserDataModel) => {
+        this.userId = user.userId;
+      });
     this.aceEditor = ace.edit(this.editor.nativeElement);
     this.aceEditor.setTheme('ace/theme/github_dark');
     this.aceEditor.session.setMode('ace/mode/' + this.selectedLanguage);
@@ -59,6 +69,7 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.runCodeSubscription.unsubscribe();
+    this.getUserDataSubscription.unsubscribe();
   }
 
   onSelectedLanguageUpdate(): void {
@@ -138,7 +149,7 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
             ...result,
             programmingLanguage: this.selectedLanguage,
             sourceCode: this.aceEditor.getValue(),
-            userId: '1234', // todo: get the real user id after authentication //
+            userId: this.userId,
           };
           return this.codeProcessorService.shareProgram(programDto);
         }),

@@ -10,7 +10,7 @@ import { ProgramModel } from '../../core/models/program.model';
 export class HomeService {
   constructor(private readonly apiService: ApiService) {}
 
-  getPrograms$(
+  getProgramsList$(
     type: 'private' | 'public' | 'only_followers',
   ): Observable<ProgramModel[]> {
     const params = new HttpParams().append('type', type);

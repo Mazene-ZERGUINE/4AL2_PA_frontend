@@ -2,11 +2,18 @@
   <div class="flex items-center justify-between mb-2">
     <div class="flex items-center">
       <img
-        src="assets/images/icons/python-svgrepo-com.svg"
+        *ngIf="user.avatarUrl === null"
+        src="https://icons8.com/icon/7819/male-user"
         class="w-6 h-6 rounded-full border border-white"
       />
-      <a class="ml-4 font-bold italic text-md">UserName</a>
+      <img
+        *ngIf="user.avatarUrl !== null"
+        [src]="user.avatarUrl"
+        class="w-6 h-6 rounded-full border border-white"
+      />
+      <a class="ml-4 font-bold italic text-md">{{ user.userName }}</a>
     </div>
+    <p class="mr-2">{{ user.lastName | uppercase }} {{ user.firstName }}</p>
   </div>
   <div class="w-full h-24 overflow-auto p-4 border bg-white bg-opacity-30 rounded-md">
     <p class="text-gray-800 text-sm z-50">{{ description }}</p>
