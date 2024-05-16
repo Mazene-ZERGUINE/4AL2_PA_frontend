@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { CodingPageComponent } from './coding-page/coding-page.component';
 
 const routes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'auth' },
   { path: 'coding', component: CodingPageComponent, canActivate: [] },
 ];
 

@@ -5,25 +5,23 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { SharedModule } from '../shared/shared.module';
 import { RequestInterceptor } from './interceptors/request.interceptor';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { CustomSnackbarComponent } from './components/custom-snackbar/custom-snackbar.component';
-import { MatIconModule } from '@angular/material/icon';
 import { SideNavbarComponent } from './components/side-navbar/side-navbar.component';
+import { AuthModule } from './Auth/auth.module';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 @NgModule({
   declarations: [CustomSnackbarComponent, SideNavbarComponent],
-  imports: [
-    CommonModule,
-    SharedModule,
-    RouterModule,
-    HttpClientModule,
-    MatSnackBarModule,
-    MatIconModule,
-  ],
+  imports: [CommonModule, SharedModule, RouterModule, HttpClientModule, AuthModule],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,
       useClass: RequestInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
       multi: true,
     },
   ],

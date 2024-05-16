@@ -73,7 +73,7 @@ export class CodingPageComponent implements AfterViewInit {
     fileReader.readAsText(file);
   }
 
-  onRunCodeClick() {
+  onRunCodeClick(): void {
     this.isLoading = true;
     const payload: RunCodeRequestDto = {
       programmingLanguage: this.selectedLanguage,

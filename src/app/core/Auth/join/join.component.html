@@ -1,0 +1,76 @@
+<div class="w-[466px]" *ngIf="!isLogin">
+  <div *ngIf="currentStep === 1">
+    <p class="text-[#E2E2E2]">Enter your email:</p>
+    <mat-form-field appearance="outline" color="primary" class="w-[100%]">
+      <input [formControl]="emailFormControl" matInput placeholder="Email" required />
+      <mat-error *ngIf="emailFormControl.touched && emailFormControl.invalid">
+        Valid email is required.
+      </mat-error>
+    </mat-form-field>
+
+    <p class="text-[#E2E2E2]">Enter your password:</p>
+    <mat-form-field appearance="outline" color="primary" class="w-[100%]">
+      <input
+        [formControl]="passwordFormControl"
+        matInput
+        type="password"
+        placeholder="Password"
+        required
+      />
+      <mat-error *ngIf="passwordFormControl.touched && passwordFormControl.invalid">
+        Password is required and must be at least 8 characters long.
+      </mat-error>
+    </mat-form-field>
+
+    <p class="text-[#E2E2E2]">Confirm your password:</p>
+    <mat-form-field appearance="outline" color="primary" class="w-[100%]">
+      <input
+        [formControl]="confirmPasswordControl"
+        matInput
+        type="password"
+        placeholder="Confirm Password"
+        required
+      />
+      <mat-error
+        *ngIf="
+          confirmPasswordControl?.touched && confirmPasswordControl?.errors?.['mismatch']
+        "
+      >
+        Passwords do not match.
+      </mat-error>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="nextStep()">Next</button>
+  </div>
+
+  <div *ngIf="currentStep === 2">
+    <p class="text-[#E2E2E2]">Enter your first name:</p>
+    <mat-form-field appearance="outline" color="primary" class="w-[100%]">
+      <input
+        [formControl]="firstNameControl"
+        matInput
+        placeholder="First Name"
+        required
+      />
+      <mat-error *ngIf="firstNameControl.touched && firstNameControl.invalid">
+        First name is required.
+      </mat-error>
+    </mat-form-field>
+
+    <p class="text-[#E2E2E2]">Enter your last name:</p>
+    <mat-form-field appearance="outline" color="primary" class="w-[100%]">
+      <input [formControl]="lastNameControl" matInput placeholder="Last Name" required />
+      <mat-error *ngIf="lastNameControl.touched && lastNameControl.invalid">
+        Last name is required.
+      </mat-error>
+    </mat-form-field>
+
+    <p class="text-[#E2E2E2]">Enter your username:</p>
+    <mat-form-field appearance="outline" color="primary" class="w-[100%]">
+      <input [formControl]="userNameControl" matInput placeholder="Username" required />
+      <mat-error *ngIf="userNameControl.touched && userNameControl.invalid">
+        Username is required.
+      </mat-error>
+    </mat-form-field>
+  </div>
+</div>
