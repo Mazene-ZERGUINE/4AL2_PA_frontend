@@ -12,9 +12,15 @@ import { SharedModule } from '../shared/shared.module';
 import { CoreModule } from '../core/core.module';
 import { HomePageComponent } from './home-page/home-page.component';
 import { ProgramItemListComponent } from './home-page/program-item-list/program-item-list.component';
+import { ProfileComponent } from './profile/profile.component';
 
 @NgModule({
-  declarations: [CodingPageComponent, HomePageComponent, ProgramItemListComponent],
+  declarations: [
+    CodingPageComponent,
+    HomePageComponent,
+    ProgramItemListComponent,
+    ProfileComponent,
+  ],
   imports: [
     CommonModule,
     EsgithubRoutingModule,
