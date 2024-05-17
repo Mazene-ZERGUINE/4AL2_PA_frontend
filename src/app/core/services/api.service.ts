@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environment/environment';
@@ -14,6 +14,7 @@ export class ApiService {
     this._apiUrl = environment.baseUrl;
   }
 
+  // todo: review the methods of this service //
   count<T>(path: string): Observable<T> {
     return this.httpClient.get<T>(this.getPath(path));
   }
@@ -64,6 +65,18 @@ export class ApiService {
 
   postRequest<T, R>(path: string, payload: T): Observable<R> {
     return this.httpClient.post<R>(this.getPath(path), payload);
+  }
+
+  getRequest<T>(path: string, params?: HttpParams): Observable<T> {
+    return this.httpClient.get<T>(this.getPath(path), { params });
+  }
+
+  deleteRequest<T>(path: string): Observable<T> {
+    return this.httpClient.delete<T>(this.getPath(path));
+  }
+
+  patchRequest<T, P>(path: string, payload: P): Observable<T> {
+    return this.httpClient.patch<T>(this.getPath(path), payload);
   }
 
   //#endregion  UPDATE methods

@@ -1,4 +1,10 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  OnDestroy,
+} from '@angular/core';
 import * as ace from 'ace-builds';
 import 'ace-builds/src-noconflict/theme-github_dark';
 import 'ace-builds/src-noconflict/mode-javascript';
@@ -8,26 +14,44 @@ import { RunCodeRequestDto } from './models/RunCodeRequestDto';
 import { CodingProcessorService } from './coding-processor.service';
 import { RunCodeResponseDto } from './models/RunCodeResponseDto';
 import { NotifierService } from '../../core/services/notifier.service';
+import { filter, Subscription, switchMap, tap } from 'rxjs';
+import { ModalService } from '../../core/services/modal.service';
+import { ShareCodeModalComponent } from '../../core/modals/share-code-modal/share-code-modal.component';
+import { CreateProgramDto } from './models/CreateProgramDto';
+import { Router } from '@angular/router';
+import { AuthService } from '../../core/Auth/auth.service';
+import { UserDataModel } from '../../core/models/user-data.model';
 
 @Component({
   selector: 'app-coding-page',
   templateUrl: './coding-page.component.html',
   styleUrls: ['./coding-page.component.scss'],
 })
-export class CodingPageComponent implements AfterViewInit {
+export class CodingPageComponent implements AfterViewInit, OnDestroy {
   @ViewChild('editor') private editor!: ElementRef<HTMLElement>;
 
   aceEditor!: Ace.Editor;
   selectedLanguage = 'javascript';
   isLoading = false;
   codeOutput!: { output: string; status: number };
+  private userId!: string;
+  private runCodeSubscription = new Subscription();
+  private getUserDataSubscription = new Subscription();
 
   constructor(
     private readonly codeProcessorService: CodingProcessorService,
     private readonly notifier: NotifierService,
+    private readonly modalService: ModalService,
+    private readonly router: Router,
+    private readonly authService: AuthService,
   ) {}
 
   ngAfterViewInit(): void {
+    this.getUserDataSubscription = this.authService
+      .getUserData()
+      .subscribe((user: UserDataModel) => {
+        this.userId = user.userId;
+      });
     this.aceEditor = ace.edit(this.editor.nativeElement);
     this.aceEditor.setTheme('ace/theme/github_dark');
     this.aceEditor.session.setMode('ace/mode/' + this.selectedLanguage);
@@ -41,6 +65,11 @@ export class CodingPageComponent implements AfterViewInit {
     this.aceEditor.setValue(`function hello() {
         console.log("Hello, world!");
     }`);
+  }
+
+  ngOnDestroy() {
+    this.runCodeSubscription.unsubscribe();
+    this.getUserDataSubscription.unsubscribe();
   }
 
   onSelectedLanguageUpdate(): void {
@@ -80,31 +109,55 @@ export class CodingPageComponent implements AfterViewInit {
       sourceCode: this.aceEditor.getValue(),
     };
 
-    this.codeProcessorService.sendCodeToProcess(payload).subscribe({
-      next: (response: RunCodeResponseDto) => {
-        if (response.result.returncode === 0) {
+    this.runCodeSubscription = this.codeProcessorService
+      .sendCodeToProcess(payload)
+      .subscribe({
+        next: (response: RunCodeResponseDto) => {
+          if (response.result.returncode === 0) {
+            this.codeOutput = {
+              output: response.result.stdout,
+              status: response.result.returncode,
+            };
+            this.notifier.showSuccess('code executed successfully');
+          } else {
+            this.codeOutput = {
+              output: response.result.stderr,
+              status: response.result.returncode,
+            };
+            this.notifier.showError('code returned with error');
+          }
+          this.isLoading = false;
+        },
+        error: () => {
           this.codeOutput = {
-            output: response.result.stdout,
-            status: response.result.returncode,
+            status: 1,
+            output: 'Request has reached timeout',
           };
-          this.notifier.showSuccess('code executed successfully');
-        } else {
-          this.codeOutput = {
-            output: response.result.stderr,
-            status: response.result.returncode,
+          this.notifier.showWarning('request has reached timout');
+          this.isLoading = false;
+        },
+      });
+  }
+
+  onShareClick(): void {
+    this.modalService
+      .openDialog(ShareCodeModalComponent, 700)
+      .pipe(
+        filter((result) => result !== undefined),
+        switchMap((result) => {
+          const programDto: CreateProgramDto = {
+            ...result,
+            programmingLanguage: this.selectedLanguage,
+            sourceCode: this.aceEditor.getValue(),
+            userId: this.userId,
           };
-          this.notifier.showError('code returned with error');
-        }
-        this.isLoading = false;
-      },
-      error: () => {
-        this.codeOutput = {
-          status: 1,
-          output: 'Request has reached timeout',
-        };
-        this.notifier.showWarning('request has reached timout');
-        this.isLoading = false;
-      },
-    });
+          return this.codeProcessorService.shareProgram(programDto);
+        }),
+        tap(() => {
+          this.notifier.showSuccess('your program has been published');
+          this.router.navigate(['home']);
+        }),
+      )
+      .subscribe();
   }
 }

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { CreateUserDto } from './models/create-user.dto';
 import { LoginDto } from './models/login.dto';
 import { AccessTokenDto } from './models/access-token.dto';
+import { UserDataModel } from '../models/user-data.model';
 
 @Injectable({
   providedIn: 'root',
@@ -15,5 +16,8 @@ export class AuthService {
   }
   login(payload: LoginDto): Observable<AccessTokenDto> {
     return this.apiService.postRequest('auth/login', payload);
+  }
+  getUserData(): Observable<UserDataModel> {
+    return this.apiService.getRequest('auth/get_info');
   }
 }
