@@ -1,6 +1,15 @@
-<div class="bg-[#424244] p-4 rounded-lg w-[90%] mx-auto text-white">
+<div
+  class="bg-[#424244] p-4 rounded-lg w-[90%] mx-auto text-white"
+  [ngClass]="{ 'w-full': isOwner === true }"
+>
+  <div
+    *ngIf="isOwner === true"
+    class="bg-black p-2 rounded-md italic font-bold w-auto flex justify-center items-center"
+  >
+    {{ visibility }}
+  </div>
   <div class="flex items-center justify-between mb-2">
-    <div class="flex items-center">
+    <div class="flex items-center" *ngIf="isOwner === false">
       <img
         *ngIf="user.avatarUrl === null"
         src="https://icons8.com/icon/7819/male-user"
@@ -13,7 +22,9 @@
       />
       <a class="ml-4 font-bold italic text-md">{{ user.userName }}</a>
     </div>
-    <p class="mr-2">{{ user.lastName | uppercase }} {{ user.firstName }}</p>
+    <p *ngIf="isOwner === false" class="mr-2">
+      {{ user.lastName | uppercase }} {{ user.firstName }}
+    </p>
   </div>
   <div class="w-full h-24 overflow-auto p-4 border bg-white bg-opacity-30 rounded-md">
     <p class="text-gray-800 text-sm z-50">{{ description }}</p>
@@ -60,7 +71,7 @@
     </div>
   </div>
 
-  <div class="flex mt-4" *ngIf="outputTypes?.length">
+  <div class="flex mt-4" *ngIf="isOwner === false">
     <button class="bg-black text-white font-bold py-1 px-4 rounded opacity-50 ml-2">
       <i class="material-icons">thumb_up_off_alt</i>
       <span class="relative p-2 bottom-1.5 italic">liked</span>
@@ -72,6 +83,12 @@
     <button class="bg-black text-white font-bold py-1 px-4 rounded opacity-80 ml-2">
       <i class="material-icons">remove_red_eye</i>
       <span class="relative p-2 bottom-1.5 italic">view</span>
+    </button>
+  </div>
+  <div *ngIf="isOwner" class="mt-4">
+    <button class="bg-black text-white font-bold py-1 px-4 rounded opacity-80 ml-2">
+      <i class="material-icons">edit</i>
+      <span class="relative p-2 bottom-1.5 italic">Edit</span>
     </button>
   </div>
 </div>

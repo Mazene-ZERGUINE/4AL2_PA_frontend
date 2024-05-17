@@ -18,4 +18,6 @@ export class ProgramItemListComponent {
 
   @Input() outputTypes!: FileTypesEnum[];
   @Input() user!: UserDataModel;
+  @Input() isOwner: boolean = false;
+  @Input() visibility!: string;
 }
