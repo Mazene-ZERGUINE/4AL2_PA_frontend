@@ -1,0 +1,12 @@
+<div *ngFor="let program of programsList$ | async" class="mb-4 w-full">
+  <app-program-item-list
+    [description]="program.description"
+    [sourceCode]="program.sourceCode"
+    [programmingLanguage]="program.programmingLanguage"
+    [inputTypes]="program.inputTypes"
+    [outputTypes]="program.outputTypes"
+    [user]="program.user"
+    [isOwner]="true"
+    [visibility]="program.visibility"
+  ></app-program-item-list>
+</div>

@@ -14,6 +14,7 @@ import { HomePageComponent } from './home-page/home-page.component';
 import { ProgramItemListComponent } from './home-page/program-item-list/program-item-list.component';
 import { ProfileComponent } from './profile/profile.component';
 import { MaterialModule } from '../shared/material.module';
+import { UserProgramsComponent } from './profile/user-programs/user-programs.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { MaterialModule } from '../shared/material.module';
     HomePageComponent,
     ProgramItemListComponent,
     ProfileComponent,
+    UserProgramsComponent,
   ],
   imports: [
     CommonModule,
