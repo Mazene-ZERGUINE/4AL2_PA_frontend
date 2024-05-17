@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
+import { map, finalize } from 'rxjs/operators';
 import { HomeService } from './home.service';
 import { ProgramModel } from '../../core/models/program.model';
 import { AuthService } from '../../core/Auth/auth.service';
@@ -11,9 +12,10 @@ import { UserDataModel } from '../../core/models/user-data.model';
   styleUrls: ['./home-page.component.scss'],
 })
 export class HomePageComponent implements OnInit {
-  // todo: a spinner in this page when data many data are loaded
   programsList$ = new Observable<ProgramModel[]>();
   userData$!: Observable<UserDataModel>;
+  isLoading = true;
+
   constructor(
     private readonly homeService: HomeService,
     private readonly authService: AuthService,
@@ -21,6 +23,14 @@ export class HomePageComponent implements OnInit {
 
   ngOnInit() {
     this.userData$ = this.authService.getUserData();
-    this.programsList$ = this.homeService.getProgramsList$('public');
+    this.programsList$ = combineLatest([
+      this.userData$,
+      this.homeService.getProgramsList$('public'),
+    ]).pipe(
+      map(([userData, programs]) =>
+        programs.filter((program) => program.user.userId !== userData.userId),
+      ),
+      finalize(() => (this.isLoading = false)),
+    );
   }
 }

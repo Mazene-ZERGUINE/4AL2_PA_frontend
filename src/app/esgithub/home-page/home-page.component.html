@@ -1,13 +1,16 @@
+<!-- home-page.component.html -->
 <div class="flex h-screen bg-gray-100">
   <div class="z-50">
     <app-side-navbar></app-side-navbar>
   </div>
 
-  <div class="overflow-auto w-full">
+  <div class="overflow-auto w-full relative">
+    <div class="absolute inset-0 flex justify-center items-center" *ngIf="isLoading">
+      <mat-spinner color="accent"></mat-spinner>
+    </div>
     <div class="relative top-12 w-full">
       <div *ngFor="let program of programsList$ | async" class="mb-4 w-full">
         <app-program-item-list
-          *ngIf="(userData$ | async)?.userId !== program.user.userId"
           [description]="program.description"
           [sourceCode]="program.sourceCode"
           [programmingLanguage]="program.programmingLanguage"

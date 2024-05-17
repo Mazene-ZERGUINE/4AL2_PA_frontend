@@ -13,6 +13,7 @@ import { CoreModule } from '../core/core.module';
 import { HomePageComponent } from './home-page/home-page.component';
 import { ProgramItemListComponent } from './home-page/program-item-list/program-item-list.component';
 import { ProfileComponent } from './profile/profile.component';
+import { MaterialModule } from '../shared/material.module';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { ProfileComponent } from './profile/profile.component';
     MatProgressBarModule,
     SharedModule,
     CoreModule,
+    MaterialModule,
   ],
 })
 export class EsgithubModule {}

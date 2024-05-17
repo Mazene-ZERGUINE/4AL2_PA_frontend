@@ -44,6 +44,6 @@ export class SideNavbarComponent implements OnInit {
   }
 
   onLogoutClick(): void {
-    // todo: logout logic here
+    this.navService.logout();
   }
 }
