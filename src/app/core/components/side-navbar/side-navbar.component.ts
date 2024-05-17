@@ -16,11 +16,11 @@ import { NavService } from './nav.service';
 })
 export class SideNavbarComponent implements OnInit {
   menus = [
-    { name: 'Home', link: '/', icon: 'home' },
+    { name: 'Home', link: '/home', icon: 'home' },
     { name: 'programmes', link: '/', icon: 'view_list' },
     { name: 'code', link: '/coding', icon: 'code' },
     { name: 'pipelines', link: '/', icon: 'webhook' },
-    { name: 'profile', link: '/', icon: 'account_circle' },
+    { name: 'profile', link: '/profile', icon: 'account_circle' },
   ];
 
   open!: boolean;
