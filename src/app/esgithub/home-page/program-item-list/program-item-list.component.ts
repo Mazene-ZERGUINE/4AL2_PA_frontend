@@ -20,4 +20,5 @@ export class ProgramItemListComponent {
   @Input() user!: UserDataModel;
   @Input() isOwner: boolean = false;
   @Input() visibility!: string;
+  @Input() homePage: boolean = true;
 }

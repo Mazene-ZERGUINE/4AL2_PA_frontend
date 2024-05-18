@@ -9,4 +9,5 @@ import { ProgramModel } from '../../../core/models/program.model';
 })
 export class UserProgramsComponent {
   @Input() programsList$!: Observable<ProgramModel[]>;
+  @Input() profileOwner!: boolean;
 }

@@ -31,6 +31,7 @@
                   hidden
                 />
                 <button
+                  *ngIf="isProfileOwner"
                   (click)="fileInput.click()"
                   class="border-2 border-black w-full rounded-lg text-white text-md bg-black p-2 block mx-auto mt-2"
                 >
@@ -65,6 +66,13 @@
                   {{ (userData$ | async)?.bio }}
                 </div>
               </section>
+              <button
+                *ngIf="!isProfileOwner"
+                (click)="fileInput.click()"
+                class="border-2 border-black w-full rounded-lg text-white text-md bg-black p-2 block mx-auto mt-2"
+              >
+                Follow
+              </button>
             </aside>
           </div>
 
@@ -98,6 +106,7 @@
                 Following
               </div>
               <div
+                *ngIf="isProfileOwner"
                 class="p-4 text-white cursor-pointer w-1/4 flex justify-center items-center rounded-md"
                 [ngClass]="{
                   'text-white bg-black italic font-bold': selectedMenuItem === 'edit'
@@ -111,6 +120,7 @@
             <div class="mt-4" *ngIf="selectedMenuItem === 'programs'">
               <app-user-programs
                 class="mt-4 w-full"
+                [profileOwner]="isProfileOwner"
                 [programsList$]="programsList$"
               ></app-user-programs>
             </div>

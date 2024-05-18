@@ -24,4 +24,7 @@ export class ProfileService {
   updatePassword(payload: UpdatePasswordDto, userId: string): Observable<void> {
     return this.apiService.patchRequest('auth/update-password/' + userId, payload);
   }
+  getUserInfo(userId: string): Observable<UserDataModel> {
+    return this.apiService.getRequest('users/' + userId);
+  }
 }

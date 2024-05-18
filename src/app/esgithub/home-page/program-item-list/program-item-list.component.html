@@ -1,6 +1,6 @@
 <div
   class="bg-[#424244] p-4 rounded-lg w-[90%] mx-auto text-white"
-  [ngClass]="{ 'w-full': isOwner === true }"
+  [ngClass]="{ 'w-full': homePage === false }"
 >
   <div
     *ngIf="isOwner === true"
@@ -20,7 +20,11 @@
         [src]="'http://' + user.avatarUrl"
         class="w-8 h-8 rounded-full border border-white"
       />
-      <a class="ml-4 font-bold italic text-md">{{ user.userName }}</a>
+      <a
+        [routerLink]="'/profile/' + user.userId"
+        class="ml-4 font-bold italic text-md hover:text-black hover:underline"
+        >{{ user.userName }}</a
+      >
     </div>
     <p *ngIf="isOwner === false" class="mr-2">
       {{ user.lastName | uppercase }} {{ user.firstName }}
