@@ -12,13 +12,13 @@
     <div class="flex items-center" *ngIf="isOwner === false">
       <img
         *ngIf="user.avatarUrl === null"
-        src="https://icons8.com/icon/7819/male-user"
-        class="w-6 h-6 rounded-full border border-white"
+        src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Circle-icons-profile.svg"
+        class="w-8 h-8 rounded-full border border-white"
       />
       <img
         *ngIf="user.avatarUrl !== null"
-        [src]="user.avatarUrl"
-        class="w-6 h-6 rounded-full border border-white"
+        [src]="'http://' + user.avatarUrl"
+        class="w-8 h-8 rounded-full border border-white"
       />
       <a class="ml-4 font-bold italic text-md">{{ user.userName }}</a>
     </div>
