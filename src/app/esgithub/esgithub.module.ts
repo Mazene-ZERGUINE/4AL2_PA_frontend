@@ -6,7 +6,7 @@ import { CodingPageComponent } from './coding-page/coding-page.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { SharedModule } from '../shared/shared.module';
 import { CoreModule } from '../core/core.module';
@@ -15,6 +15,7 @@ import { ProgramItemListComponent } from './home-page/program-item-list/program-
 import { ProfileComponent } from './profile/profile.component';
 import { MaterialModule } from '../shared/material.module';
 import { UserProgramsComponent } from './profile/user-programs/user-programs.component';
+import { EditProfileComponent } from './profile/edit-profile/edit-profile.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { UserProgramsComponent } from './profile/user-programs/user-programs.com
     ProgramItemListComponent,
     ProfileComponent,
     UserProgramsComponent,
+    EditProfileComponent,
   ],
   imports: [
     CommonModule,
@@ -35,6 +37,7 @@ import { UserProgramsComponent } from './profile/user-programs/user-programs.com
     SharedModule,
     CoreModule,
     MaterialModule,
+    ReactiveFormsModule,
   ],
 })
 export class EsgithubModule {}
