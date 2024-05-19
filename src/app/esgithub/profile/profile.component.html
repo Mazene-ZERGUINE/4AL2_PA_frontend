@@ -1,0 +1,140 @@
+<div class="flex h-screen bg-gray-100">
+  <div class="z-50">
+    <app-side-navbar></app-side-navbar>
+  </div>
+
+  <div class="overflow-auto w-full">
+    <div class="relative top-8 w-full">
+      <div class="flex flex-col w-[90%] relative left-[5%]">
+        <div class="flex w-full">
+          <div class="w-1/4 overflow-hidden">
+            <aside class="fixed w-1/6">
+              <section class="bg-[#424244] p-4 rounded-lg shadow-md mb-4">
+                <div class="h-60 flex justify-center items-center">
+                  <img
+                    *ngIf="(userData$ | async)?.avatarUrl === null"
+                    src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Circle-icons-profile.svg"
+                    class="w-full h-full object-cover rounded-md"
+                    alt="Profile Image"
+                  />
+                  <img
+                    *ngIf="(userData$ | async)?.avatarUrl"
+                    [src]="'http://' + (userData$ | async)?.avatarUrl"
+                    class="w-full h-full object-cover rounded-md"
+                  />
+                </div>
+                <input
+                  type="file"
+                  #fileInput
+                  (change)="onFileSelected($event)"
+                  accept="image/*"
+                  hidden
+                />
+                <button
+                  *ngIf="isProfileOwner"
+                  (click)="fileInput.click()"
+                  class="border-2 border-black w-full rounded-lg text-white text-md bg-black p-2 block mx-auto mt-2"
+                >
+                  Edit profile image
+                </button>
+              </section>
+              <section class="bg-[#424244] p-4 rounded-lg shadow-md">
+                <div class="flex items-center mb-2">
+                  <mat-icon class="text-gray-300 mr-2">account_circle</mat-icon>
+                  <h2 class="text-gray-300 text-xl font-bold italic">
+                    {{ (userData$ | async)?.userName }}
+                  </h2>
+                </div>
+                <div class="flex items-center mb-1">
+                  <mat-icon class="text-gray-300 mr-2">person</mat-icon>
+                  <p class="text-md text-gray-500">
+                    {{ (userData$ | async)?.lastName | uppercase }}
+                    {{ (userData$ | async)?.firstName }}
+                  </p>
+                </div>
+                <div class="flex items-center">
+                  <mat-icon class="text-gray-300 mr-2">email</mat-icon>
+                  <p class="text-md text-gray-500">{{ (userData$ | async)?.email }}</p>
+                </div>
+              </section>
+              <section class="bg-[#424244] p-4 rounded-lg shadow-md mt-4 flex flex-col">
+                <div class="flex items-center">
+                  <mat-icon class="text-gray-300 mr-2">info</mat-icon>
+                  <p class="text-md text-gray-500">Bio</p>
+                </div>
+                <div class="flex items-center justify-center w-[80%] text-gray-500">
+                  {{ (userData$ | async)?.bio }}
+                </div>
+              </section>
+              <button
+                *ngIf="!isProfileOwner"
+                (click)="fileInput.click()"
+                class="border-2 border-black w-full rounded-lg text-white text-md bg-black p-2 block mx-auto mt-2"
+              >
+                Follow
+              </button>
+            </aside>
+          </div>
+
+          <div class="w-3/4 overflow-auto ml-4 rounded-md">
+            <div class="bg-[#424244] w-full flex flex-row rounded-md">
+              <div
+                class="p-4 text-white cursor-pointer w-1/3 flex justify-center items-center rounded-md"
+                [ngClass]="{
+                  'text-white bg-black italic font-bold': selectedMenuItem === 'programs'
+                }"
+                (click)="onMenuItemClick('programs')"
+              >
+                Programs
+              </div>
+              <div
+                class="p-4 text-white cursor-pointer w-1/3 flex justify-center items-center rounded-md"
+                [ngClass]="{
+                  'italic font-bold text-white bg-black': selectedMenuItem === 'followers'
+                }"
+                (click)="onMenuItemClick('followers')"
+              >
+                Followers
+              </div>
+              <div
+                class="p-4 text-white cursor-pointer w-1/3 flex justify-center items-center rounded-md"
+                [ngClass]="{
+                  'text-white bg-black italic font-bold': selectedMenuItem === 'following'
+                }"
+                (click)="onMenuItemClick('following')"
+              >
+                Following
+              </div>
+              <div
+                *ngIf="isProfileOwner"
+                class="p-4 text-white cursor-pointer w-1/4 flex justify-center items-center rounded-md"
+                [ngClass]="{
+                  'text-white bg-black italic font-bold': selectedMenuItem === 'edit'
+                }"
+                (click)="onMenuItemClick('edit')"
+              >
+                Edit
+              </div>
+            </div>
+
+            <div class="mt-4" *ngIf="selectedMenuItem === 'programs'">
+              <app-user-programs
+                class="mt-4 w-full"
+                [profileOwner]="isProfileOwner"
+                [programsList$]="programsList$"
+              ></app-user-programs>
+            </div>
+
+            <div *ngIf="selectedMenuItem === 'followers'">followers list here</div>
+
+            <div *ngIf="selectedMenuItem === 'following'">list of following here</div>
+
+            <div *ngIf="selectedMenuItem === 'edit'">
+              <app-edit-profile (profileUpdated)="onProfileUpdated()"></app-edit-profile>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

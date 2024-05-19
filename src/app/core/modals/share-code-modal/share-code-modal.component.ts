@@ -24,7 +24,7 @@ export class ShareCodeModalComponent {
   visibilityOptions = [
     { label: 'Public', value: 'public' },
     { label: 'Private', value: 'private' },
-    { label: 'Follower Only', value: 'followerOnly' },
+    { label: 'Follower Only', value: 'only_followers' },
   ];
   constructor(
     public dialogRef: MatDialogRef<ShareCodeModalComponent>,

@@ -20,4 +20,7 @@ export class AuthService {
   getUserData(): Observable<UserDataModel> {
     return this.apiService.getRequest('auth/get_info');
   }
+  isAuthenticated(): boolean {
+    return localStorage.getItem('token') !== null;
+  }
 }
