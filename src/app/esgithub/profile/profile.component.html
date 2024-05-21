@@ -67,11 +67,18 @@
                 </div>
               </section>
               <button
-                *ngIf="!isProfileOwner"
-                (click)="fileInput.click()"
+                *ngIf="!isProfileOwner && !isFollowing"
+                (click)="onFollowClick()"
                 class="border-2 border-black w-full rounded-lg text-white text-md bg-black p-2 block mx-auto mt-2"
               >
                 Follow
+              </button>
+              <button
+                *ngIf="!isProfileOwner && isFollowing"
+                (click)="onUnfollowClick()"
+                class="border-2 border-black w-full rounded-lg text-white text-md bg-black p-2 block mx-auto mt-2"
+              >
+                Unfollow
               </button>
             </aside>
           </div>
@@ -124,11 +131,20 @@
                 [programsList$]="programsList$"
               ></app-user-programs>
             </div>
-
-            <div *ngIf="selectedMenuItem === 'followers'">followers list here</div>
-
-            <div *ngIf="selectedMenuItem === 'following'">list of following here</div>
-
+            <div *ngIf="selectedMenuItem === 'followers'">
+              <app-followers-list
+                [followersList]="userFollowersAndFollowings"
+                (removeFollowerEvent)="onUnfollowClick($event)"
+                [isOwner]="isProfileOwner"
+              ></app-followers-list>
+            </div>
+            <div *ngIf="selectedMenuItem === 'following'">
+              <app-following-list
+                [followingsList]="userFollowersAndFollowings"
+                [isOwner]="isProfileOwner"
+                (removeFollowingEvent)="onUnfollowClick($event)"
+              ></app-following-list>
+            </div>
             <div *ngIf="selectedMenuItem === 'edit'">
               <app-edit-profile (profileUpdated)="onProfileUpdated()"></app-edit-profile>
             </div>

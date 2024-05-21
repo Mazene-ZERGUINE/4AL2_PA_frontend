@@ -27,4 +27,14 @@ export class ProfileService {
   getUserInfo(userId: string): Observable<UserDataModel> {
     return this.apiService.getRequest('users/' + userId);
   }
+  getFollowersAndFollowings(userId: string): Observable<any> {
+    return this.apiService.getRequest('follow/' + userId);
+  }
+  follow(payload: { followerId: string; followingId: string }): Observable<void> {
+    return this.apiService.postRequest('follow/follow-user', payload);
+  }
+
+  unfollow(relationId: string): Observable<void> {
+    return this.apiService.getRequest('follow/unfollow-user/' + relationId);
+  }
 }
