@@ -16,6 +16,8 @@ import { ProfileComponent } from './profile/profile.component';
 import { MaterialModule } from '../shared/material.module';
 import { UserProgramsComponent } from './profile/user-programs/user-programs.component';
 import { EditProfileComponent } from './profile/edit-profile/edit-profile.component';
+import { FollowersListComponent } from './profile/followers-list/followers-list.component';
+import { FollowingListComponent } from './profile/following-list/following-list.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +27,8 @@ import { EditProfileComponent } from './profile/edit-profile/edit-profile.compon
     ProfileComponent,
     UserProgramsComponent,
     EditProfileComponent,
+    FollowersListComponent,
+    FollowingListComponent,
   ],
   imports: [
     CommonModule,
