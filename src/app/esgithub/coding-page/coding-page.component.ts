@@ -19,7 +19,7 @@ import { ModalService } from '../../core/services/modal.service';
 import { ShareCodeModalComponent } from '../../core/modals/share-code-modal/share-code-modal.component';
 import { CreateProgramDto } from './models/CreateProgramDto';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/Auth/auth.service';
+import { AuthService } from '../../core/Auth/service/auth.service';
 import { UserDataModel } from '../../core/models/user-data.model';
 
 @Component({

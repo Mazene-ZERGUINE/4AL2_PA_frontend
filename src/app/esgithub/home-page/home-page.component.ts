@@ -3,7 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { map, finalize } from 'rxjs/operators';
 import { HomeService } from './home.service';
 import { ProgramModel } from '../../core/models/program.model';
-import { AuthService } from '../../core/Auth/auth.service';
+import { AuthService } from '../../core/Auth/service/auth.service';
 import { UserDataModel } from '../../core/models/user-data.model';
 
 @Component({

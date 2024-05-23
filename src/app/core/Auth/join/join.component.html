@@ -1,9 +1,16 @@
 <div class="w-[466px]" *ngIf="!isLogin">
-  <div *ngIf="currentStep === 1">
+  <div *ngIf="(authStep$ | async) === AuthStepperType.FIRST_STEP">
     <p class="text-[#E2E2E2]">Enter your email:</p>
     <mat-form-field appearance="outline" color="primary" class="w-[100%]">
-      <input [formControl]="emailFormControl" matInput placeholder="Email" required />
-      <mat-error *ngIf="emailFormControl.touched && emailFormControl.invalid">
+      <input
+        [formControl]="authForm.controls.email"
+        matInput
+        placeholder="Email"
+        required
+      />
+      <mat-error
+        *ngIf="authForm.controls.email.touched && authForm.controls.email.invalid"
+      >
         Valid email is required.
       </mat-error>
     </mat-form-field>
@@ -11,13 +18,13 @@
     <p class="text-[#E2E2E2]">Enter your password:</p>
     <mat-form-field appearance="outline" color="primary" class="w-[100%]">
       <input
-        [formControl]="passwordFormControl"
+        [formControl]="authForm.controls.password"
         matInput
         type="password"
         placeholder="Password"
         required
       />
-      <mat-error *ngIf="passwordFormControl.touched && passwordFormControl.invalid">
+      <mat-error *ngIf="authForm.controls.password.invalid">
         Password is required and must be at least 8 characters long.
       </mat-error>
     </mat-form-field>
@@ -25,17 +32,13 @@
     <p class="text-[#E2E2E2]">Confirm your password:</p>
     <mat-form-field appearance="outline" color="primary" class="w-[100%]">
       <input
-        [formControl]="confirmPasswordControl"
+        [formControl]="authForm.controls.confirmPassword"
         matInput
         type="password"
         placeholder="Confirm Password"
         required
       />
-      <mat-error
-        *ngIf="
-          confirmPasswordControl?.touched && confirmPasswordControl?.errors?.['mismatch']
-        "
-      >
+      <mat-error *ngIf="authForm.controls.confirmPassword.hasError('passwordsNotEqual')">
         Passwords do not match.
       </mat-error>
     </mat-form-field>
@@ -43,32 +46,48 @@
     <button mat-raised-button color="primary" (click)="nextStep()">Next</button>
   </div>
 
-  <div *ngIf="currentStep === 2">
+  <div *ngIf="(authStep$ | async) === AuthStepperType.SECOND_STEP">
     <p class="text-[#E2E2E2]">Enter your first name:</p>
     <mat-form-field appearance="outline" color="primary" class="w-[100%]">
       <input
-        [formControl]="firstNameControl"
+        [formControl]="authForm.controls.firstName"
         matInput
         placeholder="First Name"
         required
       />
-      <mat-error *ngIf="firstNameControl.touched && firstNameControl.invalid">
+      <mat-error
+        *ngIf="authForm.controls.firstName.touched && authForm.controls.firstName.invalid"
+      >
         First name is required.
       </mat-error>
     </mat-form-field>
 
     <p class="text-[#E2E2E2]">Enter your last name:</p>
     <mat-form-field appearance="outline" color="primary" class="w-[100%]">
-      <input [formControl]="lastNameControl" matInput placeholder="Last Name" required />
-      <mat-error *ngIf="lastNameControl.touched && lastNameControl.invalid">
+      <input
+        [formControl]="authForm.controls.lastName"
+        matInput
+        placeholder="Last Name"
+        required
+      />
+      <mat-error
+        *ngIf="authForm.controls.lastName.touched && authForm.controls.lastName.invalid"
+      >
         Last name is required.
       </mat-error>
     </mat-form-field>
 
     <p class="text-[#E2E2E2]">Enter your username:</p>
     <mat-form-field appearance="outline" color="primary" class="w-[100%]">
-      <input [formControl]="userNameControl" matInput placeholder="Username" required />
-      <mat-error *ngIf="userNameControl.touched && userNameControl.invalid">
+      <input
+        [formControl]="authForm.controls.userName"
+        matInput
+        placeholder="Username"
+        required
+      />
+      <mat-error
+        *ngIf="authForm.controls.userName.touched && authForm.controls.userName.invalid"
+      >
         Username is required.
       </mat-error>
     </mat-form-field>

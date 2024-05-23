@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from '../services/api.service';
+import { ApiService } from '../../services/api.service';
 import { Observable } from 'rxjs';
-import { CreateUserDto } from './models/create-user.dto';
-import { LoginDto } from './models/login.dto';
-import { AccessTokenDto } from './models/access-token.dto';
-import { UserDataModel } from '../models/user-data.model';
+import { CreateUserDto } from '../models/create-user.dto';
+import { LoginDto } from '../models/login.dto';
+import { AccessTokenDto } from '../models/access-token.dto';
+import { UserDataModel } from '../../models/user-data.model';
 
 @Injectable({
   providedIn: 'root',

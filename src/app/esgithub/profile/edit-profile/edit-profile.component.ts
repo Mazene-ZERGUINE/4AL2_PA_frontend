@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
 import { ProfileService } from '../profile.service';
-import { AuthService } from '../../../core/Auth/auth.service';
+import { AuthService } from '../../../core/Auth/service/auth.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { UserDataModel } from '../../../core/models/user-data.model';
 import { Subscription, switchMap, tap } from 'rxjs';

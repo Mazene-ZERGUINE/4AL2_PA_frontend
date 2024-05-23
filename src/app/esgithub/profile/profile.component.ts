@@ -1,6 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ProfileService } from './profile.service';
-import { AuthService } from '../../core/Auth/auth.service';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { UserDataModel } from '../../core/models/user-data.model';
 import { ProgramModel } from '../../core/models/program.model';
@@ -8,6 +7,7 @@ import { NotifierService } from '../../core/services/notifier.service';
 import { ActivatedRoute } from '@angular/router';
 import { map, switchMap } from 'rxjs/operators';
 import { Follower, UserFollowersModel } from '../../core/models/user-followers.model';
+import { AuthService } from 'src/app/core/Auth/service/auth.service';
 
 @Component({
   selector: 'app-profile',
