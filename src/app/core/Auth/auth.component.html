@@ -14,16 +14,7 @@
       [passwordFormControl]="authForm.controls.password"
     ></app-login>
 
-    <app-join
-      *ngIf="!isLogin"
-      [isLogin]="isLogin"
-      [confirmPasswordControl]="authForm.controls.confirmPassword"
-      [firstNameControl]="authForm.controls.firstName"
-      [lastNameControl]="authForm.controls.lastName"
-      [userNameControl]="authForm.controls.userName"
-      [emailFormControl]="authForm.controls.email"
-      [passwordFormControl]="authForm.controls.password"
-    ></app-join>
+    <app-join *ngIf="!isLogin" [isLogin]="isLogin" [authForm]="authForm"></app-join>
 
     <div class="text-[#6C6C6C] mb-[36px]">
       <p *ngIf="isLogin">

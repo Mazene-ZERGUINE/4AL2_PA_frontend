@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { AuthFormType } from '../auth.component';
+import { AuthStepperService } from '../service/auth-stepper.service';
+import { AuthStepperType } from '../utils/auh-stepper.enum';
 
 @Component({
   selector: 'app-join',
@@ -9,35 +13,33 @@ import { FormControl } from '@angular/forms';
 })
 export class JoinComponent {
   @Input() isLogin!: boolean;
-  @Input() confirmPasswordControl!: FormControl<string | null>;
-  @Input() firstNameControl!: FormControl<string | null>;
-  @Input() lastNameControl!: FormControl<string | null>;
-  @Input() userNameControl!: FormControl<string | null>;
-  @Input() emailFormControl!: FormControl<string>;
-  @Input() passwordFormControl!: FormControl<string>;
 
-  currentStep: number = 1;
+  @Input() authForm!: FormGroup<AuthFormType>;
 
-  nextStep() {
-    if (this.passwordFormControl.value !== this.confirmPasswordControl.value) {
-      this.confirmPasswordControl.setErrors({ mismatch: true });
+  readonly authStep$: Observable<AuthStepperType> =
+    this.authStepperService.getAuthStep$();
+
+  readonly AuthStepperType = AuthStepperType;
+
+  constructor(private authStepperService: AuthStepperService) {}
+
+  nextStep(): void {
+    const { password: passwordFormControl, confirmPassword: confirmPasswordControl } =
+      this.authForm.controls;
+
+    if (passwordFormControl.value !== confirmPasswordControl.value) {
+      confirmPasswordControl.setErrors({ passwordsNotEqual: true });
       return;
     }
 
     if (this.isStepOneValid()) {
-      this.currentStep++;
-    } else {
-      this.emailFormControl.markAsTouched();
-      this.passwordFormControl.markAsTouched();
-      this.confirmPasswordControl.markAsTouched();
+      this.authStepperService.setAuthStep(AuthStepperType.SECOND_STEP);
     }
   }
 
   private isStepOneValid(): boolean {
-    return (
-      this.emailFormControl.valid &&
-      this.passwordFormControl.valid &&
-      this.confirmPasswordControl.valid
-    );
+    const { email, password, confirmPassword } = this.authForm.controls;
+
+    return email.valid && password.valid && confirmPassword.valid;
   }
 }

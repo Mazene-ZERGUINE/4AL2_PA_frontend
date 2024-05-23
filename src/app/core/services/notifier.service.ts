@@ -8,7 +8,7 @@ import { CustomSnackbarComponent } from '../components/custom-snackbar/custom-sn
 export class NotifierService {
   constructor(private readonly snackBar: MatSnackBar) {}
 
-  showSuccess(message: string) {
+  showSuccess(message: string): void {
     this.snackBar.openFromComponent(CustomSnackbarComponent, {
       data: { message: message, icon: 'check_circle' },
       duration: 6000,
@@ -18,7 +18,7 @@ export class NotifierService {
     });
   }
 
-  showWarning(message: string) {
+  showWarning(message: string): void {
     this.snackBar.openFromComponent(CustomSnackbarComponent, {
       data: { message: message, icon: 'warning' },
       duration: 6000,
@@ -28,7 +28,7 @@ export class NotifierService {
     });
   }
 
-  showError(message: string) {
+  showError(message: string): void {
     this.snackBar.openFromComponent(CustomSnackbarComponent, {
       data: { message: message, icon: 'error' },
       duration: 3000,

@@ -7,5 +7,7 @@ import { MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
   styleUrls: ['./custom-snackbar.component.scss'],
 })
 export class CustomSnackbarComponent {
-  constructor(@Inject(MAT_SNACK_BAR_DATA) public data: any) {}
+  constructor(
+    @Inject(MAT_SNACK_BAR_DATA) public data: { message: string; icon?: string },
+  ) {}
 }

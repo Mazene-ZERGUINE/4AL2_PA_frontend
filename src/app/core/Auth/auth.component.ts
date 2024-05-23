@@ -5,12 +5,12 @@ import {
   OnInit,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { CreateUserDto } from './models/create-user.dto';
-import { omit } from 'lodash';
-import { AuthService } from './auth.service';
-import { NotifierService } from '../services/notifier.service';
 import { Router } from '@angular/router';
+import { omit } from 'lodash';
+import { NotifierService } from '../services/notifier.service';
+import { CreateUserDto } from './models/create-user.dto';
 import { LoginDto } from './models/login.dto';
+import { AuthService } from './service/auth.service';
 
 export type AuthFormType = {
   firstName: FormControl<string | null>;
@@ -42,7 +42,9 @@ export class AuthComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(8)],
     }),
-    confirmPassword: new FormControl<string | null>(null),
+    confirmPassword: new FormControl<string | null>(null, {
+      nonNullable: true,
+    }),
   });
 
   constructor(
