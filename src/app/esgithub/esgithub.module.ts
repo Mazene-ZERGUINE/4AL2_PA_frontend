@@ -18,6 +18,8 @@ import { UserProgramsComponent } from './profile/user-programs/user-programs.com
 import { EditProfileComponent } from './profile/edit-profile/edit-profile.component';
 import { FollowersListComponent } from './profile/followers-list/followers-list.component';
 import { FollowingListComponent } from './profile/following-list/following-list.component';
+import { SideProfileComponent } from './side-profile/side-profile.component';
+import { FollowerFollowingComponent } from './side-profile/follower-following/follower-following.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +31,8 @@ import { FollowingListComponent } from './profile/following-list/following-list.
     EditProfileComponent,
     FollowersListComponent,
     FollowingListComponent,
+    SideProfileComponent,
+    FollowerFollowingComponent,
   ],
   imports: [
     CommonModule,

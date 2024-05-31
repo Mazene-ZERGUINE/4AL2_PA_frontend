@@ -1,0 +1,70 @@
+<aside class="w-[330px] bg-[#3B3D5E] h-[100vh]">
+  <div class="flex flex-col justify-center items-center">
+    <img
+      class="w-[170px] h-[170px] rounded-full object-cover mb-3 mt-3"
+      [src]="currentUser.avatarUrl ?? anonymousImageUrl"
+    />
+    <a [routerLink]="'/profile/' + currentUser.userId" class="text-white"
+      >{{ currentUser.firstName }} {{ currentUser.lastName }}</a
+    >
+    <p class="text-[#707396]">{{ currentUser.userName }}</p>
+  </div>
+
+  <ng-container *ngIf="userFollowersAndFollowings$ | async as userFollowersAndFollowings">
+    <div class="flex justify-around mt-10">
+      <div>
+        <a href="" class="text-[#707396]"
+          >Followers({{ userFollowersAndFollowings.followers.length }})</a
+        >
+      </div>
+      <div>
+        <a href="" class="text-[#707396]">See all</a>
+      </div>
+    </div>
+
+    <ng-container>
+      <ng-container *ngFor="let followers of userFollowersAndFollowings.followers">
+        <app-follower-following
+          [followerOrFollowingUsername]="followers.follower.userName"
+          [followerOrFollowingPicture]="followers.follower.avatarUrl"
+          [userId]="followers.follower.userId"
+        ></app-follower-following>
+      </ng-container>
+
+      <div
+        class="text-center mt-8 text-[#707396]"
+        *ngIf="userFollowersAndFollowings.followers.length === 0"
+      >
+        no followers
+      </div>
+    </ng-container>
+
+    <div class="flex justify-around mt-10">
+      <div>
+        <a href="" class="text-[#707396]"
+          >Following({{ userFollowersAndFollowings.followings.length }})</a
+        >
+      </div>
+      <div>
+        <a href="" class="text-[#707396]">See all</a>
+      </div>
+    </div>
+
+    <ng-container>
+      <ng-container *ngFor="let Followings of userFollowersAndFollowings.followings">
+        <app-follower-following
+          [followerOrFollowingUsername]="Followings.following.userName"
+          [followerOrFollowingPicture]="Followings.following.avatarUrl"
+          [userId]="Followings.following.userId"
+        ></app-follower-following>
+      </ng-container>
+
+      <div
+        class="text-center mt-8 text-[#707396]"
+        *ngIf="userFollowersAndFollowings.followings.length === 0"
+      >
+        no followings
+      </div>
+    </ng-container>
+  </ng-container>
+</aside>
