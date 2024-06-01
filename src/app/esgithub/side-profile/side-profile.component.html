@@ -2,7 +2,9 @@
   <div class="flex flex-col justify-center items-center">
     <img
       class="w-[170px] h-[170px] rounded-full object-cover mb-3 mt-3"
-      [src]="currentUser.avatarUrl ?? anonymousImageUrl"
+      [src]="
+        currentUser.avatarUrl ? 'localhost://' + currentUser.avatarUrl : anonymousImageUrl
+      "
     />
     <a [routerLink]="'/profile/' + currentUser.userId" class="text-white"
       >{{ currentUser.firstName }} {{ currentUser.lastName }}</a
