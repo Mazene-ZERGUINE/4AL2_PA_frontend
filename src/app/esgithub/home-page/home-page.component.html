@@ -3,24 +3,24 @@
     <app-side-navbar></app-side-navbar>
   </div>
 
-  <div class="w-full">
-    <ng-container *ngFor="let program of programsList$ | async">
-      <div class="flex">
-        <app-program-item-list
-          class="w-full"
-          [description]="program.description"
-          [sourceCode]="program.sourceCode"
-          [programmingLanguage]="program.programmingLanguage"
-          [inputTypes]="program.inputTypes"
-          [outputTypes]="program.outputTypes"
-          [user]="program.user"
-          [homePage]="true"
-        ></app-program-item-list>
-        <app-side-profile
-          *ngIf="userData$ | async as currentUser"
-          [currentUser]="currentUser"
-        ></app-side-profile>
-      </div>
-    </ng-container>
+  <div class="w-full flex justify-between">
+    <div class="w-full h-[100vh] overflow-auto">
+      <app-program-item-list
+        *ngFor="let program of programsList$ | async"
+        [description]="program.description"
+        [sourceCode]="program.sourceCode"
+        [programmingLanguage]="program.programmingLanguage"
+        [inputTypes]="program.inputTypes"
+        [outputTypes]="program.outputTypes"
+        [user]="program.user"
+        [homePage]="true"
+      ></app-program-item-list>
+    </div>
+    <div>
+      <app-side-profile
+        *ngIf="userData$ | async as currentUser"
+        [currentUser]="currentUser"
+      ></app-side-profile>
+    </div>
   </div>
 </div>
