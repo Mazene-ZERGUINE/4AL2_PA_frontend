@@ -1,0 +1,14 @@
+<a
+  class="flex items-center mt-5 mx-4 bg-[#555881] rounded-lg p-3 cursor-pointer"
+  [routerLink]="'/profile/' + userId"
+>
+  <img
+    class="w-[54px] h-[54px] rounded-full object-cover me-5"
+    [src]="followerOrFollowingPicture ?? anonymousImageUrl"
+  />
+
+  <div>
+    <p class="text-white">{{ followerOrFollowingUsername }}</p>
+    <span class="text-[#707396]">5 min ago</span>
+  </div>
+</a>
