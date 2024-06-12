@@ -10,9 +10,14 @@ import { SideNavbarComponent } from './components/side-navbar/side-navbar.compon
 import { AuthModule } from './Auth/auth.module';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { MaterialModule } from '../shared/material.module';
+import { CodePageUseGuidModalComponent } from './modals/code-page-use-guid-modal/code-page-use-guid-modal.component';
 
 @NgModule({
-  declarations: [CustomSnackbarComponent, SideNavbarComponent],
+  declarations: [
+    CustomSnackbarComponent,
+    SideNavbarComponent,
+    CodePageUseGuidModalComponent,
+  ],
   imports: [
     CommonModule,
     SharedModule,
