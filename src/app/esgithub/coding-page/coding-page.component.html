@@ -31,6 +31,14 @@
               <mat-icon>share</mat-icon>
               <span class="relative p-2 bottom-1.5 italic">Share</span>
             </button>
+
+            <button
+              class="mt-4 relative ml-2 bg-black text-white font-bold py-1 px-4 rounded mr-5"
+              (click)="onShowGuideClick()"
+            >
+              <mat-icon>info</mat-icon>
+              <span class="relative p-2 bottom-1.5 italic">Show guid</span>
+            </button>
           </div>
 
           <div class="relative top-4 flex">
@@ -135,11 +143,15 @@
 
         <button
           class="mt-4 relative left-[5%] bg-black text-white font-bold py-1 px-4 rounded mr-5"
-          (click)="onShowGuideClick()"
+          (click)="onClearFilesClick()"
         >
-          <mat-icon>info</mat-icon>
-          <span class="relative p-2 bottom-1.5 italic">Show guid</span>
+          <mat-icon>remove_circle</mat-icon>
+          <span class="relative p-2 bottom-1.5 italic">Clear files</span>
         </button>
+
+        <div class="text-red-500 font-bold italic text-sm left-[5%] relative mt-6">
+          {{ selectedInputFiles.length }} files selected
+        </div>
       </div>
       <p class="relative left-[5%] text-gray-50 text-sm mt-4">
         select output file formats (max 5 files)

@@ -40,7 +40,7 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
   codeOutput!: { output: string; status: number };
   private userId!: string;
   fileTypes = ['md', 'txt', 'csv', 'json', 'xlsx', 'yml', 'pdf', 'png', 'jpg', 'jpeg'];
-  private selectedInputFiles: File[] = [];
+  protected selectedInputFiles: File[] = [];
   private selectedOutputFormats: string[] = [];
   readonly userData$: Observable<UserDataModel> = this.authService.getUserData();
   private runCodeSubscription = new Subscription();
@@ -120,6 +120,15 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
           error: () => this.handleError(),
         });
     }
+  }
+
+  onClearFilesClick(): void {
+    if (this.selectedInputFiles.length === 0) {
+      this.notifier.showWarning('no files have been selected');
+      return;
+    }
+    this.selectedInputFiles = [];
+    this.notifier.showSuccess('files cleared.');
   }
 
   onShareClick(): void {
