@@ -79,6 +79,12 @@ export class ApiService {
     return this.httpClient.patch<T>(this.getPath(path), payload);
   }
 
+  downloadFile(path: string): Observable<Blob> {
+    return this.httpClient.get<Blob>(path, {
+      responseType: 'blob' as 'json',
+    });
+  }
+
   //#endregion  UPDATE methods
 
   private getPath(_path: string, id?: number | string): string {
