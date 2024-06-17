@@ -11,12 +11,15 @@ import { AuthModule } from './Auth/auth.module';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { MaterialModule } from '../shared/material.module';
 import { CodePageUseGuidModalComponent } from './modals/code-page-use-guid-modal/code-page-use-guid-modal.component';
+import { LineCommentsModalComponent } from './modals/line-comments-modal/line-comments-modal.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     CustomSnackbarComponent,
     SideNavbarComponent,
     CodePageUseGuidModalComponent,
+    LineCommentsModalComponent,
   ],
   imports: [
     CommonModule,
@@ -25,6 +28,8 @@ import { CodePageUseGuidModalComponent } from './modals/code-page-use-guid-modal
     HttpClientModule,
     AuthModule,
     MaterialModule,
+    ReactiveFormsModule,
+    FormsModule,
   ],
   providers: [
     {

@@ -1,0 +1,84 @@
+<div class="flex h-[700px] bg-[#3B3D5E] flex-col">
+  <div
+    class="p-4 absolute font-bold top-[0%] right-[0%] text-red-700 text-5xl cursor-pointer"
+    (click)="onCloseBtnClick()"
+  >
+    <i class="material-icons">close</i>
+  </div>
+
+  <div
+    class="mt-5 flex left-[5%] flex-col mt-8 w-[90%] relative rounded-lg overflow-y-auto h-[85%] mb-4"
+  >
+    <ng-container *ngFor="let comment of programComments">
+      <div class="second py-2 px-2 bg-[#1E1F3D] mb-4">
+        <div class="flex flex-row">
+          <img
+            [src]="
+              comment.user.avatarUrl
+                ? 'http://' + comment.user.avatarUrl
+                : anonymousImageUrl
+            "
+            class="w-[30px] h-[30px] rounded-full"
+          />
+          <span class="text2 p-2 mb-1">{{ comment.user.userName }}</span>
+          <span class="text2 p-2 mb-1">{{ comment.createdAt }}</span>
+        </div>
+        <div class="relative flex-row flex justify-between">
+          <span class="text3">{{ comment.content }}</span>
+          <span
+            class="text2 mb-1 cursor-pointer justify-items-end relative mr-4"
+            (click)="onReplyClick(comment.commentId)"
+            >reply</span
+          >
+        </div>
+        <div *ngIf="replyingToCommentId === comment.commentId" class="mt-2 ml-4">
+          <input
+            [(ngModel)]="commentReplyFieldText"
+            placeholder="Write a reply..."
+            class="w-10/12 mr-2 rounded-lg text-white border border-gray-200 backdrop-blur-lg bg-transparent opacity-50 p-2 relative"
+          />
+          <button
+            (click)="onSubmitReply(comment.commentId)"
+            class="py-2 px-4 bg-[#1E1F3D] rounded-lg text-white"
+          >
+            Submit Reply
+          </button>
+        </div>
+      </div>
+      <ng-container *ngFor="let reply of comment.replies">
+        <div class="second py-2 bg-[#1E1F3D] px-2 mb-4 ml-24">
+          <div class="flex flex-row">
+            <img
+              [src]="
+                reply.user.avatarUrl
+                  ? 'http://' + reply.user.avatarUrl
+                  : anonymousImageUrl
+              "
+              class="w-[30px] h-[30px] rounded-full"
+            />
+            <span class="text2 p-2 mb-1">{{ reply.user.userName }}</span>
+            <span class="text2 p-2 mb-1">{{ reply.createdAt }}</span>
+          </div>
+          <div class="relative flex-row flex justify-between">
+            <span class="text3">{{ reply.content }}</span>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </div>
+  <div class="flex-row flex-row relative left-[5%] w-full">
+    <input
+      [(ngModel)]="commentFieldText"
+      placeholder="add a comment"
+      class="w-10/12 mr-2 rounded-lg text-white border border-gray-200 backdrop-blur-lg bg-transparent opacity-50 p-2 relative"
+    />
+    <button
+      [disabled]="!commentFieldText || commentFieldText.trim().length === 0"
+      (click)="onCommentClick()"
+      (keydown.Enter)="onCommentClick()"
+      class="p-2 w-1/12 bg-[#3B3D5E] rounded-lg text-white"
+    >
+      Comment
+    </button>
+  </div>
+</div>

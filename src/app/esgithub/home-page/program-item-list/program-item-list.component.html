@@ -84,7 +84,10 @@
       <i class="material-icons">thumb_down_off_alt</i>
       <span class="relative p-2 bottom-1.5 italic">disliked</span>
     </button>
-    <button class="bg-black text-white font-bold py-1 px-4 rounded opacity-80 ml-2">
+    <button
+      [routerLink]="['/program', programId]"
+      class="bg-black text-white font-bold py-1 px-4 rounded opacity-80 ml-2"
+    >
       <i class="material-icons">remove_red_eye</i>
       <span class="relative p-2 bottom-1.5 italic">view</span>
     </button>
