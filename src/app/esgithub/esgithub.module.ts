@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 
 import { EsgithubRoutingModule } from './esgithub-routing.module';
 import { CodingPageComponent } from './coding-page/coding-page.component';
@@ -20,6 +20,8 @@ import { FollowersListComponent } from './profile/followers-list/followers-list.
 import { FollowingListComponent } from './profile/following-list/following-list.component';
 import { SideProfileComponent } from './side-profile/side-profile.component';
 import { FollowerFollowingComponent } from './side-profile/follower-following/follower-following.component';
+import { ProgramEditComponent } from './program-edit/program-edit.component';
+import { UserDisplayNamePipe } from '../shared/pipes/user-display-name.pipe';
 
 @NgModule({
   declarations: [
@@ -33,6 +35,7 @@ import { FollowerFollowingComponent } from './side-profile/follower-following/fo
     FollowingListComponent,
     SideProfileComponent,
     FollowerFollowingComponent,
+    ProgramEditComponent,
   ],
   imports: [
     CommonModule,
@@ -46,6 +49,8 @@ import { FollowerFollowingComponent } from './side-profile/follower-following/fo
     CoreModule,
     MaterialModule,
     ReactiveFormsModule,
+    UserDisplayNamePipe,
+    NgOptimizedImage,
   ],
 })
 export class EsgithubModule {}

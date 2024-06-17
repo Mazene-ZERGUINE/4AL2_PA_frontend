@@ -4,6 +4,7 @@ import { CodingPageComponent } from './coding-page/coding-page.component';
 import { HomePageComponent } from './home-page/home-page.component';
 import { ProfileComponent } from './profile/profile.component';
 import { AuthGuard } from '../core/guards/auth.guard';
+import { ProgramEditComponent } from './program-edit/program-edit.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth' },
@@ -11,6 +12,11 @@ const routes: Routes = [
   { path: 'home', component: HomePageComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'profile/:userId', component: ProfileComponent, canActivate: [AuthGuard] },
+  {
+    path: 'program/:programId',
+    component: ProgramEditComponent,
+    canActivate: [AuthGuard],
+  },
 ];
 
 @NgModule({
