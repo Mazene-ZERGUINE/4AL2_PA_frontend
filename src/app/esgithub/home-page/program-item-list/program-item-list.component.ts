@@ -9,16 +9,13 @@ import { UserDataModel } from '../../../core/models/user-data.model';
 })
 export class ProgramItemListComponent {
   @Input() programmingLanguage!: string;
-
   @Input() sourceCode!: string;
-
   @Input() description?: string;
-
   @Input() inputTypes!: FileTypesEnum[];
-
   @Input() outputTypes!: FileTypesEnum[];
   @Input() user!: UserDataModel;
   @Input() isOwner: boolean = false;
   @Input() visibility!: string;
   @Input() homePage: boolean = true;
+  @Input() programId!: string;
 }
