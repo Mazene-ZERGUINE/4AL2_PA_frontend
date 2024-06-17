@@ -28,22 +28,25 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
   @ViewChild('editor') private editor!: ElementRef<HTMLElement>;
 
   readonly userData$: Observable<UserDataModel> = this.authService.getUserData();
-  private getProgramDetailsSubscription!: Subscription;
-  private likeOrDislikeSubscription!: Subscription;
+  private getProgramDetailsSubscription: Subscription = new Subscription();
+  private likeOrDislikeSubscription: Subscription = new Subscription();
+  private loadCommentsSubscription: Subscription = new Subscription();
+  private dialogSubscription: Subscription = new Subscription();
+  private commentsSubscription: Subscription = new Subscription();
+
   programComments!: any[];
   aceEditor!: Ace.Editor;
   program!: ProgramModel;
-  readonly anonymousImageUrl =
-    'http://thumbs.dreamstime.com/b/default-profile-picture-avatar-photo-placeholder-vector-illustration-default-profile-picture-avatar-photo-placeholder-vector-189495158.jpg';
   userReaction: ReactionsEnum | undefined = undefined;
   likes!: number;
   dislikes!: number;
   commentFieldText!: string;
   replyingToCommentId: string | null = null;
   commentReplyFieldText!: string;
-
   highlightedLines: number[] = [];
-  private lineDecorations: { [line: number]: number } = {}; // To track added decorations
+
+  readonly anonymousImageUrl =
+    'http://thumbs.dreamstime.com/b/default-profile-picture-avatar-photo-placeholder-vector-illustration-default-profile-picture-avatar-photo-placeholder-vector-189495158.jpg';
 
   constructor(
     private readonly authService: AuthService,
@@ -59,9 +62,11 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.getProgramDetailsSubscription.unsubscribe();
-    if (this.likeOrDislikeSubscription) {
-      this.likeOrDislikeSubscription.unsubscribe();
-    }
+    this.getProgramDetailsSubscription.unsubscribe();
+    this.loadCommentsSubscription.unsubscribe();
+    this.likeOrDislikeSubscription.unsubscribe();
+    this.dialogSubscription.unsubscribe();
+    this.commentsSubscription.unsubscribe();
   }
 
   loadProgramDetails(): void {
@@ -113,14 +118,15 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
       return;
     }
     const row = e.getDocumentPosition().row;
-    this.modalService.openDialog(LineCommentsModalComponent, 900, {
+    const dialogRef = this.modalService.openDialog(LineCommentsModalComponent, 900, {
       lineNumber: row,
       programId: this.program.programId,
     });
+    this.dialogSubscription = dialogRef.subscribe(() => this.reloadProgramComments());
   }
 
   private reloadProgramComments(): void {
-    this.editProgramService
+    this.loadCommentsSubscription = this.editProgramService
       .getProgramComments(this.program.programId)
       .subscribe((comments) => {
         this.programComments = this.filterComments(comments);
@@ -205,7 +211,7 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
   }
 
   onCommentClick(): void {
-    this.userData$
+    this.commentsSubscription = this.userData$
       .pipe(
         map((userData) => userData.userId),
         switchMap((userId) =>
@@ -229,7 +235,7 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
   }
 
   onSubmitReply(commentId: string): void {
-    this.userData$
+    this.commentsSubscription = this.userData$
       .pipe(
         map((userData) => userData.userId),
         switchMap((userId) =>

@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { EditProgramService } from '../../../esgithub/program-edit/edit-program.service';
 import { Subscription, switchMap } from 'rxjs';
 import { AuthService } from '../../Auth/service/auth.service';
@@ -12,6 +12,9 @@ import { map } from 'rxjs/operators';
 })
 export class LineCommentsModalComponent implements OnInit, OnDestroy {
   getLinesCommentsSubscription!: Subscription;
+  onCommentSubscribe!: Subscription;
+  loadCommentsSubscription!: Subscription;
+
   lineNumber: number;
   programId: string;
 
@@ -26,6 +29,7 @@ export class LineCommentsModalComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private readonly editProgramService: EditProgramService,
     private readonly authService: AuthService,
+    public dialogRef: MatDialogRef<LineCommentsModalComponent>,
   ) {
     this.lineNumber = data.lineNumber;
     this.programId = data.programId;
@@ -37,10 +41,11 @@ export class LineCommentsModalComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.getLinesCommentsSubscription.unsubscribe();
+    this.onCommentSubscribe.unsubscribe();
   }
 
   private loadComments(): void {
-    this.editProgramService
+    this.loadCommentsSubscription = this.editProgramService
       .getLinesComments(this.lineNumber, this.programId)
       .subscribe((comments) => {
         this.programComments = this.filterComments(comments);
@@ -74,7 +79,7 @@ export class LineCommentsModalComponent implements OnInit, OnDestroy {
   }
 
   onSubmitReply(commentId: string): void {
-    this.authService
+    this.onCommentSubscribe = this.authService
       .getUserData()
       .pipe(
         map((userData) => userData.userId),
@@ -92,7 +97,7 @@ export class LineCommentsModalComponent implements OnInit, OnDestroy {
   }
 
   onCommentClick(): void {
-    this.authService
+    this.onCommentSubscribe = this.authService
       .getUserData()
       .pipe(
         map((userData) => userData.userId),
@@ -106,5 +111,9 @@ export class LineCommentsModalComponent implements OnInit, OnDestroy {
         ),
       )
       .subscribe(() => this.loadComments());
+  }
+
+  onCloseBtnClick(): void {
+    this.dialogRef.close();
   }
 }

@@ -20,11 +20,17 @@
           [src]="
             program?.user?.avatarUrl
               ? 'http://' + program?.user?.avatarUrl
-              : 'http://' + anonymousImageUrl
+              : anonymousImageUrl
           "
         />
-        <div class="ml-2 p-2.5">
-          <h2 class="text-md text-gray-100 font-bold italic relative">
+        <div
+          *ngIf="userData$ | async as userData"
+          class="ml-2 p-2.5 cursor-pointer"
+          [routerLink]="['/profile', userData.userId]"
+        >
+          <h2
+            class="text-md text-gray-100 font-bold italic relative hover:text-purple-400 hover:underline"
+          >
             {{ program?.user | userDisplayName }}
           </h2>
         </div>
