@@ -1,5 +1,6 @@
 import { FileTypesEnum } from '../../shared/enums/FileTypesEnum';
 import { UserDataModel } from './user-data.model';
+import { ReactionModel } from './reaction.model';
 
 export class ProgramModel {
   programId!: string;
@@ -11,6 +12,7 @@ export class ProgramModel {
   outputTypes!: FileTypesEnum[];
   user!: UserDataModel;
   userId!: string;
+  reactions!: ReactionModel[];
   createdAt!: Date;
   updatedAt!: Date;
 }
