@@ -1,0 +1,69 @@
+<div class="flex h-screen bg-[#1E1F3D]">
+  <div class="z-50">
+    <app-side-navbar></app-side-navbar>
+  </div>
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex flex-col mt-8 w-[90%] relative left-[5%] p-4">
+      <div
+        class="relative w-full h-[300px] bg-center bg-cover rounded-lg"
+        style="
+          background-image: url('https://s3-alpha-sig.figma.com/img/1eb6/5b9d/44abbf3c1e307507fc3830709dc244f7?Expires=1719792000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=GzOOeTzleRmENjIH29dVOq7pIYZjuSOF0Ucg0Jrvd1GVU98fO8Q8X90cxrvck1FrMTUF1kp1yLWPW74zg0IYVrdgUKHNyF~bG5XnACd22wHAXT8WvN2xytIe6~BS5M7dCc31DfHzd5fRyiA7LXhEZHTChDpt9iyKwM9J6S~hjugyzHPzHEFmW7Gnkx7lch58B9ErE6snawy646criXpC~b~uhFq~mjWcuP2JXH4bAw5iO2mj-EWE2THzxCQYG7F8qDLTQ6uw9R2Q4f1FwPP~2pScL6t-CvuE~nVpNEDHze1TL4aPNdwTCZbaNi9bM45C7hozTPL1WlcnCkfCsJ~qKg__');
+        "
+      >
+        <div
+          class="absolute inset-0 bg-black bg-opacity-10 backdrop-blur-sm rounded-lg"
+        ></div>
+        <div class="absolute inset-0 flex items-center justify-center rounded-lg">
+          <h1 class="text-white text-4xl font-bold italic">Find Your Community</h1>
+        </div>
+      </div>
+    </div>
+
+    <i
+      (click)="onAddGroupClick()"
+      class="material-icons cursor-pointer relative left-[6%] text-white mt-8 p-2 bg-purple-500 rounded-lg w-10"
+      >add_circle</i
+    >
+
+    <div class="flex-1 overflow-y-auto mt-4">
+      <div class="left-[5%] flex-col flex mt-2 relative w-[90%] p-4 overflow-hidden">
+        <div class="w-full flex flex-row justify-between">
+          <h1 class="italic text-purple-500 font-bold text-2xl">Popular Right now</h1>
+        </div>
+        <div class="slider overflow-x-auto py-2 items overflow-y-hidden">
+          <div class="flex flex-row space-x-20 items-slide">
+            <ng-container *ngFor="let group of recentGroupsList$ | async">
+              <div class="flex-none w-80 h-80">
+                <app-group-list-item [group]="group"></app-group-list-item>
+              </div>
+            </ng-container>
+            <ng-container *ngFor="let group of recentGroupsList$ | async">
+              <div class="flex-none w-80 h-80 cursor-pointer">
+                <app-group-list-item [group]="group"></app-group-list-item>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div class="left-[5%] flex-col flex mt-10 relative w-[90%] p-4 overflow-hidden">
+        <div class="w-full flex flex-row justify-between mb-6">
+          <h1 class="italic text-purple-500 font-bold text-2xl">All Groups</h1>
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+          <ng-container *ngFor="let group of groupsList$ | async">
+            <div class="flex-none w-80 h-80 cursor-pointer">
+              <app-group-list-item [group]="group"></app-group-list-item>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="w-[330px] hidden xl:block">
+    <app-side-profile
+      *ngIf="userData$ | async as currentUser"
+      [currentUser]="currentUser"
+    ></app-side-profile>
+  </div>
+</div>

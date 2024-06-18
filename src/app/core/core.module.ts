@@ -13,6 +13,7 @@ import { MaterialModule } from '../shared/material.module';
 import { CodePageUseGuidModalComponent } from './modals/code-page-use-guid-modal/code-page-use-guid-modal.component';
 import { LineCommentsModalComponent } from './modals/line-comments-modal/line-comments-modal.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CreateGroupModalComponent } from './modals/create-group-modal/create-group-modal.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     SideNavbarComponent,
     CodePageUseGuidModalComponent,
     LineCommentsModalComponent,
+    CreateGroupModalComponent,
   ],
   imports: [
     CommonModule,
