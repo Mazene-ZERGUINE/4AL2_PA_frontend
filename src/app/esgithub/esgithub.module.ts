@@ -24,6 +24,7 @@ import { ProgramEditComponent } from './program-edit/program-edit.component';
 import { UserDisplayNamePipe } from '../shared/pipes/user-display-name.pipe';
 import { GroupsComponent } from './groups/groups.component';
 import { GroupListItemComponent } from './groups/group-list-item/group-list-item.component';
+import { GroupeHomeComponent } from './groups/groupe-home/groupe-home.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { GroupListItemComponent } from './groups/group-list-item/group-list-item
     ProgramEditComponent,
     GroupsComponent,
     GroupListItemComponent,
+    GroupeHomeComponent,
   ],
   imports: [
     CommonModule,

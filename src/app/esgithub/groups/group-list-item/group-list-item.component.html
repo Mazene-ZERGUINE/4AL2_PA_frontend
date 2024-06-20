@@ -2,7 +2,7 @@
   class="rounded-lg shadow-lg border backdrop-blur-lg border-transparent overflow-hidden text-white relative w-full max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg aspect-square m-4"
 >
   <img
-    [src]="'http://' + group.imageUrl ?? anonymousGroupImage"
+    [src]="group.imageUrl ? 'http://' + group.imageUrl : anonymousGroupImage"
     class="absolute inset-0 w-full h-full object-cover"
   />
   <div

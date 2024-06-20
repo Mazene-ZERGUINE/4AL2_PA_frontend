@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { GroupsService } from './groups.service';
 import { AuthService } from '../../core/Auth/service/auth.service';
 import { ModalService } from '../../core/services/modal.service';
@@ -7,13 +7,14 @@ import { CreateGroupModalComponent } from '../../core/modals/create-group-modal/
 import { combineLatest, Observable, Subscription, switchMap, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GroupModel } from '../../core/models/group.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-groups',
   templateUrl: './groups.component.html',
   styleUrls: ['./groups.component.scss'],
 })
-export class GroupsComponent implements OnInit, OnDestroy {
+export class GroupsComponent implements OnDestroy {
   createGroupSubscription: Subscription = new Subscription();
 
   groupsList$ = this.groupsService.getGroupsList$();
@@ -29,12 +30,15 @@ export class GroupsComponent implements OnInit, OnDestroy {
     private readonly authService: AuthService,
     private readonly modalService: ModalService,
     private readonly notifier: NotifierService,
+    private readonly router: Router,
   ) {}
-
-  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.createGroupSubscription.unsubscribe();
+  }
+
+  onGroupClick(groupId: string): void {
+    this.router.navigate(['group/' + groupId]);
   }
 
   onAddGroupClick(): void {
@@ -43,7 +47,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
       .pipe(
         map(([user, dialogResult]): FormData => {
           const payload = new FormData();
-          payload.append('image', dialogResult.image);
+          if (dialogResult.image) payload.append('image', dialogResult.image);
           payload.append('name', dialogResult.groupName);
           payload.append('description', dialogResult.description);
           payload.append('ownerId', user.userId);
@@ -56,11 +60,12 @@ export class GroupsComponent implements OnInit, OnDestroy {
           this.notifier.showSuccess(
             `${result.name} has been created successfully. You will be redirected soon.`,
           );
-          //todo: interval and redirection to the group home page
+          // eslint-disable-next-line angular/interval-service
+          setInterval(() => {
+            this.router.navigate(['group/' + result.groupId]);
+          }, 4000);
         }),
       )
       .subscribe();
   }
-
-  onSeeAllClick(): void {}
 }

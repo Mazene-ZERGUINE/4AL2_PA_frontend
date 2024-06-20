@@ -6,6 +6,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { AuthGuard } from '../core/guards/auth.guard';
 import { ProgramEditComponent } from './program-edit/program-edit.component';
 import { GroupsComponent } from './groups/groups.component';
+import { GroupeHomeComponent } from './groups/groupe-home/groupe-home.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth' },
@@ -19,6 +20,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   { path: 'groups', component: GroupsComponent, canActivate: [AuthGuard] },
+  { path: 'group/:groupId', component: GroupeHomeComponent, canActivate: [AuthGuard] },
 ];
 
 @NgModule({

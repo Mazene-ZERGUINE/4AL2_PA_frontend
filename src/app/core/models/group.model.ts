@@ -8,4 +8,5 @@ export class GroupModel {
   members!: UserDataModel[];
   created_at!: Date;
   imageUrl?: string;
+  visibility?: string;
 }
