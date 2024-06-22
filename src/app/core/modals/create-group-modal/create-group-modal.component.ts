@@ -20,7 +20,7 @@ export class CreateGroupModalComponent {
     return this._createGroupForm as FormGroup;
   }
 
-  private selectedImage?: File;
+  protected selectedImage?: File;
 
   constructor(
     public dialogRef: MatDialogRef<CreateGroupModalComponent>,
