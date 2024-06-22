@@ -14,7 +14,7 @@ export class GroupsService {
     return this.apiService.getRequest('groups/all');
   }
 
-  createGroup(payload: Partial<GroupModel>): Observable<GroupModel> {
+  createGroup(payload: any): Observable<GroupModel> {
     return this.apiService.postRequest('groups/create', payload);
   }
 
@@ -28,6 +28,31 @@ export class GroupsService {
 
   getGroupPrograms(groupId: string): Observable<ProgramModel[]> {
     return this.apiService.getRequest('program/group/' + groupId);
+  }
+
+  joinGroup(groupId: string, userId: string): Observable<void> {
+    const payload = {
+      userId: userId,
+      groupId: groupId,
+    };
+    return this.apiService.postRequest('groups/add-member', payload);
+  }
+
+  leaveGroup(groupId: string, userId: string): Observable<void> {
+    const payload = {
+      userId: userId,
+      groupId: groupId,
+    };
+    return this.apiService.postRequest('groups/leave', payload);
+  }
+
+  deleteGroup(groupId: string): Observable<void> {
+    return this.apiService.deleteRequest('groups/delete/' + groupId);
+  }
+
+  publishGroup(payload: any): Observable<void> {
+    console.log(payload);
+    return this.apiService.postRequest('groups/publish', payload);
   }
 
   //todo: impliment all other methods //

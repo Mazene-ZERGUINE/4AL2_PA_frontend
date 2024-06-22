@@ -31,13 +31,16 @@
           <h1 class="italic text-purple-500 font-bold text-2xl">Popular Right now</h1>
         </div>
         <div class="slider overflow-x-auto py-2 items overflow-y-hidden">
-          <div class="flex flex-row space-x-20 items-slide">
-            <ng-container *ngFor="let group of recentGroupsList$ | async">
+          <div
+            class="flex flex-row space-x-20 items-slide"
+            *ngIf="recentGroupsList$ | async as recent"
+          >
+            <ng-container *ngFor="let group of recent">
               <div class="flex-none w-80 h-80" (click)="onGroupClick(group.groupId)">
                 <app-group-list-item [group]="group"></app-group-list-item>
               </div>
             </ng-container>
-            <ng-container *ngFor="let group of recentGroupsList$ | async">
+            <ng-container *ngFor="let group of recent">
               <div
                 class="flex-none w-80 h-80 cursor-pointer"
                 (click)="onGroupClick(group.groupId)"

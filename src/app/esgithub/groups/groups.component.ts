@@ -21,10 +21,6 @@ export class GroupsComponent implements OnDestroy {
   recentGroupsList$: Observable<GroupModel[]> = this.groupsService.getRecentGroups();
   userData$ = this.authService.getUserData();
 
-  animationState = 'running';
-  animationStarted = false;
-  transformValue = 0;
-
   constructor(
     private readonly groupsService: GroupsService,
     private readonly authService: AuthService,
@@ -42,7 +38,7 @@ export class GroupsComponent implements OnDestroy {
   }
 
   onAddGroupClick(): void {
-    const dialogRef = this.modalService.openDialog(CreateGroupModalComponent, 700);
+    const dialogRef = this.modalService.openDialog(CreateGroupModalComponent, 900);
     this.createGroupSubscription = combineLatest([this.userData$, dialogRef])
       .pipe(
         map(([user, dialogResult]): FormData => {
