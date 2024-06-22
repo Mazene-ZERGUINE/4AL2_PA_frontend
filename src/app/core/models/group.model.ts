@@ -1,4 +1,5 @@
 import { UserDataModel } from './user-data.model';
+import { ProgramModel } from './program.model';
 
 export class GroupModel {
   groupId!: string;
@@ -9,4 +10,5 @@ export class GroupModel {
   created_at!: Date;
   imageUrl?: string;
   visibility?: string;
+  programs?: ProgramModel[];
 }
