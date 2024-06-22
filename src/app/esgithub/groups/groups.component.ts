@@ -4,8 +4,8 @@ import { AuthService } from '../../core/Auth/service/auth.service';
 import { ModalService } from '../../core/services/modal.service';
 import { NotifierService } from '../../core/services/notifier.service';
 import { CreateGroupModalComponent } from '../../core/modals/create-group-modal/create-group-modal.component';
-import { combineLatest, Observable, Subscription, switchMap, tap } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { combineLatest, Observable, Subject, switchMap, tap } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { GroupModel } from '../../core/models/group.model';
 import { Router } from '@angular/router';
 
@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./groups.component.scss'],
 })
 export class GroupsComponent implements OnDestroy {
-  createGroupSubscription: Subscription = new Subscription();
+  componentDestroyer$ = new Subject<void>();
 
   groupsList$ = this.groupsService.getGroupsList$();
   recentGroupsList$: Observable<GroupModel[]> = this.groupsService.getRecentGroups();
@@ -30,7 +30,8 @@ export class GroupsComponent implements OnDestroy {
   ) {}
 
   ngOnDestroy(): void {
-    this.createGroupSubscription.unsubscribe();
+    this.componentDestroyer$.next();
+    this.componentDestroyer$.complete();
   }
 
   onGroupClick(groupId: string): void {
@@ -39,8 +40,9 @@ export class GroupsComponent implements OnDestroy {
 
   onAddGroupClick(): void {
     const dialogRef = this.modalService.openDialog(CreateGroupModalComponent, 900);
-    this.createGroupSubscription = combineLatest([this.userData$, dialogRef])
+    combineLatest([this.userData$, dialogRef])
       .pipe(
+        takeUntil(this.componentDestroyer$),
         map(([user, dialogResult]): FormData => {
           const payload = new FormData();
           if (dialogResult.image) payload.append('image', dialogResult.image);
@@ -52,13 +54,13 @@ export class GroupsComponent implements OnDestroy {
         }),
         switchMap((payload) => this.groupsService.createGroup(payload)),
         tap((result): void => {
-          console.log(result);
           this.notifier.showSuccess(
             `${result.name} has been created successfully. You will be redirected soon.`,
           );
-          // eslint-disable-next-line angular/interval-service
-          setInterval(() => {
+          // eslint-disable-next-line angular/timeout-service
+          const timeoutId = setTimeout(() => {
             this.router.navigate(['group/' + result.groupId]);
+            clearTimeout(timeoutId); // Clear the timeout once executed
           }, 4000);
         }),
       )
