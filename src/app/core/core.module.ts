@@ -14,6 +14,8 @@ import { CodePageUseGuidModalComponent } from './modals/code-page-use-guid-modal
 import { LineCommentsModalComponent } from './modals/line-comments-modal/line-comments-modal.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CreateGroupModalComponent } from './modals/create-group-modal/create-group-modal.component';
+import { ConfirmationModalComponent } from './modals/conifrmatio-modal/confirmation-modal.component';
+import { GroupPublishModalComponent } from './modals/group-publish-modal/group-publish-modal.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +24,8 @@ import { CreateGroupModalComponent } from './modals/create-group-modal/create-gr
     CodePageUseGuidModalComponent,
     LineCommentsModalComponent,
     CreateGroupModalComponent,
+    ConfirmationModalComponent,
+    GroupPublishModalComponent,
   ],
   imports: [
     CommonModule,

@@ -1,6 +1,6 @@
-<div class="p-5 rounded-lg shadow-lg max-w-2xl mx-auto">
+<div class="p-8 rounded-lg shadow-lg bg-[#1E1F3D]">
   <div class="mb-4">
-    <label for="description" class="block text-md italic font-bold text-white"
+    <label for="description" class="block text-md italic font-bold text-white mb-2"
       >Description</label
     >
     <textarea
@@ -13,9 +13,7 @@
   </div>
 
   <div class="mb-4 border border-white bg-white p-4 rounded-md">
-    <label class="block text-sm font-medium text-md italic font-bold text-black"
-      >Output Types</label
-    >
+    <label class="block text-md italic font-bold text-black mb-2">Input Files</label>
     <div class="mt-1">
       <label
         *ngFor="let type of inputFileTypeOptions; let i = index"
@@ -28,15 +26,13 @@
           [(ngModel)]="type.checked"
           name="inputType{{ i }}"
         />
-        <span class="ml-1 text-grey-500">{{ type.value }}</span>
+        <span class="ml-1 text-gray-500">{{ type.value }}</span>
       </label>
     </div>
   </div>
 
   <div class="mb-4 border border-white bg-white p-4 rounded-md">
-    <label class="block text-sm font-medium text-md italic font-bold text-black"
-      >Output Types</label
-    >
+    <label class="block text-md italic font-bold text-black mb-2">Output Files</label>
     <div class="mt-1">
       <label
         *ngFor="let type of outputFileTypeOptions; let i = index"
@@ -47,19 +43,19 @@
           type="checkbox"
           class="form-checkbox h-5 w-5 text-indigo-600"
           [(ngModel)]="type.checked"
-          name="inputType{{ i }}"
+          name="outputType{{ i }}"
         />
-        <span class="ml-1 text-grey-500">{{ type.value }}</span>
+        <span class="ml-1 text-gray-500">{{ type.value }}</span>
       </label>
     </div>
   </div>
 
   <div class="mb-4 border border-white bg-white p-4 rounded-md">
-    <label class="block text-sm font-medium text-gray-700">Visibility</label>
+    <label class="block text-md italic font-bold text-black mb-2">Visibility</label>
     <div class="mt-2">
       <label
         *ngFor="let vis of visibilityOptions; let i = index"
-        class="inline-flex items-center text-sm"
+        class="inline-flex items-center text-sm mr-2"
       >
         <input
           [ngClass]="{ 'ml-4': i !== 0 }"
@@ -69,7 +65,7 @@
           [(ngModel)]="visibility"
           [value]="vis.value"
         />
-        <span class="ml-1">{{ vis.label }}</span>
+        <span class="ml-1 text-gray-500">{{ vis.label }}</span>
       </label>
     </div>
   </div>

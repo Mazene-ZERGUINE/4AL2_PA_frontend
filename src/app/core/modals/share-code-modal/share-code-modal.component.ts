@@ -1,4 +1,3 @@
-import { OverlayContainer } from '@angular/cdk/overlay';
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FileTypesEnum } from '../../../shared/enums/FileTypesEnum';
@@ -12,6 +11,7 @@ import { NotifierService } from '../../services/notifier.service';
 export class ShareCodeModalComponent {
   visibility!: string;
   description!: string;
+  selectedProgramFile?: File;
   inputFileTypeOptions = Object.values(FileTypesEnum).map((value) => ({
     value,
     checked: false,
@@ -26,22 +26,17 @@ export class ShareCodeModalComponent {
     { label: 'Private', value: 'private' },
     { label: 'Follower Only', value: 'only_followers' },
   ];
+
   constructor(
     public dialogRef: MatDialogRef<ShareCodeModalComponent>,
-    private overlayContainer: OverlayContainer,
     private readonly notifier: NotifierService,
-  ) {
-    this.overlayContainer.getContainerElement().classList.add('app-dark-theme');
-  }
+  ) {}
 
   shareCode(): void {
-    const missingInputType = !this.inputFileTypeOptions.some((type) => type.checked);
-    const missingOutputType = !this.outputFileTypeOptions.some((type) => type.checked);
-    if (!this.visibility || missingInputType || missingOutputType) {
+    if (!this.visibility) {
       this.notifier.showWarning('input types, output types and visibility are mandatory');
       return;
     }
-
     const inputTypes = this.inputFileTypeOptions
       .filter((type) => type.checked)
       .map((type) => type.value);
