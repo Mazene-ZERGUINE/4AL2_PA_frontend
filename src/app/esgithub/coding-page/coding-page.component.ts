@@ -103,7 +103,7 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
 
   onRunCodeClick(): void {
     this.isLoading = true;
-    if (this.selectedInputFiles.length > 0) {
+    if (this.selectedInputFiles.length > 0 || this.selectedOutputFormats.length > 0) {
       const formData = this.buildFormData();
       this.runCodeSubscription = this.codeProcessorService
         .sendCodeWithFilesToProcess(formData)
@@ -133,9 +133,9 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
 
   onShareClick(): void {
     this.modalService
-      .openDialog(ShareCodeModalComponent, 700)
+      .openDialog(ShareCodeModalComponent, 900, { isGroupProgram: false })
       .pipe(
-        filter((result) => result !== undefined),
+        filter((result: any) => result !== undefined),
         switchMap((result) => {
           const programDto: CreateProgramDto = {
             ...result,

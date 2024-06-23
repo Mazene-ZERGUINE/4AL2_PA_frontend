@@ -1,101 +1,140 @@
 <div
-  class="bg-[#424244] p-4 rounded-lg w-[90%] mx-auto text-white mb-10 mt-10"
-  [ngClass]="{ 'w-full': homePage === false }"
+  class="relative p-4 rounded-lg mx-auto text-white mb-10 h-[320px]"
+  [ngStyle]="{ 'background-image': 'url(' + selectedBgImageUrl + ')' }"
+  [ngClass]="{ 'w-full': homePage === false, 'w-[90%]': homePage === true }"
 >
-  <div
-    *ngIf="isOwner === true"
-    class="bg-black p-2 rounded-md italic font-bold w-auto flex justify-center items-center"
-  >
-    {{ visibility }}
-  </div>
-  <div class="flex items-center justify-between mb-2">
-    <div class="flex items-center" *ngIf="isOwner === false">
+  <div class="flex-col flex w-full h-[70%] top-[80%]">
+    <div class="flex flex-row ml-6 z-10">
       <img
-        *ngIf="user.avatarUrl === null"
-        src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Circle-icons-profile.svg"
-        class="w-8 h-8 rounded-full border border-white"
+        class="h-14 w-14 rounded-full"
+        *ngIf="program.programmingLanguage === 'javascript'"
+        src="assets/images/icons/javascript-svgrepo-com.svg"
       />
       <img
-        *ngIf="user.avatarUrl !== null"
-        [src]="'http://' + user.avatarUrl"
-        class="w-8 h-8 rounded-full border border-white"
+        class="h-14 w-14 rounded-full"
+        *ngIf="program.programmingLanguage === 'python'"
+        src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg"
       />
-      <a
-        [routerLink]="'/profile/' + user.userId"
-        class="ml-4 font-bold italic text-md hover:text-black hover:underline"
-        >{{ user.userName }}</a
+      <img
+        class="h-14 w-14 rounded-full"
+        *ngIf="program.programmingLanguage === 'php'"
+        src="https://upload.wikimedia.org/wikipedia/commons/3/31/Webysther_20160423_-_Elephpant.svg"
+      />
+      <img
+        class="h-14 w-14 rounded-full"
+        *ngIf="program.programmingLanguage === 'c++'"
+        src="https://upload.wikimedia.org/wikipedia/commons/3/32/C%2B%2B_logo.png"
+      />
+
+      <h1 class="p-2 text-white text-3xl italic font-bold ml-4">
+        {{ program.programmingLanguage }}
+      </h1>
+    </div>
+
+    <div class="z-10 mt-4">
+      <div
+        class="h-[80px] w-[70%] overflow-auto z-10 ml-8 p-2 text-sm text-gray-500 border border-white border-opacity-20 rounded-lg"
       >
+        {{ program.description }}
+      </div>
+
+      <div class="ml-8 z-10 mt-4">
+        <div class="flex flex-row z-10" *ngIf="program.inputTypes.length > 0">
+          <h1>Entry File/s:</h1>
+          <div
+            class="ml-2 p-0.5 w-16 text-center bg-green-400 rounded-lg z-10"
+            *ngFor="let file of program.inputTypes"
+          >
+            {{ file }}
+          </div>
+        </div>
+        <div class="flex flex-row z-10" *ngIf="program.inputTypes.length === 0">
+          <h1>Entry File/s:</h1>
+          <div class="ml-2 p-0.5 w-64 text-sm text-red-700">
+            this program has no entry files
+          </div>
+        </div>
+
+        <div class="flex flex-row z-10 mt-2" *ngIf="program.outputTypes.length > 0">
+          <h1>Exist File/s:</h1>
+          <div
+            class="ml-2 p-0.5 w-16 text-center bg-red-700 rounded-lg z-10"
+            *ngFor="let file of program.outputTypes"
+          >
+            {{ file }}
+          </div>
+        </div>
+        <div class="flex flex-row z-10 mt-2" *ngIf="program.outputTypes.length === 0">
+          <h1>Exit File/s:</h1>
+          <div class="ml-2 p-0.5 w-64 text-sm text-red-700">
+            this program has no exit files
+          </div>
+        </div>
+      </div>
     </div>
-    <p *ngIf="isOwner === false" class="mr-2">
-      {{ user.lastName | uppercase }} {{ user.firstName }}
-    </p>
-  </div>
-  <div class="w-full h-24 overflow-auto p-4 border bg-white bg-opacity-30 rounded-md">
-    <p class="text-gray-800 text-sm z-50">{{ description }}</p>
-  </div>
-  <div
-    class="w-full h-32 overflow-auto p-4 border bg-white bg-opacity-30 rounded-md mt-2"
-  >
-    <textarea
-      disabled
-      class="text-black font-bold text-md z-50 w-full h-full border-0 bg-transparent"
-      >{{ sourceCode }}</textarea
-    >
-  </div>
-  <div class="flex mt-4 ml-4">
-    <img
-      *ngIf="programmingLanguage === 'javascript'"
-      src="assets/images/icons/javascript-svgrepo-com.svg"
-      class="w-4 h-4 rounded-full border border-white"
-    />
-    <img
-      *ngIf="programmingLanguage === 'python'"
-      src="assets/images/icons/python-svgrepo-com.svg"
-      class="w-4 h-4 rounded-full border border-white"
-    />
-    <div style="margin-top: -1px" class="text-blue-400 text-xs mt-2 ml-4">
-      {{ programmingLanguage }}
+
+    <div class="flex flex-row w-full absolute top-[80%] ml-4">
+      <div class="flex flex-row p-2 w-[27%]">
+        <img
+          class="h-8 w-8 z-10 rounded-full"
+          [src]="
+            program.user.avatarUrl
+              ? 'http://' + program.user.avatarUrl
+              : anonymousImageUrl
+          "
+        />
+        <h3
+          [routerLink]="['/profile', program.user.userId]"
+          class="p-2 ml-2 hover:text-purple-500 cursor-pointer text-white italic font-bold text-sm z-10"
+        >
+          {{ program.user.userName }}
+        </h3>
+      </div>
+
+      <div class="flex-row flex p-2 z-10">
+        <i
+          (click)="onLikeBtnClick()"
+          class="material-icons text-green-500 text-3xl font-bold cursor-pointer z-10"
+        >
+          {{
+            userReaction?.type === ReactionsEnum.LIKE
+              ? 'thumb_up_alt'
+              : 'thumb_up_off_alt'
+          }}
+        </i>
+        <h1 class="ml-2 mt-1.5 text-sm text-green-200 z-10">{{ likes }}</h1>
+      </div>
+      <div class="flex flex-row p-3 z-10">
+        <i
+          (click)="onDislikeBtnClick()"
+          class="material-icons text-red-500 text-3xl font-bold cursor-pointer z-10"
+        >
+          {{
+            userReaction?.type === ReactionsEnum.DISLIKE
+              ? 'thumb_down_alt'
+              : 'thumb_down_off_alt'
+          }}
+        </i>
+        <h1 class="ml-2 mt-1.5 text-sm text-red-200">{{ dislikes }}</h1>
+      </div>
+      <div class="flex flex-row p-3 z-10">
+        <i
+          [routerLink]="['/program', program.programId]"
+          class="material-icons text-white text-3xl font-bold cursor-pointer z-10"
+        >
+          remove_red_eye
+        </i>
+      </div>
+      <div class="flex flex-row p-3 z-10" *ngIf="isProgramOwner || isGroupOwner">
+        <i
+          (click)="onDeleteBtnClick()"
+          class="material-icons text-red-700 text-3xl font-bold cursor-pointer z-10"
+        >
+          delete_outline
+        </i>
+      </div>
     </div>
   </div>
 
-  <div class="flex mt-4 ml-4" *ngIf="inputTypes?.length">
-    <div class="w-[10%] text-sm font-bold italic mr-4">Entry files:</div>
-    <div
-      class="bg-green-400 rounded-md px-4 ml-2 text-sm"
-      *ngFor="let file of inputTypes"
-    >
-      {{ file }}
-    </div>
-  </div>
-
-  <div class="flex mt-4 ml-4" *ngIf="outputTypes?.length">
-    <div class="w-[10%] text-sm font-bold italic mr-4">Exit files:</div>
-    <div class="bg-red-400 rounded-md px-4 ml-2 text-sm" *ngFor="let file of outputTypes">
-      {{ file }}
-    </div>
-  </div>
-
-  <div class="flex mt-4" *ngIf="isOwner === false">
-    <button class="bg-black text-white font-bold py-1 px-4 rounded opacity-50 ml-2">
-      <i class="material-icons">thumb_up_off_alt</i>
-      <span class="relative p-2 bottom-1.5 italic">liked</span>
-    </button>
-    <button class="bg-black text-white font-bold py-1 px-4 rounded opacity-50 ml-2">
-      <i class="material-icons">thumb_down_off_alt</i>
-      <span class="relative p-2 bottom-1.5 italic">disliked</span>
-    </button>
-    <button
-      [routerLink]="['/program', programId]"
-      class="bg-black text-white font-bold py-1 px-4 rounded opacity-80 ml-2"
-    >
-      <i class="material-icons">remove_red_eye</i>
-      <span class="relative p-2 bottom-1.5 italic">view</span>
-    </button>
-  </div>
-  <div *ngIf="isOwner" class="mt-4">
-    <button class="bg-black text-white font-bold py-1 px-4 rounded opacity-80 ml-2">
-      <i class="material-icons">edit</i>
-      <span class="relative p-2 bottom-1.5 italic">Edit</span>
-    </button>
-  </div>
+  <div class="liner absolute inset-0"></div>
 </div>
