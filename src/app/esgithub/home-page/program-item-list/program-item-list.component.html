@@ -32,7 +32,9 @@
     </div>
 
     <div class="z-10 mt-4">
-      <div class="h-[80px] w-[70%] overflow-auto z-10 ml-8 p-2 text-sm text-gray-500">
+      <div
+        class="h-[80px] w-[70%] overflow-auto z-10 ml-8 p-2 text-sm text-gray-500 border border-white border-opacity-20 rounded-lg"
+      >
         {{ program.description }}
       </div>
 
@@ -123,7 +125,7 @@
           remove_red_eye
         </i>
       </div>
-      <div class="flex flex-row p-3 z-10" *ngIf="isProgramOwner">
+      <div class="flex flex-row p-3 z-10" *ngIf="isProgramOwner || isGroupOwner">
         <i
           (click)="onDeleteBtnClick()"
           class="material-icons text-red-700 text-3xl font-bold cursor-pointer z-10"

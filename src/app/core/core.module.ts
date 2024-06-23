@@ -16,6 +16,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CreateGroupModalComponent } from './modals/create-group-modal/create-group-modal.component';
 import { ConfirmationModalComponent } from './modals/conifrmatio-modal/confirmation-modal.component';
 import { GroupPublishModalComponent } from './modals/group-publish-modal/group-publish-modal.component';
+import { GroupMembersModalComponent } from './modals/group-members-modal/group-members-modal.component';
+import { UserDisplayNamePipe } from '../shared/pipes/user-display-name.pipe';
 
 @NgModule({
   declarations: [
@@ -26,6 +28,7 @@ import { GroupPublishModalComponent } from './modals/group-publish-modal/group-p
     CreateGroupModalComponent,
     ConfirmationModalComponent,
     GroupPublishModalComponent,
+    GroupMembersModalComponent,
   ],
   imports: [
     CommonModule,
@@ -36,6 +39,7 @@ import { GroupPublishModalComponent } from './modals/group-publish-modal/group-p
     MaterialModule,
     ReactiveFormsModule,
     FormsModule,
+    UserDisplayNamePipe,
   ],
   providers: [
     {

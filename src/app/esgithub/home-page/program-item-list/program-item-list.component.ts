@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { UserDataModel } from '../../../core/models/user-data.model';
 import { ReactionsEnum } from '../../../shared/enums/reactions.enum';
 import { ReactionModel } from '../../../core/models/reaction.model';
-import { Subject, tap } from 'rxjs';
+import { Subject } from 'rxjs';
 import { AuthService } from '../../../core/Auth/service/auth.service';
 import { ProgramModel } from '../../../core/models/program.model';
 import { takeUntil } from 'rxjs/operators';
@@ -24,46 +24,44 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
     'https://i.pinimg.com/1200x/a2/be/77/a2be778cac94e9d39e705efb7f89d296.jpg',
   ];
 
-  userReaction?: ReactionModel;
-  likes: number = 0;
-  dislikes: number = 0;
-  @Input() program!: ProgramModel;
   componentDestroyer$: Subject<void> = new Subject();
+
+  @Input() program!: ProgramModel;
+  @Input() homePage!: boolean;
+  @Input() imageUrl!: string;
+  @Input() isGroupOwner!: boolean;
+
   @Output() likeClickEvent = new EventEmitter<{ programId: string; userId: string }>();
   @Output() dislikeClickEvent = new EventEmitter<{ programId: string; userId: string }>();
   @Output() removeClickEvent = new EventEmitter<string>();
-  @Input() homePage!: boolean;
-  protected readonly ReactionsEnum = ReactionsEnum;
-  @Input() imageUrl!: string;
-  isProgramOwner: boolean = false;
-  currentUser = this.authService.getUserData();
 
-  // New property to store the selected background image
+  isProgramOwner: boolean = false;
+  userReaction?: ReactionModel;
+  likes: number = 0;
+  dislikes: number = 0;
+  protected readonly ReactionsEnum = ReactionsEnum;
+
   selectedBgImageUrl!: string;
 
   constructor(private readonly authService: AuthService) {}
 
   private user!: UserDataModel;
 
-  ngOnInit() {
-    this.currentUser
-      .pipe(
-        takeUntil(this.componentDestroyer$),
-        tap((user: UserDataModel) => {
-          this.userReaction = this.getUserReaction(user);
-          this.isProgramOwner = this.checkOwner(user);
-          this.dislikes = this.getDislikes();
-          this.likes = this.getLikes();
-          this.user = user;
-        }),
-      )
-      .subscribe();
-
-    // Initialize the selected background image once
+  ngOnInit(): void {
+    this.authService
+      .getUserData()
+      .pipe(takeUntil(this.componentDestroyer$))
+      .subscribe((user) => {
+        this.userReaction = this.getUserReaction(user);
+        this.isProgramOwner = this.checkOwner(user);
+        this.dislikes = this.getDislikes();
+        this.likes = this.getLikes();
+        this.user = user;
+      });
     this.selectedBgImageUrl = this.getRandomImage();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.componentDestroyer$.next();
     this.componentDestroyer$.complete();
   }

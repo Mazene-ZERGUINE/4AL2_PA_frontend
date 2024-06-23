@@ -64,6 +64,7 @@
               <ul class="text-center space-y-2">
                 <li>
                   <div
+                    (click)="onViewMembersClick()"
                     class="text-purple-500 hover:underline cursor-pointer font-bold italic"
                   >
                     View Members
@@ -71,13 +72,7 @@
                 </li>
                 <li>
                   <div
-                    class="text-purple-500 hover:underline cursor-pointer font-bold italic"
-                  >
-                    Invite Members
-                  </div>
-                </li>
-                <li>
-                  <div
+                    (click)="onChangeVisibilityClick()"
                     class="text-purple-500 hover:underline cursor-pointer font-bold italic"
                   >
                     Edit Visibility
@@ -128,11 +123,13 @@
         <div *ngIf="isVisible" class="h-full w-full overflow-auto relative ml-8">
           <div class="w-full">
             <app-program-item-list
-              *ngFor="let program of (groupDetails$ | async)?.programs"
+              *ngFor="let program of groupPrograms$ | async"
               [program]="program"
               [homePage]="false"
+              [isGroupOwner]="isGroupOwner"
               (likeClickEvent)="likeProgram($event)"
               (dislikeClickEvent)="dislikeProgram($event)"
+              (removeClickEvent)="deleteProgram($event)"
               class="mb-4"
             ></app-program-item-list>
           </div>

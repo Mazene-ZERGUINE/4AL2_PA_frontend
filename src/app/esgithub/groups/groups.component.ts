@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GroupsService } from './groups.service';
 import { AuthService } from '../../core/Auth/service/auth.service';
 import { ModalService } from '../../core/services/modal.service';
@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
   templateUrl: './groups.component.html',
   styleUrls: ['./groups.component.scss'],
 })
-export class GroupsComponent implements OnDestroy {
+export class GroupsComponent implements OnDestroy, OnInit {
   componentDestroyer$ = new Subject<void>();
 
   groupsList$ = this.groupsService.getGroupsList$();
@@ -33,6 +33,8 @@ export class GroupsComponent implements OnDestroy {
     this.componentDestroyer$.next();
     this.componentDestroyer$.complete();
   }
+
+  ngOnInit(): void {}
 
   onGroupClick(groupId: string): void {
     this.router.navigate(['group/' + groupId]);
