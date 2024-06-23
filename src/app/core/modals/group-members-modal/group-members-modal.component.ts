@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { UserDataModel } from '../../models/user-data.model';
 import { GroupsService } from '../../../esgithub/groups/groups.service';
-import { Subject, tap } from 'rxjs';
+import { Observable, Subject, tap } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { NotifierService } from '../../services/notifier.service';
 import { ChangeDetectorRef } from '@angular/core';
@@ -21,7 +21,8 @@ export class GroupMembersModalComponent implements OnDestroy {
 
   constructor(
     public dialogRef: MatDialogRef<GroupMembersModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { groupId: string; members: UserDataModel[] },
+    @Inject(MAT_DIALOG_DATA)
+    public data: { groupId: string; members: Observable<UserDataModel[]> },
     private readonly router: Router,
     private readonly groupService: GroupsService,
     private readonly notifier: NotifierService,
@@ -45,10 +46,7 @@ export class GroupMembersModalComponent implements OnDestroy {
         takeUntil(this.componentDestroyer$),
         tap(() => {
           this.notifier.showSuccess('User removed from the group');
-          this.data.members = this.data.members.filter(
-            (member: UserDataModel) => member.userId !== userId,
-          );
-          this.cdr.markForCheck();
+          // todo: refresh the list aprés le delete //
         }),
       )
       .subscribe();
