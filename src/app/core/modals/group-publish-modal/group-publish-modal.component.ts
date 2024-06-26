@@ -11,7 +11,7 @@ export class GroupPublishModalComponent {
   fileContent: string = '';
   selectedLanguage: string = '';
 
-  languages = ['python', 'c++', 'php', 'javaScript'];
+  languages = ['python', 'c++', 'php', 'javascript'];
 
   constructor(public dialogRef: MatDialogRef<GroupPublishModalComponent>) {}
 

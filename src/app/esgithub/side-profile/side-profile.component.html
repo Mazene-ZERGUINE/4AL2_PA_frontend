@@ -24,22 +24,24 @@
       </div>
     </div>
 
-    <ng-container>
-      <ng-container *ngFor="let followers of userFollowersAndFollowings.followers">
-        <app-follower-following
-          [followerOrFollowingUsername]="followers.follower.userName"
-          [followerOrFollowingPicture]="followers.follower.avatarUrl"
-          [userId]="followers.follower.userId"
-        ></app-follower-following>
-      </ng-container>
+    <div class="h-72 overflow-auto">
+      <ng-container>
+        <ng-container *ngFor="let followers of userFollowersAndFollowings.followers">
+          <app-follower-following
+            [followerOrFollowingUsername]="followers.follower.userName"
+            [followerOrFollowingPicture]="followers.follower.avatarUrl"
+            [userId]="followers.follower.userId"
+          ></app-follower-following>
+        </ng-container>
 
-      <div
-        class="text-center mt-8 text-[#707396]"
-        *ngIf="userFollowersAndFollowings.followers.length === 0"
-      >
-        no followers
-      </div>
-    </ng-container>
+        <div
+          class="text-center mt-8 text-[#707396]"
+          *ngIf="userFollowersAndFollowings.followers.length === 0"
+        >
+          no followers
+        </div>
+      </ng-container>
+    </div>
 
     <div class="flex justify-around mt-10">
       <div>
@@ -51,22 +53,23 @@
         <a href="" class="text-[#707396]">See all</a>
       </div>
     </div>
+    <div class="h-72 overflow-auto">
+      <ng-container>
+        <ng-container *ngFor="let Followings of userFollowersAndFollowings.followings">
+          <app-follower-following
+            [followerOrFollowingUsername]="Followings.following.userName"
+            [followerOrFollowingPicture]="Followings.following.avatarUrl"
+            [userId]="Followings.following.userId"
+          ></app-follower-following>
+        </ng-container>
 
-    <ng-container>
-      <ng-container *ngFor="let Followings of userFollowersAndFollowings.followings">
-        <app-follower-following
-          [followerOrFollowingUsername]="Followings.following.userName"
-          [followerOrFollowingPicture]="Followings.following.avatarUrl"
-          [userId]="Followings.following.userId"
-        ></app-follower-following>
+        <div
+          class="text-center mt-8 text-[#707396]"
+          *ngIf="userFollowersAndFollowings.followings.length === 0"
+        >
+          no followings
+        </div>
       </ng-container>
-
-      <div
-        class="text-center mt-8 text-[#707396]"
-        *ngIf="userFollowersAndFollowings.followings.length === 0"
-      >
-        no followings
-      </div>
-    </ng-container>
+    </div>
   </ng-container>
 </aside>
