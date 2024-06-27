@@ -15,7 +15,7 @@
       </button>
     </div>
     <h1
-      class="text-green-200 ml-4 italic text-2xl"
+      class="text-[#1E1F3D] ml-4 italic text-2xl"
       style="font-weight: bolder"
       *ngIf="open"
       [@fadeIn]
@@ -27,15 +27,15 @@
         *ngFor="let menu of menus; let i = index"
         (click)="navigateToUrl(menu.link)"
         class="group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-gray-800 rounded-md py-4"
+        [ngClass]="{ 'bg-[#1E1F3D] p-1.5': selectedMenu === menu.link }"
       >
-        <div style="margin-top: -17px">
+        <div>
           <mat-icon> {{ menu.icon }} </mat-icon>
         </div>
         <h2
-          style="margin-top: -20px"
           [style.transitionDelay]="i + 3 + '00ms'"
-          [ngClass]="{ 'opacity-0 translate-x-28 overflow-hidden': !open }"
-          class="whitespace-pre duration-500"
+          [ngClass]="{ 'opacity-0  translate-x-28 overflow-hidden': !open }"
+          class="whitespace-pre duration-500 p-1"
         >
           {{ menu.name }}
         </h2>
@@ -45,13 +45,14 @@
       <a
         (click)="onLogoutClick()"
         class="group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-gray-800 rounded-md py-4"
+        [ngClass]="{ 'bg-gray-700': selectedMenu === '/logout' }"
       >
         <div style="margin-top: -17px"><mat-icon>logout</mat-icon></div>
         <h2
           style="margin-top: -20px"
           [style.transitionDelay]="9 + '00ms'"
           [ngClass]="{ 'opacity-0 translate-x-28 overflow-hidden': !open }"
-          class="whitespace-pre duration-500"
+          class="whitespace-pre duration-500 p-1"
         >
           Logout
         </h2>
