@@ -21,6 +21,11 @@ const routes: Routes = [
   },
   { path: 'groups', component: GroupsComponent, canActivate: [AuthGuard] },
   { path: 'group/:groupId', component: GroupeHomeComponent, canActivate: [AuthGuard] },
+  {
+    path: 'program/edit/:programId',
+    component: ProfileComponent,
+    canActivate: [AuthGuard],
+  },
 ];
 
 @NgModule({
