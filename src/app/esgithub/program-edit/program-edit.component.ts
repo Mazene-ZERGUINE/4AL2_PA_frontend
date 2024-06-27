@@ -5,12 +5,20 @@ import {
   OnDestroy,
   ViewChild,
 } from '@angular/core';
-import { filter, forkJoin, Observable, Subscription, switchMap, tap } from 'rxjs';
+import {
+  filter,
+  forkJoin,
+  Observable,
+  Subject,
+  Subscription,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { UserDataModel } from '../../core/models/user-data.model';
 import { AuthService } from '../../core/Auth/service/auth.service';
 import { EditProgramService } from './edit-program.service';
 import { ActivatedRoute } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { ProgramModel } from '../../core/models/program.model';
 import * as ace from 'ace-builds';
 import { Ace } from 'ace-builds';
@@ -18,11 +26,38 @@ import { ReactionsEnum } from '../../shared/enums/reactions.enum';
 import { NotifierService } from '../../core/services/notifier.service';
 import { ModalService } from '../../core/services/modal.service';
 import { LineCommentsModalComponent } from '../../core/modals/line-comments-modal/line-comments-modal.component';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { CodingProcessorService } from '../coding-page/coding-processor.service';
+import { RunCodeResponseDto } from '../coding-page/models/RunCodeResponseDto';
+import { ShowCodeExecutionResultModalComponent } from '../../core/modals/show-code-execution-result-modal/show-code-execution-result-modal.component';
+import { RunCodeRequestDto } from '../coding-page/models/RunCodeRequestDto';
 
 @Component({
   selector: 'app-program-edit',
   templateUrl: './program-edit.component.html',
   styleUrls: ['./program-edit.component.scss'],
+  animations: [
+    trigger('slideInOut', [
+      state(
+        'in',
+        style({
+          transform: 'translateX(0)',
+          opacity: 1,
+          display: 'block',
+        }),
+      ),
+      state(
+        'out',
+        style({
+          transform: 'translateX(-100%)',
+          opacity: 0,
+          display: 'none',
+        }),
+      ),
+      transition('in => out', [animate('600ms ease-in-out')]),
+      transition('out => in', [animate('600ms ease-in-out')]),
+    ]),
+  ],
 })
 export class ProgramEditComponent implements AfterViewInit, OnDestroy {
   @ViewChild('editor') private editor!: ElementRef<HTMLElement>;
@@ -44,9 +79,17 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
   replyingToCommentId: string | null = null;
   commentReplyFieldText!: string;
   highlightedLines: number[] = [];
+  isDescriptionVisible: boolean = false;
+  protected selectedInputFiles: File[] = [];
+  hideButtonText: string = 'Show description';
+  @ViewChild('inputSelect', { static: false }) inputSelect!: ElementRef<HTMLInputElement>;
+  @ViewChild('descriptionButton') descriptionButton!: ElementRef<HTMLButtonElement>;
 
   readonly anonymousImageUrl =
     'http://thumbs.dreamstime.com/b/default-profile-picture-avatar-photo-placeholder-vector-illustration-default-profile-picture-avatar-photo-placeholder-vector-189495158.jpg';
+
+  componentDestroyes$ = new Subject<void>();
+  isLoading: boolean = false;
 
   constructor(
     private readonly authService: AuthService,
@@ -54,6 +97,7 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly notifier: NotifierService,
     private readonly modalService: ModalService,
+    private readonly codeProccesorService: CodingProcessorService,
   ) {}
 
   ngAfterViewInit(): void {
@@ -67,6 +111,9 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
     this.likeOrDislikeSubscription.unsubscribe();
     this.dialogSubscription.unsubscribe();
     this.commentsSubscription.unsubscribe();
+
+    this.componentDestroyes$.next();
+    this.componentDestroyes$.complete();
   }
 
   loadProgramDetails(): void {
@@ -95,6 +142,9 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
           this.aceEditor = ace.edit(this.editor.nativeElement);
           this.aceEditor.setTheme('ace/theme/nord_dark');
           this.aceEditor.session.setMode('ace/mode/' + this.program.programmingLanguage);
+          if (programDetails.programmingLanguage === 'c++') {
+            this.aceEditor.session.setMode('ace/mode/c_cpp');
+          }
           this.aceEditor.setOptions({
             fontSize: '15px',
             showLineNumbers: true,
@@ -254,5 +304,120 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
         this.replyingToCommentId = null;
       });
   }
+
+  onInputFilesSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      Array.from(input.files).forEach((file) => {
+        this.selectedInputFiles.push(file);
+      });
+      this.inputSelect.nativeElement.value = '';
+    }
+  }
+
+  onRunCodeClick(): void {
+    if (this.program.inputTypes.length > 0 || this.program.outputTypes.length > 0) {
+      if (this.selectedInputFiles.length <= 0 && this.program.inputTypes.length > 0) {
+        this.notifier.showWarning(
+          'Input files are required for this program check description for more details',
+        );
+        this.descriptionButton.nativeElement.focus();
+        return;
+      }
+
+      if (this.selectedInputFiles.length !== this.selectedInputFiles.length) {
+        this.notifier.showWarning(
+          'the number of files you have selected dont match with the required files',
+        );
+        this.descriptionButton.nativeElement.focus();
+        return;
+      }
+      this.isLoading = true;
+      const formData = this.buildFormData();
+      this.codeProccesorService.sendCodeWithFilesToProcess(formData).subscribe({
+        next: (response: any) => this.handleResponse(response),
+        error: () => this.handleError(),
+      });
+    } else {
+      this.isLoading = true;
+      const payload = this.buildPayload();
+      this.codeProccesorService.sendCodeToProcess(payload).subscribe({
+        next: (response: RunCodeResponseDto) => this.handleResponse(response),
+        error: () => this.handleError(),
+      });
+    }
+  }
+
+  private buildPayload(): RunCodeRequestDto {
+    return {
+      programmingLanguage: this.program.programmingLanguage,
+      sourceCode: this.program.sourceCode,
+    };
+  }
+
+  private handleResponse(response: RunCodeResponseDto): void {
+    if (response.result.output_file_paths) {
+      if (response.result.output_file_paths.length > 0) {
+        this.codeProccesorService.downloadFilesAsZip(response.result.output_file_paths);
+      } else {
+        this.codeProccesorService.downloadOutputFile(
+          response.result.output_file_paths[0],
+        );
+      }
+    }
+    const dialog = this.modalService.openDialog(
+      ShowCodeExecutionResultModalComponent,
+      700,
+      {
+        code: response.result.returncode,
+        stdout: response.result.stdout,
+        stderr: response.result.stderr,
+      },
+    );
+    dialog
+      .pipe(
+        takeUntil(this.componentDestroyes$),
+        tap(() => {
+          this.notifier.showSuccess('code executed completed successfully.');
+          this.cleanAll();
+        }),
+      )
+      .subscribe();
+    this.isLoading = false;
+  }
+
+  private cleanAll(): void {
+    this.selectedInputFiles = [];
+  }
+
+  private handleError(): void {
+    this.notifier.showError('Something went wrong!');
+  }
+
+  private buildFormData(): FormData {
+    const formData = new FormData();
+
+    this.selectedInputFiles.forEach((file) => formData.append('files', file));
+
+    this.program.outputTypes.forEach((format) =>
+      formData.append('outputFilesFormats', format),
+    );
+    formData.append('programmingLanguage', this.program.programmingLanguage);
+    formData.append('sourceCode', this.aceEditor.getValue());
+
+    return formData;
+  }
+
+  toggleDescription(): void {
+    this.isDescriptionVisible = !this.isDescriptionVisible;
+  }
+
+  get descriptionState(): string {
+    this.isDescriptionVisible
+      ? (this.hideButtonText = 'Hide Description')
+      : 'Show Description';
+    return this.isDescriptionVisible ? 'in' : 'out';
+  }
+
   protected readonly ReactionsEnum = ReactionsEnum;
 }
