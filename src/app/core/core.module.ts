@@ -18,6 +18,7 @@ import { ConfirmationModalComponent } from './modals/conifrmatio-modal/confirmat
 import { GroupPublishModalComponent } from './modals/group-publish-modal/group-publish-modal.component';
 import { GroupMembersModalComponent } from './modals/group-members-modal/group-members-modal.component';
 import { UserDisplayNamePipe } from '../shared/pipes/user-display-name.pipe';
+import { ShowCodeExecutionResultModalComponent } from './modals/show-code-execution-result-modal/show-code-execution-result-modal.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { UserDisplayNamePipe } from '../shared/pipes/user-display-name.pipe';
     ConfirmationModalComponent,
     GroupPublishModalComponent,
     GroupMembersModalComponent,
+    ShowCodeExecutionResultModalComponent,
   ],
   imports: [
     CommonModule,

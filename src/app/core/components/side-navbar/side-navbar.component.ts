@@ -24,6 +24,7 @@ export class SideNavbarComponent implements OnInit {
   ];
 
   open!: boolean;
+  selectedMenu!: string;
 
   constructor(
     private readonly router: Router,
@@ -32,6 +33,7 @@ export class SideNavbarComponent implements OnInit {
 
   ngOnInit() {
     this.open = this.navService.navBarState;
+    this.selectedMenu = this.router.url;
   }
 
   toggleOpen(): void {

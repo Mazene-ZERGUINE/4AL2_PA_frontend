@@ -1,16 +1,89 @@
-<div class="flex h-screen bg-[#1E1F3D]">
+<div class="flex h-screen bg-[#1E1F3D] overflow-hidden">
+  <div
+    *ngIf="isLoading"
+    class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50"
+  >
+    <div
+      class="loader ease-linear rounded-full border-8 border-t-4 border-[#1E1F3D] h-32 w-32"
+    ></div>
+  </div>
   <div class="z-50">
     <app-side-navbar></app-side-navbar>
   </div>
   <div class="w-full">
-    <div
-      class="flex flex-col mt-8 w-[90%] relative left-[5%] border p-4 rounded-lg bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75"
-    >
-      <div>
-        <div
-          #editor
-          class="h-[400px] w-full border-0 bg-[#1E1F3D] bg-opacity-50 backdrop-filter backdrop-blur-lg border border-black border-opacity-30"
-        ></div>
+    <div class="flex-row flex w-[90%] relative left-[5%]">
+      <div
+        class="flex flex-col mt-8 mr-2 border p-4 rounded-lg bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75 overflow-auto"
+        [@slideInOut]="descriptionState"
+      >
+        <div class="fle flex-col bg-[#1E1F3D] p-4 opacity-60 rounded-lg">
+          <label class="text-white font-bold italic">Description</label>
+          <p *ngIf="program" class="text-gray-500 text-sm">{{ program.description }}</p>
+        </div>
+        <div class="fle flex-col bg-[#1E1F3D] p-4 opacity-60 rounded-lg mt-2">
+          <ng-container *ngIf="program">
+            <div class="mb-4">
+              <label class="text-white font-bold italic">Input files</label>
+              <ng-container
+                *ngIf="program.inputTypes.length > 0; then outFiles; else noFiles"
+              ></ng-container>
+
+              <ng-template #outFiles>
+                <div *ngFor="let fileType of program.inputTypes" class="flex flex-row">
+                  <div
+                    class="bg-green-500 w-auto text-white p-0.5 px-4 ml-2 rounded-lg flex-flex-row mb-2"
+                  >
+                    {{ fileType }}
+                  </div>
+                </div>
+              </ng-template>
+
+              <ng-template #noFiles>
+                <div class="text-gray-500 text-sm italic font-bold">
+                  this program does not need any input files click on run code to execute
+                </div>
+              </ng-template>
+            </div>
+            <div class="mt-2">
+              <label class="text-white font-bold italic">output files</label>
+              <ng-container
+                *ngIf="
+                  program.outputTypes.length > 0;
+                  then outFilesTypes;
+                  else noFilesTypes
+                "
+              ></ng-container>
+
+              <ng-template #outFilesTypes>
+                <div *ngFor="let fileType of program.outputTypes" class="flex flex-row">
+                  <div
+                    class="bg-red-500 w-auto text-white p-0.5 px-4 ml-2 rounded-lg flex-flex-row mb-2"
+                  >
+                    {{ fileType }}
+                  </div>
+                </div>
+              </ng-template>
+
+              <ng-template #noFilesTypes>
+                ok
+                <div class="text-gray-500 text-sm italic font-bold">
+                  this program does not generate any output files click on run code to
+                  execute
+                </div>
+              </ng-template>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+      <div
+        class="flex flex-col w-full mt-8 border p-4 rounded-lg bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75"
+      >
+        <div>
+          <div
+            #editor
+            class="h-[400px] border-0 bg-[#1E1F3D] bg-opacity-50 backdrop-filter backdrop-blur-lg border border-black border-opacity-30"
+          ></div>
+        </div>
       </div>
     </div>
     <div class="flex-row flex h-[50px] w-full left-[5%] relative mt-4 justify-between">
@@ -62,9 +135,46 @@
         </div>
       </div>
     </div>
+
+    <div
+      class="h-[50px] p-2 border-0 rounded-lg w-[90%] relative left-[5%] bg-[#3B3D5E] bg-opacity-50 backdrop-filter backdrop-blur-lg border border-black border-opacity-30"
+    >
+      <div class="w-full flex flex-row">
+        <button
+          #descriptionButton
+          (click)="toggleDescription()"
+          class="p-0.5 relative bg-black text-white font-bold px-4 rounded mr-5"
+        >
+          <i class="material-icons p-0.5">lightbulb</i>
+          <span class="relative p-2 bottom-1.5 italic">{{ hideButtonText }}</span>
+        </button>
+        <input
+          #inputSelect
+          type="file"
+          id="fileInput"
+          style="display: none"
+          (change)="onInputFilesSelect($event)"
+        />
+        <button
+          class="p-0.5 relative bg-black text-white font-bold px-4 rounded mr-5"
+          (click)="inputSelect.click()"
+        >
+          <mat-icon>attach_file</mat-icon>
+          <span class="relative p-2 bottom-1.5 italic">Select files</span>
+        </button>
+        <button
+          (click)="onRunCodeClick()"
+          class="relative p-0.5 bg-black text-white font-bold px-4 rounded mr-5"
+        >
+          <i class="material-icons p-0.5">play_arrow</i>
+          <span class="relative p-2 bottom-1.5 italic">Run code</span>
+        </button>
+      </div>
+    </div>
+
     <div class="text-sm relative left-[5%] text-gray-100 mt-4">Comments</div>
     <div
-      class="flex flex-col mt-8 w-[90%] relative left-[5%] rounded-lg overflow-y-auto h-[32%] mb-4 border border-transparent backdrop-blur-lg"
+      class="flex flex-col mt-8 w-[90%] relative left-[5%] rounded-lg overflow-y-auto h-[25%] mb-4 border border-transparent backdrop-blur-lg"
     >
       <ng-container *ngFor="let comment of programComments">
         <div class="second py-2 px-2 bg-[#3B3D5E] mb-4">
