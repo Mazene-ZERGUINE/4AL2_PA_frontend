@@ -30,6 +30,7 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
   @Input() homePage!: boolean;
   @Input() imageUrl!: string;
   @Input() isGroupOwner!: boolean;
+  @Input() isProfileOwner?: boolean;
 
   @Output() likeClickEvent = new EventEmitter<{ programId: string; userId: string }>();
   @Output() dislikeClickEvent = new EventEmitter<{ programId: string; userId: string }>();
@@ -73,6 +74,7 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
   }
 
   private getLikes(): number {
+    console.log(this.program);
     return this.program.reactions.filter(
       (reaction) => reaction.type === ReactionsEnum.LIKE,
     ).length;

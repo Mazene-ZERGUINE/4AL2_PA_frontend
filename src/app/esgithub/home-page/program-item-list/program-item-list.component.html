@@ -117,12 +117,20 @@
         </i>
         <h1 class="ml-2 mt-1.5 text-sm text-red-200">{{ dislikes }}</h1>
       </div>
-      <div class="flex flex-row p-3 z-10">
+      <div class="flex flex-row p-3 z-10" *ngIf="!isProfileOwner">
         <i
           [routerLink]="['/program', program.programId]"
           class="material-icons text-white text-3xl font-bold cursor-pointer z-10"
         >
           remove_red_eye
+        </i>
+      </div>
+      <div class="flex flex-row p-3 z-10" *ngIf="isProfileOwner">
+        <i
+          [routerLink]="['/program/edit/', program.programId]"
+          class="material-icons text-white text-3xl font-bold cursor-pointer z-10 text-blue-500"
+        >
+          edit
         </i>
       </div>
       <div class="flex flex-row p-3 z-10" *ngIf="isProgramOwner || isGroupOwner">
