@@ -5,7 +5,7 @@ import {
   ViewChild,
   AfterViewChecked,
 } from '@angular/core';
-import { filter, Observable, Subject, switchMap, tap } from 'rxjs';
+import { filter, Observable, of, Subject, switchMap, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/Auth/service/auth.service';
 import { EditProgramService } from '../program-edit/edit-program.service';
@@ -41,16 +41,17 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
   fileTypes = ['md', 'txt', 'csv', 'json', 'xlsx', 'yml', 'pdf', 'png', 'jpg', 'jpeg'];
   protected selectedInputFiles: File[] = [];
   private selectedOutputFormats: string[] = [];
-  private programmingLanguage!: string; // Add this property
+  private programmingLanguage!: string;
+  protected selectedVersion: ProgramModel | null = null;
 
-  private readonly programId: string = this.route.snapshot.params['programId'];
+  protected programId: string = this.route.snapshot.params['programId'];
   readonly userData$ = this.authService.getUserData().pipe(
     shareReplay({
       refCount: true,
       bufferSize: 1,
     }),
   );
-  readonly programData$ = this.programEditService.getProgram(this.programId).pipe(
+  programData$ = this.programEditService.getProgram(this.programId).pipe(
     shareReplay({
       refCount: true,
       bufferSize: 1,
@@ -218,6 +219,23 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
     }
   }
 
+  onProgramVersionSelect(): void {
+    if (this.selectedVersion?.programId === this.programId) {
+      this.programData$ = of(this.selectedVersion);
+      this.initializeAceEditor();
+    } else {
+      this.afterVersionSelect(this.selectedVersion);
+    }
+  }
+
+  private afterVersionSelect(selectedVersion: ProgramModel | null): void {
+    this.aceEditor.setValue(selectedVersion?.sourceCode as string);
+    this.programId = selectedVersion?.programId as string;
+    this.aceEditor.session.setOptions({
+      readOnly: true,
+    });
+  }
+
   private buildFormData(): FormData {
     const formData = new FormData();
 
@@ -279,6 +297,16 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
   private clearAll(): void {
     this.selectedInputFiles = [];
     this.selectedOutputFormats = [];
+  }
+
+  onInputFilesSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      Array.from(input.files).forEach((file) => {
+        this.selectedInputFiles.push(file);
+      });
+      this.inputSelect.nativeElement.value = '';
+    }
   }
 
   private getAceMode(language: string): string {
