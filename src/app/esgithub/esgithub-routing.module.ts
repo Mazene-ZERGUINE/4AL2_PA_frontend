@@ -7,6 +7,7 @@ import { AuthGuard } from '../core/guards/auth.guard';
 import { ProgramEditComponent } from './program-edit/program-edit.component';
 import { GroupsComponent } from './groups/groups.component';
 import { GroupeHomeComponent } from './groups/groupe-home/groupe-home.component';
+import { EditUserProgramComponent } from './edit-user-program/edit-user-program.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth' },
@@ -21,6 +22,11 @@ const routes: Routes = [
   },
   { path: 'groups', component: GroupsComponent, canActivate: [AuthGuard] },
   { path: 'group/:groupId', component: GroupeHomeComponent, canActivate: [AuthGuard] },
+  {
+    path: 'program/edit/:programId',
+    component: EditUserProgramComponent,
+    canActivate: [AuthGuard],
+  },
 ];
 
 @NgModule({

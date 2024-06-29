@@ -1,3 +1,7 @@
 <div *ngFor="let program of programsList$ | async" class="mb-4 w-full">
-  <app-program-item-list [program]="program" [homePage]="false"></app-program-item-list>
+  <app-program-item-list
+    [program]="program"
+    [homePage]="false"
+    [isProfileOwner]="profileOwner"
+  ></app-program-item-list>
 </div>

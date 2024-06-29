@@ -74,4 +74,33 @@ export class EditProgramService {
       .set('programId', programId);
     return this.apiService.getRequest('comment/line/' + programId, params);
   }
+
+  updateProgram(programId: string, payload: any): Observable<void> {
+    return this.apiService.patchRequest('programs/edit/' + programId, payload);
+  }
+
+  saveNewVersion(payload: any): Observable<void> {
+    return this.apiService.postRequest('versions/', payload);
+  }
+
+  getProgramVersion(programId: string): Observable<any> {
+    return this.apiService.getRequest('versions/all/' + programId);
+  }
+
+  updateProgramVersion(
+    versionId: string,
+    payload: {
+      sourceCode: string;
+    },
+  ): Observable<void> {
+    return this.apiService.patchRequest('versions/' + versionId, payload);
+  }
+
+  deleteProgramOrVersion(type: string, id: string): Observable<void> {
+    if (type === 'version') {
+      return this.apiService.deleteRequest('versions/' + id);
+    } else {
+      return this.apiService.deleteRequest('programs/' + id);
+    }
+  }
 }

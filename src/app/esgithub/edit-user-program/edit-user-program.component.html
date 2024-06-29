@@ -1,0 +1,187 @@
+<div class="flex h-screen bg-[#1E1F3D]">
+  <div class="z-50">
+    <app-side-navbar></app-side-navbar>
+  </div>
+  <div class="w-full">
+    <div class="relative top-8 w-full">
+      <ng-container *ngIf="programData$ | async as program">
+        <div
+          class="flex flex-col w-[90%] relative left-[5%] border p-4 rounded-lg bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75"
+        >
+          <div class="flex justify-between mb-2">
+            <div class="relative mb-4">
+              <button
+                (click)="onShowGuidClick()"
+                class="mt-4 relative ml-2 bg-black text-white font-bold py-1 px-4 rounded"
+              >
+                <mat-icon>info</mat-icon>
+                <span class="relative p-2 bottom-1.5 italic">Show guid</span>
+              </button>
+              <button
+                (click)="onSaveChangesClick()"
+                class="bg-black text-white font-bold py-1 px-4 rounded ml-2"
+              >
+                <mat-icon>edit</mat-icon>
+                <span class="relative p-2 bottom-1.5 italic">Save changes</span>
+              </button>
+              <button
+                (click)="onSaveNewVersionClick()"
+                class="bg-black text-white font-bold py-1 px-4 rounded ml-2"
+              >
+                <mat-icon>account_tree</mat-icon>
+                <span class="relative p-2 bottom-1.5 italic">Save new version</span>
+              </button>
+
+              <select
+                class="bg-black opacity-30 border border-black text-white font-bold relative top-[-2px] rounded ml-2 p-2"
+                [(ngModel)]="selectedVersion"
+                (change)="onProgramVersionSelect()"
+              >
+                <option disabled selected [ngValue]="null">SELECT PROGRAM VERSION</option>
+                <option [ngValue]="program">current version</option>
+                <option
+                  *ngFor="let programVersion of (programVersions$ | async)?.versions"
+                  [ngValue]="programVersion"
+                >
+                  {{ programVersion.version }}
+                </option>
+              </select>
+              <button
+                (click)="onDeleteProgramOrVersionClick()"
+                class="bg-red-700 text-white font-bold py-1 px-4 rounded ml-2"
+              >
+                <mat-icon>delete</mat-icon>
+                <span class="relative p-2 bottom-1.5 italic">Delete</span>
+              </button>
+            </div>
+
+            <div class="relative top-4 flex">
+              <img
+                *ngIf="program.programmingLanguage === 'python'"
+                src="assets/images/icons/python-svgrepo-com.svg"
+                style="height: 40px; width: 40px"
+              />
+              <img
+                *ngIf="program.programmingLanguage === 'javascript'"
+                src="assets/images/icons/javascript-svgrepo-com.svg"
+                style="height: 40px; width: 40px"
+              />
+              <img
+                *ngIf="program.programmingLanguage === 'c++'"
+                src="https://raw.githubusercontent.com/isocpp/logos/master/cpp_logo.png"
+                style="height: 40px; width: 40px"
+              />
+              <img
+                *ngIf="program.programmingLanguage === 'php'"
+                src="https://upload.wikimedia.org/wikipedia/commons/c/c6/Twemoji_1f4a9.svg"
+                style="height: 40px; width: 40px"
+              />
+            </div>
+          </div>
+
+          <div class="mb-1">
+            <div
+              #editor
+              class="h-[400px] w-full border-0 bg-[#1E1F3D] bg-opacity-50 backdrop-filter backdrop-blur-lg border border-black border-opacity-30"
+            ></div>
+          </div>
+        </div>
+      </ng-container>
+      <div class="flex flex-row m-1.5">
+        <button
+          (click)="onRunCodeClick()"
+          class="mt-4 relative left-[5%] bg-black text-white font-bold py-1 px-4 rounded mr-5"
+        >
+          <mat-icon>play_arrow</mat-icon>
+          <span class="relative p-2 bottom-1.5 italic">Run code</span>
+        </button>
+
+        <input
+          #inputSelect
+          type="file"
+          id="fileInput"
+          style="display: none"
+          (change)="onInputFilesSelect($event)"
+        />
+        <button
+          class="mt-4 relative left-[5%] bg-black text-white font-bold py-1 px-4 rounded mr-5"
+          (click)="inputSelect.click()"
+        >
+          <mat-icon>attach_file</mat-icon>
+          <span class="relative p-2 bottom-1.5 italic">Select files</span>
+        </button>
+
+        <button
+          (click)="onClearSelectedFilesClick()"
+          class="mt-4 relative left-[5%] bg-black text-white font-bold py-1 px-4 rounded mr-5"
+        >
+          <mat-icon>remove_circle</mat-icon>
+          <span class="relative p-2 bottom-1.5 italic">Clear files</span>
+        </button>
+
+        <div class="text-red-500 font-bold italic text-sm left-[5%] relative mt-6">
+          {{ selectedInputFiles.length }} files selected
+        </div>
+      </div>
+
+      <p class="relative left-[5%] text-white text-sm mt-4">
+        select output file formats (max 5 files) leave it empty if you want to keep the
+        current ouput files formats
+      </p>
+
+      <div
+        class="overflow-x-auto bg-[#1E1F3D] flex flex-row w-[90%] mt-1 relative left-[5%] border mb-8 border-gray-300 bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75 rounded-lg"
+      >
+        <div
+          (click)="onAddFormatClick(format)"
+          *ngFor="let format of fileTypes"
+          class="h-full hover:bg-white py-5 w-full relative flex items-center cursor-pointer hover:bg-opacity-25"
+        >
+          <span
+            class="px-2 mr-2 ml-1 border-gray-50 bg-white bg-opacity-15 text-black rounded-full text-black"
+          >
+            {{
+              getSelectedOutputFilesNumbers(format) !== 0
+                ? getSelectedOutputFilesNumbers(format)
+                : ''
+            }}
+          </span>
+          <span class="text-white font-bold italic">{{ format }}</span>
+        </div>
+      </div>
+
+      <div
+        class="flex flex-col w-[90%] mt-1 relative left-[5%] border h-48 max-h-96 border-gray-300 bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75 rounded-lg"
+      >
+        <mat-progress-bar
+          mode="indeterminate"
+          color="accent"
+          *ngIf="isLoading"
+        ></mat-progress-bar>
+        <textarea
+          disabled
+          *ngIf="codeOutput && codeOutput.status === 0"
+          class="h-48 max-h-96 overflow-y-auto bg-[#1E1F3D] bg-opacity-50 backdrop-filter backdrop-blur-lg border border-black border-opacity-30"
+        >
+      {{ codeOutput.output }}
+    </textarea
+        >
+        <textarea
+          disabled
+          *ngIf="codeOutput && codeOutput.status !== 0"
+          class="h-48 max-h-96 overflow-y-auto text-red-600 bg-[#1E1F3D] bg-opacity-50 backdrop-filter backdrop-blur-lg border border-black border-opacity-30"
+        >
+      {{ codeOutput.output }}
+    </textarea
+        >
+      </div>
+    </div>
+  </div>
+
+  <div class="w-[33Opx]">
+    <app-side-profile
+      *ngIf="userData$ | async as currentUser"
+      [currentUser]="currentUser"
+    ></app-side-profile>
+  </div>
+</div>

@@ -18,7 +18,7 @@ import { UserDataModel } from '../../core/models/user-data.model';
 import { AuthService } from '../../core/Auth/service/auth.service';
 import { EditProgramService } from './edit-program.service';
 import { ActivatedRoute } from '@angular/router';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { ProgramModel } from '../../core/models/program.model';
 import * as ace from 'ace-builds';
 import { Ace } from 'ace-builds';
@@ -31,6 +31,10 @@ import { CodingProcessorService } from '../coding-page/coding-processor.service'
 import { RunCodeResponseDto } from '../coding-page/models/RunCodeResponseDto';
 import { ShowCodeExecutionResultModalComponent } from '../../core/modals/show-code-execution-result-modal/show-code-execution-result-modal.component';
 import { RunCodeRequestDto } from '../coding-page/models/RunCodeRequestDto';
+import {
+  ProgramVersionModel,
+  VersionModel,
+} from '../../core/models/program-version.model';
 
 @Component({
   selector: 'app-program-edit',
@@ -90,6 +94,14 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
 
   componentDestroyes$ = new Subject<void>();
   isLoading: boolean = false;
+  private readonly programId = this.route.snapshot.params['programId'];
+
+  protected readonly programVersions$: Observable<ProgramVersionModel> =
+    this.editProgramService
+      .getProgramVersion(this.programId)
+      .pipe(shareReplay({ refCount: true, bufferSize: 1 }));
+
+  protected selectedVersion: ProgramModel | VersionModel | null = null;
 
   constructor(
     private readonly authService: AuthService,
@@ -160,6 +172,13 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
         }),
       )
       .subscribe();
+  }
+
+  onProgramVersionSelect(): void {
+    this.aceEditor.setValue(this.selectedVersion?.sourceCode as string);
+    if ((this.selectedVersion as ProgramModel).programId === this.programId) {
+      this.reloadProgramComments();
+    }
   }
 
   private onGutterClick(e: any): void {
