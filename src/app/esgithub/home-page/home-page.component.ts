@@ -6,6 +6,7 @@ import { ProgramModel } from '../../core/models/program.model';
 import { UserDataModel } from '../../core/models/user-data.model';
 import { HomeService } from './home.service';
 import { ReactionsEnum } from '../../shared/enums/reactions.enum';
+import { ModalService } from '../../core/services/modal.service';
 
 @Component({
   selector: 'app-home-page',
@@ -51,6 +52,7 @@ export class HomePageComponent implements OnDestroy {
   constructor(
     private readonly homeService: HomeService,
     private readonly authService: AuthService,
+    private readonly modalService: ModalService,
   ) {}
 
   ngOnDestroy(): void {
@@ -94,16 +96,22 @@ export class HomePageComponent implements OnDestroy {
       .subscribe();
   }
 
-  deleteProgram(event: string) {
-    this.homeService
-      .deleteProgram(event)
-      .pipe(
-        takeUntil(this.componentDestroy$),
-        tap(() => {
-          this.refreshPrograms$.next();
-        }),
-      )
-      .subscribe();
+  async deleteProgram(event: string) {
+    const result = await this.modalService.getConfirmationModelResults(
+      'delete program',
+      'are you sur you want to delete this program?',
+    );
+    if (result) {
+      this.homeService
+        .deleteProgram(event)
+        .pipe(
+          takeUntil(this.componentDestroy$),
+          tap(() => {
+            this.refreshPrograms$.next();
+          }),
+        )
+        .subscribe();
+    }
   }
 
   onLanguageChange(event: any) {

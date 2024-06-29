@@ -95,4 +95,12 @@ export class EditProgramService {
   ): Observable<void> {
     return this.apiService.patchRequest('versions/' + versionId, payload);
   }
+
+  deleteProgramOrVersion(type: string, id: string): Observable<void> {
+    if (type === 'version') {
+      return this.apiService.deleteRequest('versions/' + id);
+    } else {
+      return this.apiService.deleteRequest('programs/' + id);
+    }
+  }
 }

@@ -6,7 +6,7 @@ import {
   AfterViewChecked,
 } from '@angular/core';
 import { filter, Observable, of, Subject, switchMap, tap } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/Auth/service/auth.service';
 import { EditProgramService } from '../program-edit/edit-program.service';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
@@ -83,6 +83,7 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
     private readonly codeProcessor: CodingProcessorService,
     private readonly notifier: NotifierService,
     private readonly modalService: ModalService,
+    private readonly router: Router,
   ) {}
 
   ngAfterViewChecked(): void {
@@ -262,14 +263,52 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
   }
 
   onProgramVersionSelect(): void {
-    if (this.selectedVersion instanceof ProgramModel) {
-      this.programData$ = of(this.selectedVersion);
-      this.initializeAceEditor();
+    if ((this.selectedVersion as ProgramModel).programId === this.programId) {
       this.isProgramVersion = false;
       this.programVersionId = undefined;
+      this.programData$ = of(this.selectedVersion as ProgramModel);
+      this.initializeAceEditor();
     } else {
-      this.afterVersionSelect(this.selectedVersion);
+      this.afterVersionSelect(this.selectedVersion as VersionModel);
       this.isProgramVersion = true;
+    }
+  }
+
+  async onDeleteProgramOrVersionClick(): Promise<void> {
+    let id = this.programId;
+    let message = 'are you sur you want to delete this program ?';
+    let type = 'program';
+    if (this.isProgramVersion) {
+      id = this.programVersionId as string;
+      type = 'version';
+      message = `are you sur you want to delete version ${(this.selectedVersion as VersionModel).version} ?`;
+    }
+
+    const result = await this.modalService.getConfirmationModelResults(
+      'delete program',
+      message,
+    );
+    if (result) {
+      this.programEditService
+        .deleteProgramOrVersion(type, id)
+        .pipe(
+          takeUntil(this.componentDestroyer$),
+          tap(() => {
+            if (type === 'version') {
+              this.notifier.showSuccess('Your program version has been deleted');
+              this.programVersions$ = this.programEditService.getProgramVersion(
+                this.programId,
+              );
+              this.programData$ = of(this.program);
+              this.initializeAceEditor();
+              this.isProgramVersion = false;
+            } else {
+              this.notifier.showSuccess('Your program has been deleted');
+              this.router.navigate(['/profile']);
+            }
+          }),
+        )
+        .subscribe();
     }
   }
 

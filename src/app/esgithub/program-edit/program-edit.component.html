@@ -78,6 +78,20 @@
       <div
         class="flex flex-col w-full mt-8 border p-4 rounded-lg bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75"
       >
+        <select
+          class="bg-black opacity-30 border border-black text-white font-bold relative top-[-2px] rounded ml-2 p-2 mb-4"
+          [(ngModel)]="selectedVersion"
+          (change)="onProgramVersionSelect()"
+        >
+          <option disabled selected [ngValue]="null">SELECT PROGRAM VERSION</option>
+          <option [ngValue]="program">current version</option>
+          <option
+            *ngFor="let programVersion of (programVersions$ | async)?.versions"
+            [ngValue]="programVersion"
+          >
+            {{ programVersion.version }}
+          </option>
+        </select>
         <div>
           <div
             #editor
@@ -137,7 +151,7 @@
     </div>
 
     <div
-      class="h-[50px] p-2 border-0 rounded-lg w-[90%] relative left-[5%] bg-[#3B3D5E] bg-opacity-50 backdrop-filter backdrop-blur-lg border border-black border-opacity-30"
+      class="h-[50px] p-2 mt-4 border-0 rounded-lg w-[90%] relative left-[5%] bg-[#3B3D5E] bg-opacity-50 backdrop-filter backdrop-blur-lg border border-black border-opacity-30"
     >
       <div class="w-full flex flex-row">
         <button
@@ -174,7 +188,7 @@
 
     <div class="text-sm relative left-[5%] text-gray-100 mt-4">Comments</div>
     <div
-      class="flex flex-col mt-8 w-[90%] relative left-[5%] rounded-lg overflow-y-auto h-[25%] mb-4 border border-transparent backdrop-blur-lg"
+      class="flex flex-col mt-1 w-[90%] relative left-[5%] rounded-lg overflow-y-auto h-[23%] mb-4 border border-transparent backdrop-blur-lg"
     >
       <ng-container *ngFor="let comment of programComments">
         <div class="second py-2 px-2 bg-[#3B3D5E] mb-4">
