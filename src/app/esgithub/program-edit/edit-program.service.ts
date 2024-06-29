@@ -78,4 +78,12 @@ export class EditProgramService {
   updateProgram(programId: string, payload: any): Observable<void> {
     return this.apiService.patchRequest('programs/edit/' + programId, payload);
   }
+
+  saveNewVersion(payload: any): Observable<void> {
+    return this.apiService.postRequest('versions/', payload);
+  }
+
+  getProgramVersion(programId: string): Observable<any> {
+    return this.apiService.getRequest('versions/all/' + programId);
+  }
 }
