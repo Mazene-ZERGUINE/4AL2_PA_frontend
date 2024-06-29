@@ -86,4 +86,13 @@ export class EditProgramService {
   getProgramVersion(programId: string): Observable<any> {
     return this.apiService.getRequest('versions/all/' + programId);
   }
+
+  updateProgramVersion(
+    versionId: string,
+    payload: {
+      sourceCode: string;
+    },
+  ): Observable<void> {
+    return this.apiService.patchRequest('versions/' + versionId, payload);
+  }
 }

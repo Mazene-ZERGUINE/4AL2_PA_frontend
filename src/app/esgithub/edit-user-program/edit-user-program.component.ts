@@ -22,7 +22,10 @@ import { RunCodeRequestDto } from '../coding-page/models/RunCodeRequestDto';
 import { ShareCodeModalComponent } from '../../core/modals/share-code-modal/share-code-modal.component';
 import { CreateProgramDto } from '../coding-page/models/CreateProgramDto';
 import { VersionModalComponent } from '../../core/modals/version-modal/version-modal.component';
-import { ProgramVersionModel } from '../../core/models/program-version.model';
+import {
+  ProgramVersionModel,
+  VersionModel,
+} from '../../core/models/program-version.model';
 
 @Component({
   selector: 'app-edit-user-program',
@@ -42,7 +45,10 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
   protected selectedInputFiles: File[] = [];
   private selectedOutputFormats: string[] = [];
   private programmingLanguage!: string;
-  protected selectedVersion: ProgramModel | null = null;
+  private isProgramVersion: boolean = false;
+  private programVersionId?: string;
+  protected selectedVersion: VersionModel | ProgramModel | null = null;
+  private program!: ProgramModel;
 
   protected programId: string = this.route.snapshot.params['programId'];
   readonly userData$ = this.authService.getUserData().pipe(
@@ -59,7 +65,7 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
     map((program: ProgramModel) => program),
   );
 
-  readonly programVersions$: Observable<ProgramVersionModel> = this.programEditService
+  programVersions$: Observable<ProgramVersionModel> = this.programEditService
     .getProgramVersion(this.programId)
     .pipe(
       shareReplay({
@@ -96,7 +102,8 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
       .pipe(
         takeUntil(this.componentDestroyer$),
         tap((program: ProgramModel) => {
-          this.programmingLanguage = program.programmingLanguage; // Set the programming language
+          this.program = program;
+          this.programmingLanguage = program.programmingLanguage;
           this.aceEditor = ace.edit(this.editor.nativeElement);
           this.aceEditor.setTheme('ace/theme/nord_dark');
           this.aceEditor.session.setMode(
@@ -152,44 +159,77 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
   }
 
   async onSaveChangesClick(): Promise<void> {
-    const result = await this.modalService.getConfirmationModelResults(
-      'update program',
-      'do you want to also update the program visibility, files or description ?',
-    );
-    if (result) {
-      const dialog = this.modalService.openDialog(ShareCodeModalComponent, 700, {
-        isGroupProgram: false,
-      });
-      dialog
-        .pipe(
-          takeUntil(this.componentDestroyer$),
-          filter((result: any) => result !== undefined),
-          switchMap((result) => {
-            const programDto: CreateProgramDto = {
-              ...result,
-              sourceCode: this.aceEditor.getValue(),
-            };
-            console.log(programDto);
-            return this.programEditService.updateProgram(this.programId, programDto);
-          }),
-          tap(() => this.notifier.showSuccess('Your program has been updated')),
-        )
-        .subscribe();
+    if (!this.isProgramVersion) {
+      const result = await this.modalService.getConfirmationModelResults(
+        'update program',
+        'do you want to also update the program visibility, files or description ?',
+      );
+      if (result) {
+        const dialog = this.modalService.openDialog(ShareCodeModalComponent, 700, {
+          isGroupProgram: false,
+        });
+        dialog
+          .pipe(
+            takeUntil(this.componentDestroyer$),
+            filter((result: any) => result !== undefined),
+            switchMap((result) => {
+              const programDto: CreateProgramDto = {
+                ...result,
+                sourceCode: this.aceEditor.getValue(),
+              };
+              return this.programEditService.updateProgram(this.programId, programDto);
+            }),
+            tap(() => this.notifier.showSuccess('Your program has been updated')),
+          )
+          .subscribe();
+      } else {
+        const payload = {
+          sourceCode: this.aceEditor.getValue(),
+        };
+        this.programEditService
+          .updateProgram(this.programId, payload)
+          .pipe(
+            takeUntil(this.componentDestroyer$),
+            tap(() => this.notifier.showSuccess('your program has been updated')),
+          )
+          .subscribe();
+      }
     } else {
-      const payload = {
-        sourceCode: this.aceEditor.getValue(),
-      };
-      this.programEditService
-        .updateProgram(this.programId, payload)
-        .pipe(
-          takeUntil(this.componentDestroyer$),
-          tap(() => this.notifier.showSuccess('your program has been updated')),
-        )
-        .subscribe();
+      const result = await this.modalService.getConfirmationModelResults(
+        `update program version ${(this.selectedVersion as VersionModel).version}`,
+        'do you want modify the current source code of this program version ?',
+      );
+      if (result) {
+        this.programEditService
+          .updateProgramVersion(this.programVersionId as string, {
+            sourceCode: this.aceEditor.getValue(),
+          })
+          .pipe(
+            takeUntil(this.componentDestroyer$),
+            tap(() => {
+              this.notifier.showSuccess('Your program version has been updated');
+              this.programVersions$ = this.programEditService.getProgramVersion(
+                this.programId,
+              );
+            }),
+          )
+          .subscribe();
+      }
     }
   }
 
   async onSaveNewVersionClick(): Promise<void> {
+    if (this.isProgramVersion) {
+      this.notifier.showWarning(
+        'you can not save a new program version from another version',
+      );
+      this.selectedVersion = this.program;
+      this.programData$ = of(this.program);
+      this.initializeAceEditor();
+      this.isProgramVersion = false;
+      return;
+    }
+
     const result = await this.modalService.getConfirmationModelResults(
       'save this updates as new version',
       'do you want to create a new version for this update',
@@ -212,7 +252,9 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
           }),
           tap(() => {
             this.notifier.showSuccess(`program version has been created`);
-            // todo reload the program versions list
+            this.programVersions$ = this.programEditService.getProgramVersion(
+              this.programId,
+            );
           }),
         )
         .subscribe();
@@ -220,20 +262,20 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
   }
 
   onProgramVersionSelect(): void {
-    if (this.selectedVersion?.programId === this.programId) {
+    if (this.selectedVersion instanceof ProgramModel) {
       this.programData$ = of(this.selectedVersion);
       this.initializeAceEditor();
+      this.isProgramVersion = false;
+      this.programVersionId = undefined;
     } else {
       this.afterVersionSelect(this.selectedVersion);
+      this.isProgramVersion = true;
     }
   }
 
-  private afterVersionSelect(selectedVersion: ProgramModel | null): void {
+  private afterVersionSelect(selectedVersion: VersionModel | null): void {
     this.aceEditor.setValue(selectedVersion?.sourceCode as string);
-    this.programId = selectedVersion?.programId as string;
-    this.aceEditor.session.setOptions({
-      readOnly: true,
-    });
+    this.programVersionId = selectedVersion?.programVersionId;
   }
 
   private buildFormData(): FormData {

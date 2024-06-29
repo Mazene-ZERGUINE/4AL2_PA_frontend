@@ -46,6 +46,13 @@
                   {{ programVersion.version }}
                 </option>
               </select>
+              <button
+                (click)="onSaveNewVersionClick()"
+                class="bg-red-700 text-white font-bold py-1 px-4 rounded ml-2"
+              >
+                <mat-icon>delete</mat-icon>
+                <span class="relative p-2 bottom-1.5 italic">Delete</span>
+              </button>
             </div>
 
             <div class="relative top-4 flex">
