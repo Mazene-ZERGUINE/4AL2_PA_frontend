@@ -74,4 +74,8 @@ export class EditProgramService {
       .set('programId', programId);
     return this.apiService.getRequest('comment/line/' + programId, params);
   }
+
+  updateProgram(programId: string, payload: any): Observable<void> {
+    return this.apiService.patchRequest('programs/edit/' + programId, payload);
+  }
 }
