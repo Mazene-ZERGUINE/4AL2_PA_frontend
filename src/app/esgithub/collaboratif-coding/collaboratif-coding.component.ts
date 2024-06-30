@@ -216,9 +216,10 @@ export class CollaboratifCodingComponent implements AfterViewInit, OnDestroy, On
   }
 
   private updateEditorContent(payload: CodeChangePayload): void {
+    const currentCursor = this.aceEditor.getCursorPosition();
     this.isInternalChange = true;
-    this.aceEditor.setValue(payload.code, -1); // -1 prevents cursor move
-    this.aceEditor.clearSelection();
+    this.aceEditor.session.setValue(payload.code);
+    this.aceEditor.moveCursorToPosition(currentCursor);
     this.isInternalChange = false;
     this.cdr.detectChanges();
   }
