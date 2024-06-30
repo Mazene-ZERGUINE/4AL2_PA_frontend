@@ -102,7 +102,7 @@
               : 'thumb_up_off_alt'
           }}
         </i>
-        <h1 class="ml-2 mt-1.5 text-sm text-green-200 z-10">{{ likes }}</h1>
+        <h1 class="ml-2 mt-1.5 text-sm text-green-200 z-10">{{ likes$ | async }}</h1>
       </div>
       <div class="flex flex-row p-3 z-10">
         <i
@@ -115,7 +115,7 @@
               : 'thumb_down_off_alt'
           }}
         </i>
-        <h1 class="ml-2 mt-1.5 text-sm text-red-200">{{ dislikes }}</h1>
+        <h1 class="ml-2 mt-1.5 text-sm text-red-200">{{ dislikes$ | async }}</h1>
       </div>
       <div class="flex flex-row p-3 z-10" *ngIf="!isProfileOwner">
         <i

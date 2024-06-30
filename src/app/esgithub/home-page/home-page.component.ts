@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable, Subject, BehaviorSubject, combineLatest } from 'rxjs';
 import { map, shareReplay, switchMap, takeUntil, tap, startWith } from 'rxjs/operators';
 import { AuthService } from '../../core/Auth/service/auth.service';
@@ -7,18 +7,20 @@ import { UserDataModel } from '../../core/models/user-data.model';
 import { HomeService } from './home.service';
 import { ReactionsEnum } from '../../shared/enums/reactions.enum';
 import { ModalService } from '../../core/services/modal.service';
+import { SocketService } from '../socket.service';
 
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomePageComponent implements OnDestroy {
+export class HomePageComponent implements OnInit, OnDestroy {
   readonly userData$: Observable<UserDataModel> = this.authService
     .getUserData()
     .pipe(shareReplay({ refCount: true, bufferSize: 1 }));
 
-  private refreshPrograms$ = new BehaviorSubject<void>(undefined);
+  private refreshPrograms$ = new Subject<void>();
   private selectedLanguages$ = new BehaviorSubject<string[]>([]);
   private searchQuery$ = new BehaviorSubject<string>('');
 
@@ -26,7 +28,7 @@ export class HomePageComponent implements OnDestroy {
 
   readonly programsList$: Observable<ProgramModel[]> = combineLatest([
     this.userData$,
-    this.refreshPrograms$,
+    this.refreshPrograms$.pipe(startWith(undefined)),
     this.selectedLanguages$,
     this.searchQuery$.pipe(startWith('')),
   ]).pipe(
@@ -53,14 +55,25 @@ export class HomePageComponent implements OnDestroy {
     private readonly homeService: HomeService,
     private readonly authService: AuthService,
     private readonly modalService: ModalService,
+    private socketService: SocketService,
   ) {}
+
+  ngOnInit(): void {
+    this.socketService.on(ReactionsEnum.LIKE, () => {
+      this.refreshPrograms$.next();
+    });
+
+    this.socketService.on(ReactionsEnum.DISLIKE, () => {
+      this.refreshPrograms$.next();
+    });
+  }
 
   ngOnDestroy(): void {
     this.componentDestroy$.next();
     this.componentDestroy$.complete();
   }
 
-  likeProgram(event: any) {
+  likeProgram(event: any): void {
     this.userData$
       .pipe(
         takeUntil(this.componentDestroy$),
@@ -78,7 +91,7 @@ export class HomePageComponent implements OnDestroy {
       .subscribe();
   }
 
-  dislikeProgram(event: any) {
+  dislikeProgram(event: any): void {
     this.userData$
       .pipe(
         takeUntil(this.componentDestroy$),
