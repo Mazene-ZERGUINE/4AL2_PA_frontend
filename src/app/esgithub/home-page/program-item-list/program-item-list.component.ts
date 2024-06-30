@@ -2,10 +2,10 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { UserDataModel } from '../../../core/models/user-data.model';
 import { ReactionsEnum } from '../../../shared/enums/reactions.enum';
 import { ReactionModel } from '../../../core/models/reaction.model';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { AuthService } from '../../../core/Auth/service/auth.service';
 import { ProgramModel } from '../../../core/models/program.model';
-import { takeUntil } from 'rxjs/operators';
+import { ReactionService } from './reaction.service';
 
 @Component({
   selector: 'app-program-item-list',
@@ -27,6 +27,7 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
   componentDestroyer$: Subject<void> = new Subject();
 
   @Input() program!: ProgramModel;
+  @Input() currentUser!: UserDataModel;
   @Input() homePage!: boolean;
   @Input() imageUrl!: string;
   @Input() isGroupOwner!: boolean;
@@ -38,27 +39,28 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
 
   isProgramOwner: boolean = false;
   userReaction?: ReactionModel;
-  likes: number = 0;
-  dislikes: number = 0;
+  likes$!: Observable<number>;
+  dislikes$!: Observable<number>;
   protected readonly ReactionsEnum = ReactionsEnum;
 
   selectedBgImageUrl!: string;
 
-  constructor(private readonly authService: AuthService) {}
-
-  private user!: UserDataModel;
+  constructor(
+    private readonly authService: AuthService,
+    private reactionService: ReactionService,
+  ) {}
 
   ngOnInit(): void {
-    this.authService
-      .getUserData()
-      .pipe(takeUntil(this.componentDestroyer$))
-      .subscribe((user) => {
-        this.userReaction = this.getUserReaction(user);
-        this.isProgramOwner = this.checkOwner(user);
-        this.dislikes = this.getDislikes();
-        this.likes = this.getLikes();
-        this.user = user;
-      });
+    if (this.currentUser && this.program) {
+      this.userReaction = this.getUserReaction(this.currentUser);
+      this.isProgramOwner = this.checkOwner(this.currentUser);
+
+      this.reactionService.updateLikes(this.program.programId, this.getLikes());
+      this.reactionService.updateDislikes(this.program.programId, this.getDislikes());
+
+      this.likes$ = this.reactionService.getLikes$(this.program.programId);
+      this.dislikes$ = this.reactionService.getDislikes$(this.program.programId);
+    }
     this.selectedBgImageUrl = this.getRandomImage();
   }
 
@@ -74,7 +76,6 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
   }
 
   private getLikes(): number {
-    console.log(this.program);
     return this.program.reactions.filter(
       (reaction) => reaction.type === ReactionsEnum.LIKE,
     ).length;
@@ -92,14 +93,14 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
 
   onLikeBtnClick(): void {
     this.likeClickEvent.emit({
-      userId: this.user.userId,
+      userId: this.currentUser.userId,
       programId: this.program.programId,
     });
   }
 
   onDislikeBtnClick(): void {
     this.dislikeClickEvent.emit({
-      userId: this.user.userId,
+      userId: this.currentUser.userId,
       programId: this.program.programId,
     });
   }

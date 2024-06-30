@@ -65,14 +65,18 @@
     <div
       class="m-10 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-auto relative h-[90%]"
     >
-      <app-program-item-list
-        *ngFor="let program of programsList$ | async"
-        [program]="program"
-        [homePage]="true"
-        (likeClickEvent)="likeProgram($event)"
-        (dislikeClickEvent)="dislikeProgram($event)"
-        (removeClickEvent)="deleteProgram($event)"
-      ></app-program-item-list>
+      <ng-container *ngIf="userData$ | async; let currentUser">
+        <app-program-item-list
+          *ngFor="let program of programsList$ | async"
+          [program]="program"
+          [currentUser]="currentUser"
+          [homePage]="true"
+          (likeClickEvent)="likeProgram($event)"
+          (dislikeClickEvent)="dislikeProgram($event)"
+          (removeClickEvent)="deleteProgram($event)"
+        >
+        </app-program-item-list>
+      </ng-container>
     </div>
   </div>
   <div>
