@@ -26,6 +26,7 @@ import { GroupsComponent } from './groups/groups.component';
 import { GroupListItemComponent } from './groups/group-list-item/group-list-item.component';
 import { GroupeHomeComponent } from './groups/groupe-home/groupe-home.component';
 import { EditUserProgramComponent } from './edit-user-program/edit-user-program.component';
+import { CollaboratifCodingComponent } from './collaboratif-coding/collaboratif-coding.component';
 
 @NgModule({
   declarations: [
@@ -44,6 +45,7 @@ import { EditUserProgramComponent } from './edit-user-program/edit-user-program.
     GroupListItemComponent,
     GroupeHomeComponent,
     EditUserProgramComponent,
+    CollaboratifCodingComponent,
   ],
   imports: [
     CommonModule,

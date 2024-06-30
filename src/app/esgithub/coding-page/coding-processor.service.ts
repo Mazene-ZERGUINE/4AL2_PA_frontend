@@ -50,6 +50,10 @@ export class CodingProcessorService {
     });
   }
 
+  generateCodingSession(): Observable<{ sessionId: string }> {
+    return this.apiService.getRequest('collaboratif-coding/generate-session');
+  }
+
   private getFileNameFromPath(filePath: string): string {
     const fileName = filePath.split('/').pop();
     return fileName ? fileName : 'unknown';

@@ -7,48 +7,14 @@
       <div
         class="flex flex-col w-[90%] relative left-[5%] border p-4 rounded-lg bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75"
       >
+        <div
+          class="flex flex-row relative border p-4 rounded-lg bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75"
+        >
+          share this link to invite collaborators
+          <a class="text-purple-900 underline ml-2 font-bold italic">{{ sessionUrl }}</a>
+        </div>
         <div class="flex justify-between mb-2">
-          <div class="relative top-6">
-            <input
-              type="file"
-              #fileInput
-              style="display: none"
-              (change)="onFileSelected($event)"
-              accept=".py,.js"
-            />
-
-            <button
-              class="bg-black mt-4 text-white font-bold py-1 px-4 rounded"
-              (click)="fileInput.click()"
-            >
-              <mat-icon>file_upload</mat-icon>
-              <span class="relative p-2 bottom-1.5 italic">Upload from file</span>
-            </button>
-            <button
-              (click)="onShareClick()"
-              class="bg-black text-white font-bold py-1 px-4 rounded ml-2"
-            >
-              <mat-icon>share</mat-icon>
-              <span class="relative p-2 bottom-1.5 italic">Share</span>
-            </button>
-
-            <button
-              class="mt-4 relative ml-2 bg-black text-white font-bold py-1 px-4 rounded"
-              (click)="onShowGuideClick()"
-            >
-              <mat-icon>info</mat-icon>
-              <span class="relative p-2 bottom-1.5 italic">Show guid</span>
-            </button>
-            <button
-              (click)="onInviteUsersClick()"
-              class="mt-4 relative ml-2 bg-black text-white font-bold py-1 px-4 rounded mr-5"
-            >
-              <i class="material-icons">supervised_user_circle</i>
-              <span class="relative p-2 bottom-1.5 italic"
-                >Invite users to collaborate</span
-              >
-            </button>
-          </div>
+          <div class="relative top-6"></div>
 
           <div class="relative top-4 flex">
             <img
@@ -187,7 +153,7 @@
       </div>
 
       <div
-        class="flex flex-col w-[90%] mt-1 relative left-[5%] border h-48 max-h-96 border-gray-300 bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75 rounded-lg"
+        class="flex flex-col w-[90%] mt-1 relative left-[5%] border h-44 max-h-96 border-gray-300 bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75 rounded-lg"
       >
         <mat-progress-bar
           mode="indeterminate"
@@ -212,12 +178,5 @@
         >
       </div>
     </div>
-  </div>
-
-  <div class="w-[33Opx]">
-    <app-side-profile
-      *ngIf="userData$ | async as currentUser"
-      [currentUser]="currentUser"
-    ></app-side-profile>
   </div>
 </div>

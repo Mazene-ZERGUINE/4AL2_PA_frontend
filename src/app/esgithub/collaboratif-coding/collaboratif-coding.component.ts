@@ -4,6 +4,8 @@ import {
   ElementRef,
   AfterViewInit,
   OnDestroy,
+  OnInit,
+  ChangeDetectorRef,
 } from '@angular/core';
 import * as ace from 'ace-builds';
 import 'ace-builds/src-noconflict/theme-nord_dark';
@@ -12,25 +14,29 @@ import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/mode-c_cpp';
 import 'ace-builds/src-noconflict/mode-php';
 import { Ace } from 'ace-builds';
-import { RunCodeRequestDto } from './models/RunCodeRequestDto';
-import { CodingProcessorService } from './coding-processor.service';
-import { RunCodeResponseDto } from './models/RunCodeResponseDto';
+import { RunCodeRequestDto } from '../coding-page/models/RunCodeRequestDto';
+import { CodingProcessorService } from '../coding-page/coding-processor.service';
+import { RunCodeResponseDto } from '../coding-page/models/RunCodeResponseDto';
 import { NotifierService } from '../../core/services/notifier.service';
-import { filter, Observable, Subscription, switchMap, take, tap } from 'rxjs';
-import { ModalService } from '../../core/services/modal.service';
-import { ShareCodeModalComponent } from '../../core/modals/share-code-modal/share-code-modal.component';
-import { CreateProgramDto } from './models/CreateProgramDto';
-import { Router } from '@angular/router';
-import { AuthService } from '../../core/Auth/service/auth.service';
-import { UserDataModel } from '../../core/models/user-data.model';
-import { CodePageUseGuidModalComponent } from '../../core/modals/code-page-use-guid-modal/code-page-use-guid-modal.component';
+import { ActivatedRoute } from '@angular/router';
+import { environment } from '../../../environment/environment';
+import { io, Socket } from 'socket.io-client';
+import { debounceTime, Subject } from 'rxjs';
+
+interface CodeChangePayload {
+  code: string;
+}
+
+interface CursorChangePayload {
+  cursor: Ace.Point;
+}
 
 @Component({
-  selector: 'app-coding-page',
-  templateUrl: './coding-page.component.html',
-  styleUrls: ['./coding-page.component.scss'],
+  selector: 'app-collaboratif-coding',
+  templateUrl: './collaboratif-coding.component.html',
+  styleUrls: ['./collaboratif-coding.component.scss'],
 })
-export class CodingPageComponent implements AfterViewInit, OnDestroy {
+export class CollaboratifCodingComponent implements AfterViewInit, OnDestroy, OnInit {
   @ViewChild('editor') private editor!: ElementRef<HTMLElement>;
   @ViewChild('inputSelect', { static: false }) inputSelect!: ElementRef<HTMLInputElement>;
 
@@ -38,32 +44,37 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
   selectedLanguage = 'javascript';
   isLoading = false;
   codeOutput!: { output: string; status: number };
-  private userId!: string;
   fileTypes = ['md', 'txt', 'csv', 'json', 'xlsx', 'yml', 'pdf', 'png', 'jpg', 'jpeg'];
   protected selectedInputFiles: File[] = [];
   private selectedOutputFormats: string[] = [];
-  readonly userData$: Observable<UserDataModel> = this.authService.getUserData();
-  private runCodeSubscription = new Subscription();
-  private getUserDataSubscription = new Subscription();
+  private sessionId!: string;
+  protected sessionUrl!: string;
+  private socket!: Socket;
+  private codeChange$ = new Subject<CodeChangePayload>();
+  private cursorChange$ = new Subject<CursorChangePayload>();
+  private isInternalChange: boolean = false;
 
   constructor(
     private readonly codeProcessorService: CodingProcessorService,
     private readonly notifier: NotifierService,
-    private readonly modalService: ModalService,
-    private readonly router: Router,
-    private readonly authService: AuthService,
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly route: ActivatedRoute,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
+  ngOnInit(): void {
+    this.sessionId = this.route.snapshot.params['sessionId'];
+    this.sessionUrl = `${environment.baseUrl}/api/v1/${this.sessionId}`;
+    this.initializeWebSocketConnection();
+    this.setupDebouncedCodeChange();
+    this.setupDebouncedCursorChange();
+    this.cdr.detectChanges();
+  }
+
   ngAfterViewInit(): void {
-    this.modalService.openDialog(CodePageUseGuidModalComponent, 700).subscribe();
-    this.getUserDataSubscription = this.authService
-      .getUserData()
-      .subscribe((user: UserDataModel) => {
-        this.userId = user.userId;
-      });
     this.aceEditor = ace.edit(this.editor.nativeElement);
     this.aceEditor.setTheme('ace/theme/nord_dark');
-    this.aceEditor.session.setMode('ace/mode/' + this.getAceMode(this.selectedLanguage));
+    this.aceEditor.session.setMode('ace/mode/javascript');
     this.aceEditor.setOptions({
       fontSize: '15px',
       showLineNumbers: true,
@@ -71,12 +82,42 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
       readOnly: false,
       useWrapMode: true,
     });
-    this.setDefaultCode(this.selectedLanguage);
+
+    this.isInternalChange = false;
+
+    this.aceEditor.on('change', () => {
+      if (!this.isInternalChange) {
+        const code = this.aceEditor.getValue();
+        this.codeChange$.next({ code });
+      }
+    });
+
+    this.aceEditor.getSession().selection.on('changeCursor', () => {
+      if (!this.isInternalChange) {
+        const cursor = this.aceEditor.getCursorPosition();
+        this.cursorChange$.next({ cursor });
+      }
+    });
+
+    this.cdr.detectChanges();
+
+    this.socket.on('loadCode', (payload: CodeChangePayload) => {
+      this.updateEditorContent(payload);
+    });
+
+    this.socket.on('codeUpdate', (payload: CodeChangePayload) => {
+      this.updateEditorContent(payload);
+    });
+
+    this.socket.on('cursorUpdate', (payload: CursorChangePayload) => {
+      this.updateCursor(payload);
+    });
   }
 
-  ngOnDestroy() {
-    this.runCodeSubscription.unsubscribe();
-    this.getUserDataSubscription.unsubscribe();
+  ngOnDestroy(): void {
+    this.socket.disconnect();
+    this.codeChange$.unsubscribe();
+    this.cursorChange$.unsubscribe();
   }
 
   onSelectedLanguageUpdate(): void {
@@ -84,41 +125,20 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
     this.aceEditor.session.setMode('ace/mode/' + this.getAceMode(this.selectedLanguage));
   }
 
-  onFileSelected(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    const file: File | null = target.files ? target.files[0] : null;
-
-    if (file) {
-      this.readFile(file);
-    }
-  }
-
-  private readFile(file: File): void {
-    const fileReader = new FileReader();
-    fileReader.onload = () => {
-      this.aceEditor.setValue(fileReader.result as string);
-    };
-    fileReader.readAsText(file);
-  }
-
   onRunCodeClick(): void {
     this.isLoading = true;
     if (this.selectedInputFiles.length > 0 || this.selectedOutputFormats.length > 0) {
       const formData = this.buildFormData();
-      this.runCodeSubscription = this.codeProcessorService
-        .sendCodeWithFilesToProcess(formData)
-        .subscribe({
-          next: (response: any) => this.handleResponse(response),
-          error: () => this.handleError(),
-        });
+      this.codeProcessorService.sendCodeWithFilesToProcess(formData).subscribe({
+        next: (response: any) => this.handleResponse(response),
+        error: () => this.handleError(),
+      });
     } else {
       const payload = this.buildPayload();
-      this.runCodeSubscription = this.codeProcessorService
-        .sendCodeToProcess(payload)
-        .subscribe({
-          next: (response: RunCodeResponseDto) => this.handleResponse(response),
-          error: () => this.handleError(),
-        });
+      this.codeProcessorService.sendCodeToProcess(payload).subscribe({
+        next: (response: RunCodeResponseDto) => this.handleResponse(response),
+        error: () => this.handleError(),
+      });
     }
   }
 
@@ -129,32 +149,6 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
     }
     this.selectedInputFiles = [];
     this.notifier.showSuccess('files cleared.');
-  }
-
-  onShareClick(): void {
-    this.modalService
-      .openDialog(ShareCodeModalComponent, 900, { isGroupProgram: false })
-      .pipe(
-        filter((result: any) => result !== undefined),
-        switchMap((result) => {
-          const programDto: CreateProgramDto = {
-            ...result,
-            programmingLanguage: this.selectedLanguage,
-            sourceCode: this.aceEditor.getValue(),
-            userId: this.userId,
-          };
-          return this.codeProcessorService.shareProgram(programDto);
-        }),
-        tap(() => {
-          this.notifier.showSuccess('your program has been published');
-          this.router.navigate(['home']);
-        }),
-      )
-      .subscribe();
-  }
-
-  onShowGuideClick(): void {
-    this.modalService.openDialog(CodePageUseGuidModalComponent, 700).subscribe();
   }
 
   onAddFormatClick(format: string): void {
@@ -175,22 +169,74 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  onInviteUsersClick(): void {
-    this.codeProcessorService
-      .generateCodingSession()
-      .pipe(
-        take(1),
-        tap((session: { sessionId: string }) => {
-          this.notifier.showSuccess(
-            'creating the new coding session you will be redirected soon',
-          );
-          // eslint-disable-next-line angular/timeout-service
-          setTimeout(() => {
-            this.router.navigate(['collaborate', session.sessionId]);
-          }, 4000);
-        }),
-      )
-      .subscribe();
+  private initializeWebSocketConnection(): void {
+    this.socket = io('http://localhost:3000/collaboratif-coding', {
+      withCredentials: true,
+    });
+
+    this.socket.on('connect', () => {
+      this.socket.emit('joinSession', this.sessionId);
+    });
+
+    this.socket.on('loadCode', (payload: CodeChangePayload) => {
+      this.updateEditorContent(payload);
+    });
+
+    this.socket.on('codeUpdate', (payload: CodeChangePayload) => {
+      this.updateEditorContent(payload);
+    });
+
+    this.socket.on('cursorUpdate', (payload: CursorChangePayload) => {
+      this.updateCursor(payload);
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('Disconnected from WebSocket server');
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('WebSocket connection error:', error);
+    });
+  }
+
+  private setupDebouncedCodeChange(): void {
+    this.codeChange$
+      .pipe(debounceTime(500)) // Adjust the debounce time as needed
+      .subscribe((payload: CodeChangePayload) => {
+        this.socket.emit('codeChange', { sessionId: this.sessionId, ...payload });
+      });
+  }
+
+  private setupDebouncedCursorChange(): void {
+    this.cursorChange$
+      .pipe(debounceTime(300)) // Adjust the debounce time as needed
+      .subscribe((payload: CursorChangePayload) => {
+        this.socket.emit('cursorChange', { sessionId: this.sessionId, ...payload });
+      });
+  }
+
+  private updateEditorContent(payload: CodeChangePayload): void {
+    this.isInternalChange = true;
+    this.aceEditor.setValue(payload.code, -1); // -1 prevents cursor move
+    this.aceEditor.clearSelection();
+    this.isInternalChange = false;
+    this.cdr.detectChanges();
+  }
+
+  private updateCursor(payload: CursorChangePayload): void {
+    if (!payload.cursor) {
+      console.error('Cursor is undefined:', payload);
+      return;
+    }
+
+    this.isInternalChange = true;
+    const scrollTop = this.aceEditor.session.getScrollTop();
+    const scrollLeft = this.aceEditor.session.getScrollLeft();
+    this.aceEditor.moveCursorToPosition(payload.cursor);
+    this.aceEditor.session.setScrollTop(scrollTop);
+    this.aceEditor.session.setScrollLeft(scrollLeft);
+    this.isInternalChange = false;
+    this.cdr.detectChanges();
   }
 
   private buildFormData(): FormData {

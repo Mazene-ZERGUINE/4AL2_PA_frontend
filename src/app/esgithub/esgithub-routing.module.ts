@@ -8,6 +8,7 @@ import { ProgramEditComponent } from './program-edit/program-edit.component';
 import { GroupsComponent } from './groups/groups.component';
 import { GroupeHomeComponent } from './groups/groupe-home/groupe-home.component';
 import { EditUserProgramComponent } from './edit-user-program/edit-user-program.component';
+import { CollaboratifCodingComponent } from './collaboratif-coding/collaboratif-coding.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth' },
@@ -26,6 +27,10 @@ const routes: Routes = [
     path: 'program/edit/:programId',
     component: EditUserProgramComponent,
     canActivate: [AuthGuard],
+  },
+  {
+    path: 'collaborate/:sessionId',
+    component: CollaboratifCodingComponent,
   },
 ];
 
