@@ -33,10 +33,10 @@ interface CursorChangePayload {
 
 @Component({
   selector: 'app-collaboratif-coding',
-  templateUrl: './collaboratif-coding.component.html',
-  styleUrls: ['./collaboratif-coding.component.scss'],
+  templateUrl: './collaborative-coding.component.html',
+  styleUrls: ['./collaborative-coding.component.scss'],
 })
-export class CollaboratifCodingComponent implements AfterViewInit, OnDestroy, OnInit {
+export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, OnInit {
   @ViewChild('editor') private editor!: ElementRef<HTMLElement>;
   @ViewChild('inputSelect', { static: false }) inputSelect!: ElementRef<HTMLInputElement>;
 
