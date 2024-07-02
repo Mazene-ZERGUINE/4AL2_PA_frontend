@@ -20,18 +20,20 @@ export class SessionGuard implements CanActivate {
     const access = next.queryParams['access'];
     const userId = next.queryParams['id'];
 
-    if (access === 'owner' && !this.authService.isAuthenticated()) {
-      this.notifier.showError('You are not authorized to access this resource');
-      this.router.navigate(['/auth']);
-      return false;
+    if (userId && access) {
+      if (access === 'owner' && !this.authService.isAuthenticated()) {
+        this.notifier.showError('You are not authorized to access this resource');
+        this.router.navigate(['/auth']);
+        return false;
+      }
+      /*
+            if (this.authService.user?.userId !== userId) {
+              console.log(userId, this.authService.user?.userId);
+              this.notifier.showError('You are not authorized to access this resource');
+              this.router.navigate(['/auth']);
+              return false;
+            }*/
     }
-
-    if (this.authService.user?.userId !== userId) {
-      this.notifier.showError('You are not authorized to access this resource');
-      this.router.navigate(['/auth']);
-      return false;
-    }
-
     return true;
   }
 }

@@ -29,7 +29,7 @@ export class AuthService {
   }
 
   getUserData(): Observable<UserDataModel> {
-    this.fetchUser();
+    this.fetchUser().subscribe();
     return this.apiService.getRequest('auth/get_info');
   }
 
