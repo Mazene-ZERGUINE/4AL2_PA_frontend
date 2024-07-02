@@ -186,7 +186,7 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
           );
           // eslint-disable-next-line angular/timeout-service
           setTimeout(() => {
-            this.router.navigate(['collaborate', session.sessionId]);
+            this.router.navigate(['collaborate', session.sessionId, this.userId]);
           }, 4000);
         }),
       )

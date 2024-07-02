@@ -18,10 +18,14 @@ import { RunCodeRequestDto } from '../coding-page/models/RunCodeRequestDto';
 import { CodingProcessorService } from '../coding-page/coding-processor.service';
 import { RunCodeResponseDto } from '../coding-page/models/RunCodeResponseDto';
 import { NotifierService } from '../../core/services/notifier.service';
-import { ActivatedRoute } from '@angular/router';
-import { environment } from '../../../environment/environment';
+import { ActivatedRoute, Router } from '@angular/router';
 import { io, Socket } from 'socket.io-client';
-import { debounceTime, Subject } from 'rxjs';
+import { BehaviorSubject, debounceTime, Observable, Subject, take } from 'rxjs';
+import { AuthService } from '../../core/Auth/service/auth.service';
+import { map } from 'rxjs/operators';
+import { ModalService } from '../../core/services/modal.service';
+import { ConfirmationModalComponent } from '../../core/modals/conifrmatio-modal/confirmation-modal.component';
+import { UserDataModel } from '../../core/models/user-data.model';
 
 interface CodeChangePayload {
   code: string;
@@ -47,12 +51,21 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
   fileTypes = ['md', 'txt', 'csv', 'json', 'xlsx', 'yml', 'pdf', 'png', 'jpg', 'jpeg'];
   protected selectedInputFiles: File[] = [];
   private selectedOutputFormats: string[] = [];
-  private sessionId!: string;
   protected sessionUrl!: string;
   private socket!: Socket;
   private codeChange$ = new Subject<CodeChangePayload>();
   private cursorChange$ = new Subject<CursorChangePayload>();
   private isInternalChange: boolean = false;
+
+  private ownerId!: string;
+  private sessionId!: string;
+  protected userAccess!: string;
+  protected isWaitingForApproval: boolean = false;
+
+  protected userTmpName: string = '';
+
+  private userDataSubject = new BehaviorSubject<UserDataModel | null>(null);
+  userData$: Observable<UserDataModel | null> = this.userDataSubject.asObservable();
 
   constructor(
     private readonly codeProcessorService: CodingProcessorService,
@@ -60,11 +73,17 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
     private readonly activatedRoute: ActivatedRoute,
     private readonly route: ActivatedRoute,
     private readonly cdr: ChangeDetectorRef,
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly modalService: ModalService,
   ) {}
 
   ngOnInit(): void {
-    this.sessionId = this.route.snapshot.params['sessionId'];
-    this.sessionUrl = `${environment.baseUrl}/api/v1/${this.sessionId}`;
+    this.ownerId = this.activatedRoute.snapshot.params['ownerId'];
+    this.sessionId = this.activatedRoute.snapshot.params['sessionId'];
+    this.sessionUrl = `localhost:4200/collaborate/${this.sessionId}/${this.ownerId}`;
+    this.checkUserRole();
+    this.userAccess = this.activatedRoute.snapshot.queryParams['access'];
     this.initializeWebSocketConnection();
     this.setupDebouncedCodeChange();
     this.setupDebouncedCursorChange();
@@ -101,16 +120,77 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
 
     this.cdr.detectChanges();
 
-    this.socket.on('loadCode', (payload: CodeChangePayload) => {
-      this.updateEditorContent(payload);
+    if (this.socket) {
+      this.socket.on('loadCode', (payload: CodeChangePayload) => {
+        this.updateEditorContent(payload);
+      });
+
+      this.socket.on('codeUpdate', (payload: CodeChangePayload) => {
+        this.updateEditorContent(payload);
+      });
+
+      this.socket.on('cursorUpdate', (payload: CursorChangePayload) => {
+        this.updateCursor(payload);
+      });
+    }
+  }
+
+  private initializeWebSocketConnection(): void {
+    this.socket = io('http://localhost:3000/collaboratif-coding', {
+      withCredentials: true,
     });
 
-    this.socket.on('codeUpdate', (payload: CodeChangePayload) => {
-      this.updateEditorContent(payload);
+    this.socket.on('connect', () => {
+      this.checkUserAccess();
     });
 
-    this.socket.on('cursorUpdate', (payload: CursorChangePayload) => {
-      this.updateCursor(payload);
+    this.socket.on('disconnect', () => {
+      console.log('Disconnected from WebSocket server');
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('WebSocket connection error:', error);
+    });
+
+    this.socket.on('requestAuthorization', () => {
+      this.showAuthorizationDialog();
+    });
+
+    this.socket.on('authorizationGranted', () => {
+      this.isWaitingForApproval = false;
+      this.socket.emit('joinSession', this.sessionId);
+    });
+
+    this.socket.on('authorizationDenied', () => {
+      this.isWaitingForApproval = false;
+      this.notifier.showError('your request has been denied by the owner');
+      this.router.navigate(['/auth']);
+    });
+  }
+
+  private checkUserAccess(): void {
+    if (this.userAccess === 'owner') {
+      this.socket.emit('joinSession', this.sessionId);
+    } else {
+      this.isWaitingForApproval = true;
+      this.socket.emit('requestAccess', this.sessionId);
+    }
+  }
+
+  private showAuthorizationDialog(): void {
+    const randomUserName = `user_${Math.floor(10000 + Math.random() * 90000)}`;
+    this.userTmpName = randomUserName;
+    const dialogRef = this.modalService.openDialog(ConfirmationModalComponent, 700, {
+      title: 'join request',
+      message: `${randomUserName} is asking to join the coding session authorize ?'`,
+    });
+
+    dialogRef.subscribe((result: any) => {
+      if (result) {
+        this.socket.emit('grantAccess', this.sessionId);
+      } else {
+        this.socket.emit('denyAccess', this.sessionId);
+      }
     });
   }
 
@@ -169,47 +249,45 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
     }
   }
 
-  private initializeWebSocketConnection(): void {
-    this.socket = io('http://localhost:3000/collaboratif-coding', {
-      withCredentials: true,
-    });
-
-    this.socket.on('connect', () => {
-      this.socket.emit('joinSession', this.sessionId);
-    });
-
-    this.socket.on('loadCode', (payload: CodeChangePayload) => {
-      this.updateEditorContent(payload);
-    });
-
-    this.socket.on('codeUpdate', (payload: CodeChangePayload) => {
-      this.updateEditorContent(payload);
-    });
-
-    this.socket.on('cursorUpdate', (payload: CursorChangePayload) => {
-      this.updateCursor(payload);
-    });
-
-    this.socket.on('disconnect', () => {
-      console.log('Disconnected from WebSocket server');
-    });
-
-    this.socket.on('connect_error', (error) => {
-      console.error('WebSocket connection error:', error);
-    });
+  private checkUserRole(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['collaborate/', this.sessionId, this.ownerId], {
+        queryParams: { access: 'invited', id: 'no-authenticated' },
+      });
+    } else {
+      this.authService
+        .getUserData()
+        .pipe(
+          take(1),
+          map((user) => {
+            if (user.userId === this.ownerId) {
+              this.router.navigate(['collaborate/', this.sessionId, this.ownerId], {
+                queryParams: { access: 'owner', id: this.ownerId },
+              });
+              this.userAccess = 'owner';
+            } else {
+              this.router.navigate(['collaborate/', this.sessionId, this.ownerId], {
+                queryParams: { access: 'invited', id: user.userId },
+              });
+              this.userAccess = 'invited';
+            }
+            this.userDataSubject.next(user);
+            this.cdr.detectChanges();
+          }),
+        )
+        .subscribe();
+    }
   }
 
   private setupDebouncedCodeChange(): void {
-    this.codeChange$
-      .pipe(debounceTime(500)) // Adjust the debounce time as needed
-      .subscribe((payload: CodeChangePayload) => {
-        this.socket.emit('codeChange', { sessionId: this.sessionId, ...payload });
-      });
+    this.codeChange$.pipe(debounceTime(500)).subscribe((payload: CodeChangePayload) => {
+      this.socket.emit('codeChange', { sessionId: this.sessionId, ...payload });
+    });
   }
 
   private setupDebouncedCursorChange(): void {
     this.cursorChange$
-      .pipe(debounceTime(300)) // Adjust the debounce time as needed
+      .pipe(debounceTime(300))
       .subscribe((payload: CursorChangePayload) => {
         this.socket.emit('cursorChange', { sessionId: this.sessionId, ...payload });
       });

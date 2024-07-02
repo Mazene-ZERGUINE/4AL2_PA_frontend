@@ -9,6 +9,7 @@ import { GroupsComponent } from './groups/groups.component';
 import { GroupeHomeComponent } from './groups/groupe-home/groupe-home.component';
 import { EditUserProgramComponent } from './edit-user-program/edit-user-program.component';
 import { CollaborativeCodingComponent } from './collaboratif-coding/collaborative-coding.component';
+import { SessionGuard } from '../core/guards/session.guard';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth' },
@@ -29,8 +30,9 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'collaborate/:sessionId',
+    path: 'collaborate/:sessionId/:ownerId',
     component: CollaborativeCodingComponent,
+    canActivate: [SessionGuard],
   },
 ];
 

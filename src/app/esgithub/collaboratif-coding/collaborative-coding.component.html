@@ -1,11 +1,24 @@
-<div class="flex h-screen bg-[#1E1F3D]">
-  <div class="z-50">
+<div class="flex h-screen bg-[#1E1F3D] overflow-hidden">
+  <div *ngIf="userAccess === 'owner'" class="z-50">
     <app-side-navbar></app-side-navbar>
   </div>
-  <div class="w-full">
-    <div class="relative top-8 w-full">
+  <div class="w-full relative">
+    <!-- Spinner -->
+    <div
+      *ngIf="isWaitingForApproval"
+      class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 flex flex-col"
+    >
+      <div>
+        <mat-spinner diameter="64"></mat-spinner>
+      </div>
+      <div class="text-purple-500 text-xl italic font-bold mt-8">
+        waiting for owner approval ...
+      </div>
+    </div>
+
+    <div class="relative top-8 w-full h-full">
       <div
-        class="flex flex-col w-[90%] relative left-[5%] border p-4 rounded-lg bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75"
+        class="flex flex-col w-[90%] relative h-[59%] left-[5%] border p-4 rounded-lg bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75"
       >
         <div
           class="flex flex-row relative border p-4 rounded-lg bg-white bg-opacity-15 backdrop-filter backdrop-blur-lg border-black border-opacity-75"
@@ -178,5 +191,12 @@
         >
       </div>
     </div>
+  </div>
+
+  <div *ngIf="userAccess === 'owner'" class="w-[33Opx]">
+    <app-side-profile
+      *ngIf="userData$ | async as currentUser"
+      [currentUser]="currentUser"
+    ></app-side-profile>
   </div>
 </div>
