@@ -16,7 +16,7 @@ import { RunCodeRequestDto } from './models/RunCodeRequestDto';
 import { CodingProcessorService } from './coding-processor.service';
 import { RunCodeResponseDto } from './models/RunCodeResponseDto';
 import { NotifierService } from '../../core/services/notifier.service';
-import { filter, Observable, Subscription, switchMap, tap } from 'rxjs';
+import { filter, Observable, Subscription, switchMap, take, tap } from 'rxjs';
 import { ModalService } from '../../core/services/modal.service';
 import { ShareCodeModalComponent } from '../../core/modals/share-code-modal/share-code-modal.component';
 import { CreateProgramDto } from './models/CreateProgramDto';
@@ -173,6 +173,24 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
       });
       this.inputSelect.nativeElement.value = '';
     }
+  }
+
+  onInviteUsersClick(): void {
+    this.codeProcessorService
+      .generateCodingSession()
+      .pipe(
+        take(1),
+        tap((session: { sessionId: string }) => {
+          this.notifier.showSuccess(
+            'creating the new coding session you will be redirected soon',
+          );
+          // eslint-disable-next-line angular/timeout-service
+          setTimeout(() => {
+            this.router.navigate(['collaborate', session.sessionId, this.userId]);
+          }, 4000);
+        }),
+      )
+      .subscribe();
   }
 
   private buildFormData(): FormData {
