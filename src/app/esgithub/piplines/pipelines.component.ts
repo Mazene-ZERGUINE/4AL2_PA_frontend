@@ -30,6 +30,7 @@ export class PipelinesComponent implements OnInit, OnDestroy {
   private selectedLanguages$ = new BehaviorSubject<string[]>([]);
   private searchQuery$ = new BehaviorSubject<string>('');
   private inputFilesFormats$ = new BehaviorSubject<string[]>([]);
+  private latestOutputFilesFormats$ = new BehaviorSubject<string[]>([]);
 
   protected selectedInputFiles: File[] = [];
   protected droppedPrograms: ProgramModel[] = [];
@@ -39,28 +40,40 @@ export class PipelinesComponent implements OnInit, OnDestroy {
     this.selectedLanguages$,
     this.searchQuery$.pipe(startWith('')),
     this.inputFilesFormats$,
+    this.latestOutputFilesFormats$,
   ]).pipe(
-    switchMap(([, selectedLanguages, searchQuery, inputFilesFormats]) =>
-      this.pipelinesService.getAllPrograms$().pipe(
-        map((programList) =>
-          programList.filter((program) => {
-            const matchesLanguage =
-              selectedLanguages.length === 0 ||
-              selectedLanguages.includes(program.programmingLanguage.toLowerCase());
-            const matchesSearch = program.description
-              ?.toLowerCase()
-              .includes(searchQuery.toLowerCase());
-            const matchesInputFormat =
-              inputFilesFormats.length === 0 ||
-              inputFilesFormats.every((format) =>
-                program.inputTypes.some(
-                  (inputType) => inputType.toLowerCase() === format,
-                ),
+    switchMap(
+      ([, selectedLanguages, searchQuery, inputFilesFormats, latestOutputFilesFormats]) =>
+        this.pipelinesService.getAllPrograms$().pipe(
+          map((programList) =>
+            programList.filter((program) => {
+              const matchesLanguage =
+                selectedLanguages.length === 0 ||
+                selectedLanguages.includes(program.programmingLanguage.toLowerCase());
+              const matchesSearch = program.description
+                ?.toLowerCase()
+                .includes(searchQuery.toLowerCase());
+              const matchesInputFormat =
+                inputFilesFormats.length === 0 ||
+                inputFilesFormats.every((format) =>
+                  program.inputTypes.some(
+                    (inputType) => inputType.toLowerCase() === format,
+                  ),
+                );
+              const matchesLatestOutputFormat =
+                latestOutputFilesFormats.length === 0 ||
+                program.inputTypes.some((inputType) =>
+                  latestOutputFilesFormats.includes(inputType.toLowerCase()),
+                );
+              return (
+                matchesLanguage &&
+                matchesSearch &&
+                matchesInputFormat &&
+                matchesLatestOutputFormat
               );
-            return matchesLanguage && matchesSearch && matchesInputFormat;
-          }),
+            }),
+          ),
         ),
-      ),
     ),
     shareReplay({ refCount: true, bufferSize: 1 }),
   );
@@ -124,8 +137,22 @@ export class PipelinesComponent implements OnInit, OnDestroy {
     const data = event.dataTransfer?.getData('application/json');
     if (data) {
       const program = JSON.parse(data) as ProgramModel;
+      if (
+        this.selectedInputFiles.length === 0 &&
+        program.inputTypes.length > 0 &&
+        this.droppedPrograms.length === 0
+      ) {
+        this.notifierService.showWarning(
+          'you must select the start input file first or a program that do not have input files',
+        );
+        return;
+      }
       this.droppedPrograms.push(program);
-      this.cdr.markForCheck(); // Trigger change detection
+      this.latestOutputFilesFormats$.next(
+        program.outputTypes.map((type) => type.toLowerCase()),
+      );
+      this.refreshPrograms$.next();
+      this.cdr.markForCheck();
     }
   }
 
