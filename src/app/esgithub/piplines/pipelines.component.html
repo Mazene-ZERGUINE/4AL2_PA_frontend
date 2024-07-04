@@ -10,13 +10,189 @@
           background-image: url('https://s3-alpha-sig.figma.com/img/1eb6/5b9d/44abbf3c1e307507fc3830709dc244f7?Expires=1719792000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=GzOOeTzleRmENjIH29dVOq7pIYZjuSOF0Ucg0Jrvd1GVU98fO8Q8X90cxrvck1FrMTUF1kp1yLWPW74zg0IYVrdgUKHNyF~bG5XnACd22wHAXT8WvN2xytIe6~BS5M7dCc31DfHzd5fRyiA7LXhEZHTChDpt9iyKwM9J6S~hjugyzHPzHEFmW7Gnkx7lch58B9ErE6snawy646criXpC~b~uhFq~mjWcuP2JXH4bAw5iO2mj-EWE2THzxCQYG7F8qDLTQ6uw9R2Q4f1FwPP~2pScL6t-CvuE~nVpNEDHze1TL4aPNdwTCZbaNi9bM45C7hozTPL1WlcnCkfCsJ~qKg__');
         "
       >
-        <div
-          class="absolute inset-0 bg-black bg-opacity-10 backdrop-blur-sm rounded-lg"
-        ></div>
-        <div class="absolute inset-0 flex items-center justify-center rounded-lg">
-          <h1 class="text-white text-4xl font-bold italic">
-            PipeLines: stream line programs as you wish
-          </h1>
+        <div class="w-full h-[70vh] relative mt-8 flex flex-row">
+          <div
+            class="w-1/2 h-full flex flex-col bg-black bg-opacity-10 backdrop-blur-sm rounded-lg p-2 mr-4"
+          >
+            <input
+              type="file"
+              #fileSelector
+              hidden="hidden"
+              (change)="onSelectStartFiles($event)"
+            />
+            <div class="flex flex-col">
+              <button
+                (click)="fileSelector.click()"
+                class="w-full p-2 bg-black text-white text-center items-center rounded-lg italic font-bold"
+              >
+                Select a starting file
+              </button>
+              <div class="h-full opacity-10 bg-white p-2 overflow-auto flex-col">
+                <div
+                  *ngFor="let file of selectedInputFiles; let i = index"
+                  class="text-center italic font-bold text-purple-500"
+                >
+                  selected input file {{ i }}: {{ file.name }}
+                </div>
+              </div>
+            </div>
+            <div
+              class="h-full opacity-10 bg-white p-2 overflow-auto"
+              (drop)="onDrop($event)"
+              (dragover)="onDragOver($event)"
+            >
+              <p
+                *ngIf="droppedPrograms.length === 0"
+                class="text-black text-center items-center italic font-bold top-1/2 relative"
+              >
+                drop your selections here
+              </p>
+              <div
+                *ngFor="let program of droppedPrograms"
+                class="mt-2 bg-gray-300 p-2 rounded"
+              >
+                <div class="text-black italic font-bold">
+                  {{ program.programmingLanguage }}
+                </div>
+                <div class="text-black">{{ program.description }}</div>
+              </div>
+            </div>
+            <div class="mt-auto flex">
+              <button
+                class="w-full p-2 bg-black text-white text-center items-center rounded-lg italic font-bold"
+              >
+                Run pipeline
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="w-1/2 h-full bg-black bg-opacity-10 backdrop-blur-sm rounded-lg relative p-2 overflow-y-auto overflow-x-hidden"
+          >
+            <div
+              class="flex-row items-center gap-4 w-full bg-white opacity-20 shadow-md rounded-lg flex justify-center p-2 mb-4"
+            >
+              <div class="flex items-center gap-2">
+                <div class="flex flex-row mr-2 z-10">
+                  <input
+                    type="checkbox"
+                    value="python"
+                    (change)="onLanguageChange($event)"
+                  />
+                  <label
+                    class="flex items-center p-1 bg-white text-purple-500 italic font-bold"
+                    >Python</label
+                  >
+                </div>
+                <div class="flex flex-row mr-2">
+                  <input
+                    type="checkbox"
+                    value="javascript"
+                    class="p-1 bg-red-700"
+                    (change)="onLanguageChange($event)"
+                  />
+                  <label
+                    class="flex items-center p-1 bg-white text-purple-500 italic font-bold"
+                    >JavaScript</label
+                  >
+                </div>
+                <div class="flex flex-row mr-2">
+                  <input
+                    type="checkbox"
+                    value="c++"
+                    class="p-1 bg-red-700"
+                    (change)="onLanguageChange($event)"
+                  />
+                  <label
+                    class="flex items-center p-1 bg-white text-purple-500 italic font-bold"
+                    >C++</label
+                  >
+                </div>
+                <div class="flex flex-row mr-2">
+                  <input
+                    type="checkbox"
+                    value="php"
+                    class="p-1 bg-red-700"
+                    (change)="onLanguageChange($event)"
+                  />
+                  <label
+                    class="flex items-center p-1 bg-white text-purple-500 italic font-bold"
+                    >PHP</label
+                  >
+                </div>
+              </div>
+              <div class="relative">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  class="border p-2 rounded pl-10 border-purple-500 text-black"
+                  (input)="onSearchChange($event)"
+                />
+                <span
+                  class="material-icons absolute left-2 top-2 text-black cursor-pointer"
+                  >search</span
+                >
+              </div>
+            </div>
+
+            <ng-container *ngIf="programsList$ | async as programs">
+              <div
+                *ngFor="let program of programs"
+                class="h-48 bg-black opacity-30 rounded-lg mt-2 relative"
+                draggable="true"
+                (dragstart)="onDragStart($event, program)"
+              >
+                <div
+                  class="flex flex-row ml-6 z-10 border-white border w-44 rounded-lg relative top-2 p-1"
+                >
+                  <img
+                    class="h-8 w-8 rounded-full"
+                    *ngIf="program.programmingLanguage === 'javascript'"
+                    src="assets/images/icons/javascript-svgrepo-com.svg"
+                  />
+                  <img
+                    class="h-8 w-8 rounded-full"
+                    *ngIf="program.programmingLanguage === 'python'"
+                    src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg"
+                  />
+                  <img
+                    class="h-8 w-8 rounded-full"
+                    *ngIf="program.programmingLanguage === 'php'"
+                    src="https://upload.wikimedia.org/wikipedia/commons/3/31/Webysther_20160423_-_Elephpant.svg"
+                  />
+                  <img
+                    class="h-8 w-8 rounded-full"
+                    *ngIf="program.programmingLanguage === 'c++'"
+                    src="https://upload.wikimedia.org/wikipedia/commons/3/32/C%2B%2B_logo.png"
+                  />
+                  <div class="text-white italic font-bold text-lg ml-4">
+                    {{ program.programmingLanguage }}
+                  </div>
+                </div>
+                <div class="text-white text-sm relative top-4 ml-6">
+                  {{ program.description }}
+                </div>
+                <div class="flex-row flex relative top-12 ml-6">
+                  <p class="text-white">input files:</p>
+                  <div
+                    class="text-green-200 ml-2 mr-2"
+                    *ngFor="let type of program.inputTypes"
+                  >
+                    {{ type }}
+                  </div>
+                </div>
+                <div class="flex-row flex relative top-14 ml-6">
+                  <p class="text-white">output files:</p>
+                  <div
+                    class="text-yellow-200 ml-2 mr-2"
+                    *ngFor="let type of program.outputTypes"
+                  >
+                    {{ type }}
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+          </div>
         </div>
       </div>
     </div>
