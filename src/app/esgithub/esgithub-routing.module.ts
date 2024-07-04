@@ -10,6 +10,7 @@ import { GroupeHomeComponent } from './groups/groupe-home/groupe-home.component'
 import { EditUserProgramComponent } from './edit-user-program/edit-user-program.component';
 import { CollaborativeCodingComponent } from './collaboratif-coding/collaborative-coding.component';
 import { SessionGuard } from '../core/guards/session.guard';
+import { PipelinesComponent } from './piplines/pipelines.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth' },
@@ -33,6 +34,11 @@ const routes: Routes = [
     path: 'collaborate/:sessionId/:ownerId',
     component: CollaborativeCodingComponent,
     canActivate: [SessionGuard],
+  },
+  {
+    path: 'pipelines',
+    component: PipelinesComponent,
+    canActivate: [AuthGuard],
   },
 ];
 
