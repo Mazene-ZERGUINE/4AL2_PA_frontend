@@ -14,4 +14,12 @@ export class PipelinesService {
     const params = new HttpParams().set('type', 'public');
     return this.apiService.getRequest('programs', params);
   }
+
+  runPipeLine(payload: any): Observable<any> {
+    return this.apiService.postRequest('pipelines', payload);
+  }
+
+  runPipeLinesWithFiles(payload: any): Observable<any> {
+    return this.apiService.postRequest('pipelines/file', payload);
+  }
 }

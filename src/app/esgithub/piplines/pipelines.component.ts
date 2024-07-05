@@ -62,8 +62,10 @@ export class PipelinesComponent implements OnInit, OnDestroy {
                 );
               const matchesLatestOutputFormat =
                 latestOutputFilesFormats.length === 0 ||
-                program.inputTypes.some((inputType) =>
-                  latestOutputFilesFormats.includes(inputType.toLowerCase()),
+                latestOutputFilesFormats.some((format) =>
+                  program.inputTypes.some(
+                    (inputType) => inputType.toLowerCase() === format,
+                  ),
                 );
               return (
                 matchesLanguage &&
@@ -143,10 +145,12 @@ export class PipelinesComponent implements OnInit, OnDestroy {
         this.droppedPrograms.length === 0
       ) {
         this.notifierService.showWarning(
-          'you must select the start input file first or a program that do not have input files',
+          'You must select the start input file first or a program that does not have input files',
         );
         return;
       }
+      this.selectedInputFiles = [];
+      this.inputFilesFormats$.next([]);
       this.droppedPrograms.push(program);
       this.latestOutputFilesFormats$.next(
         program.outputTypes.map((type) => type.toLowerCase()),
@@ -158,5 +162,21 @@ export class PipelinesComponent implements OnInit, OnDestroy {
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
+  }
+
+  onRunPipeLineClick(): void {
+    if (this.selectedInputFiles.length === 0) {
+      const payload = { programs: this.droppedPrograms };
+      this.pipelinesService.runPipeLine(payload).subscribe((res) => console.log(res));
+    } else {
+      const formData = new FormData();
+      this.selectedInputFiles.forEach((file) => formData.append('files', file));
+      const programsJson = JSON.stringify(this.droppedPrograms);
+      formData.append('programs', programsJson);
+
+      this.pipelinesService
+        .runPipeLinesWithFiles(formData)
+        .subscribe((res) => console.log(res));
+    }
   }
 }
