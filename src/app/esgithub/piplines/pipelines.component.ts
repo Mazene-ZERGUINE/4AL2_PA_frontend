@@ -6,19 +6,27 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { Observable, Subject, BehaviorSubject, combineLatest } from 'rxjs';
-import { map, shareReplay, switchMap, startWith } from 'rxjs/operators';
+import { Observable, Subject, BehaviorSubject, combineLatest, tap, finalize } from 'rxjs';
+import { map, shareReplay, switchMap, startWith, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../core/Auth/service/auth.service';
 import { ProgramModel } from '../../core/models/program.model';
 import { PipelinesService } from './pipelines.service';
 import { NotifierService } from '../../core/services/notifier.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { CodingProcessorService } from '../coding-page/coding-processor.service';
 
 @Component({
   selector: 'app-piplines',
   templateUrl: './pipelines.component.html',
   styleUrls: ['./pipelines.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('fadeIn', [
+      state('void', style({ opacity: 0 })),
+      transition(':enter', [animate('1s ease-in', style({ opacity: 1 }))]),
+    ]),
+  ],
 })
 export class PipelinesComponent implements OnInit, OnDestroy {
   @ViewChild('fileSelector', { static: false })
@@ -34,6 +42,20 @@ export class PipelinesComponent implements OnInit, OnDestroy {
 
   protected selectedInputFiles: File[] = [];
   protected droppedPrograms: ProgramModel[] = [];
+  protected isLogin: boolean = false;
+
+  protected generatedFiles: string[] = [];
+
+  private readonly fileIconMapping: { [key: string]: string } = {
+    pdf: 'https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg',
+    png: 'https://images.freeimages.com/fic/images/icons/2275/sinem/512/jpeg_file_icon.png',
+    jpeg: 'https://images.freeimages.com/fic/images/icons/2275/sinem/512/jpeg_file_icon.png',
+    csv: 'https://upload.wikimedia.org/wikipedia/commons/1/18/Text-csv-text.svg',
+    yml: 'https://freepngimg.com/icon/download/file/10375-yaml-file-format.png',
+    json: 'https://upload.wikimedia.org/wikipedia/commons/5/56/JSON_Formatter.svg',
+    xlsx: 'https://upload.wikimedia.org/wikipedia/commons/c/c6/.csv_icon.svg',
+    txt: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Text-txt.svg',
+  };
 
   protected readonly programsList$: Observable<ProgramModel[]> = combineLatest([
     this.refreshPrograms$.pipe(startWith(undefined)),
@@ -85,6 +107,7 @@ export class PipelinesComponent implements OnInit, OnDestroy {
     private readonly pipelinesService: PipelinesService,
     private readonly notifierService: NotifierService,
     private readonly cdr: ChangeDetectorRef,
+    private readonly codeProcessorService: CodingProcessorService,
   ) {}
 
   ngOnInit(): void {
@@ -149,7 +172,6 @@ export class PipelinesComponent implements OnInit, OnDestroy {
         );
         return;
       }
-      this.selectedInputFiles = [];
       this.inputFilesFormats$.next([]);
       this.droppedPrograms.push(program);
       this.latestOutputFilesFormats$.next(
@@ -165,9 +187,13 @@ export class PipelinesComponent implements OnInit, OnDestroy {
   }
 
   onRunPipeLineClick(): void {
+    this.isLogin = true;
     if (this.selectedInputFiles.length === 0) {
-      const payload = { programs: this.droppedPrograms };
-      this.pipelinesService.runPipeLine(payload).subscribe((res) => console.log(res));
+      this.notifierService.showError(
+        'No input file provided. Select a file and try again.',
+      );
+      this.isLogin = false;
+      return;
     } else {
       const formData = new FormData();
       this.selectedInputFiles.forEach((file) => formData.append('files', file));
@@ -176,7 +202,33 @@ export class PipelinesComponent implements OnInit, OnDestroy {
 
       this.pipelinesService
         .runPipeLinesWithFiles(formData)
-        .subscribe((res) => console.log(res));
+        .pipe(
+          takeUntil(this.componentDestroyer$),
+          tap((response: { success: boolean; outputFiles: string[] }) => {
+            this.generatedFiles = response.outputFiles;
+            this.droppedPrograms = [];
+            this.selectedInputFiles = [];
+            this.selectedLanguages$.next([]);
+            this.searchQuery$.next(''), this.inputFilesFormats$.next([]);
+            this.latestOutputFilesFormats$.next([]);
+            this.refreshPrograms$.next();
+            this.notifierService.showSuccess('pipeline executed successfully.');
+          }),
+          finalize(() => {
+            this.isLogin = false;
+            this.cdr.markForCheck();
+          }),
+        )
+        .subscribe();
     }
+  }
+
+  protected onGeneratedFileClick(filePath: string): void {
+    this.codeProcessorService.downloadOutputFile(filePath);
+  }
+
+  protected getFileIcon(fileName: string): string {
+    const extension = fileName.split('.').pop()?.toLowerCase() as string;
+    return this.fileIconMapping[extension];
   }
 }
