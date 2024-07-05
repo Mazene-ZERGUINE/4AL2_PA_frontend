@@ -10,11 +10,12 @@ import { HttpParams } from '@angular/common/http';
 export class PipelinesService {
   constructor(private readonly apiService: ApiService) {}
 
-  getAllPrograms$(): Observable<ProgramModel[]> {
-    const params = new HttpParams().set('type', 'public');
-    return this.apiService.getRequest('programs', params);
-  }
   runPipeLinesWithFiles(payload: any): Observable<any> {
     return this.apiService.postRequest('pipelines/file', payload);
+  }
+
+  getFilesPrograms$(): Observable<ProgramModel[]> {
+    const params = new HttpParams().set('type', 'public');
+    return this.apiService.getRequest('programs/files', params);
   }
 }

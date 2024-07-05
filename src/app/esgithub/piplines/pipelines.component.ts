@@ -8,13 +8,13 @@ import {
 } from '@angular/core';
 import { Observable, Subject, BehaviorSubject, combineLatest, tap, finalize } from 'rxjs';
 import { map, shareReplay, switchMap, startWith, takeUntil } from 'rxjs/operators';
-import { AuthService } from '../../core/Auth/service/auth.service';
 import { ProgramModel } from '../../core/models/program.model';
 import { PipelinesService } from './pipelines.service';
 import { NotifierService } from '../../core/services/notifier.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { CodingProcessorService } from '../coding-page/coding-processor.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-piplines',
@@ -43,8 +43,8 @@ export class PipelinesComponent implements OnInit, OnDestroy {
   protected selectedInputFiles: File[] = [];
   protected droppedPrograms: ProgramModel[] = [];
   protected isLogin: boolean = false;
-
   protected generatedFiles: string[] = [];
+  protected isRefreshing: boolean = false;
 
   private readonly fileIconMapping: { [key: string]: string } = {
     pdf: 'https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg',
@@ -57,7 +57,7 @@ export class PipelinesComponent implements OnInit, OnDestroy {
     txt: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Text-txt.svg',
   };
 
-  protected readonly programsList$: Observable<ProgramModel[]> = combineLatest([
+  protected programsList$: Observable<ProgramModel[]> = combineLatest([
     this.refreshPrograms$.pipe(startWith(undefined)),
     this.selectedLanguages$,
     this.searchQuery$.pipe(startWith('')),
@@ -66,7 +66,7 @@ export class PipelinesComponent implements OnInit, OnDestroy {
   ]).pipe(
     switchMap(
       ([, selectedLanguages, searchQuery, inputFilesFormats, latestOutputFilesFormats]) =>
-        this.pipelinesService.getAllPrograms$().pipe(
+        this.pipelinesService.getFilesPrograms$().pipe(
           map((programList) =>
             programList.filter((program) => {
               const matchesLanguage =
@@ -97,20 +97,35 @@ export class PipelinesComponent implements OnInit, OnDestroy {
               );
             }),
           ),
+          tap(() => {
+            this.isRefreshing = true;
+            // eslint-disable-next-line angular/timeout-service
+            setTimeout(() => {
+              this.isRefreshing = false;
+              this.cdr.markForCheck();
+            }, 1500);
+          }),
         ),
     ),
     shareReplay({ refCount: true, bufferSize: 1 }),
   );
 
   constructor(
-    private readonly authService: AuthService,
     private readonly pipelinesService: PipelinesService,
     private readonly notifierService: NotifierService,
     private readonly cdr: ChangeDetectorRef,
     private readonly codeProcessorService: CodingProcessorService,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
+    // eslint-disable-next-line angular/timeout-service
+    this.isRefreshing = true;
+    // eslint-disable-next-line angular/timeout-service
+    setTimeout(() => {
+      this.isRefreshing = false;
+      this.cdr.markForCheck();
+    }, 2000);
     this.refreshPrograms$.next();
   }
 
@@ -177,6 +192,9 @@ export class PipelinesComponent implements OnInit, OnDestroy {
       this.latestOutputFilesFormats$.next(
         program.outputTypes.map((type) => type.toLowerCase()),
       );
+      this.programsList$ = this.programsList$.pipe(
+        map((programs) => programs.filter((p) => p.programId !== program.programId)),
+      );
       this.refreshPrograms$.next();
       this.cdr.markForCheck();
     }
@@ -230,5 +248,11 @@ export class PipelinesComponent implements OnInit, OnDestroy {
   protected getFileIcon(fileName: string): string {
     const extension = fileName.split('.').pop()?.toLowerCase() as string;
     return this.fileIconMapping[extension];
+  }
+
+  protected onViewProgramClick(programId: string): void {
+    const url = this.router.createUrlTree(['/program', programId]).toString();
+    // eslint-disable-next-line angular/window-service
+    window.open(url, '_blank');
   }
 }
