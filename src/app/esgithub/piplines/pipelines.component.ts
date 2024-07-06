@@ -45,10 +45,11 @@ export class PipelinesComponent implements OnInit, OnDestroy {
   protected isLogin: boolean = false;
   protected generatedFiles: string[] = [];
   protected isRefreshing: boolean = false;
+  protected outputError?: string;
 
   private readonly fileIconMapping: { [key: string]: string } = {
     pdf: 'https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg',
-    png: 'https://images.freeimages.com/fic/images/icons/2275/sinem/512/jpeg_file_icon.png',
+    png: 'https://images.freeimages.com/fic/images/icons/2275/sinem/512/png_file_icon.png',
     jpeg: 'https://images.freeimages.com/fic/images/icons/2275/sinem/512/jpeg_file_icon.png',
     csv: 'https://upload.wikimedia.org/wikipedia/commons/1/18/Text-csv-text.svg',
     yml: 'https://freepngimg.com/icon/download/file/10375-yaml-file-format.png',
@@ -222,15 +223,20 @@ export class PipelinesComponent implements OnInit, OnDestroy {
         .runPipeLinesWithFiles(formData)
         .pipe(
           takeUntil(this.componentDestroyer$),
-          tap((response: { success: boolean; outputFiles: string[] }) => {
-            this.generatedFiles = response.outputFiles;
+          tap((response: { success: boolean; outputFiles: string[]; error?: string }) => {
+            if (response.success) {
+              this.generatedFiles = response.outputFiles;
+              this.notifierService.showSuccess('pipeline executed successfully.');
+            } else {
+              this.outputError = response.error;
+              this.notifierService.showError('error occurred while running pipelines.');
+            }
             this.droppedPrograms = [];
             this.selectedInputFiles = [];
             this.selectedLanguages$.next([]);
             this.searchQuery$.next(''), this.inputFilesFormats$.next([]);
             this.latestOutputFilesFormats$.next([]);
             this.refreshPrograms$.next();
-            this.notifierService.showSuccess('pipeline executed successfully.');
           }),
           finalize(() => {
             this.isLogin = false;

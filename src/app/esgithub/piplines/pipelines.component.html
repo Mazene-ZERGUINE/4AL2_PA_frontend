@@ -247,6 +247,14 @@
               />
             </div>
           </div>
+          <div *ngIf="outputError !== undefined">
+            <textarea
+              class="text-red-700 text-md italic font-bold w-full h-[10vh] relative bg-transparent"
+            >
+                {{ outputError }}
+              </textarea
+            >
+          </div>
         </div>
       </div>
     </div>
