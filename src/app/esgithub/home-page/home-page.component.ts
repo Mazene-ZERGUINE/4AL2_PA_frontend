@@ -1,14 +1,21 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
-import { Observable, Subject, BehaviorSubject, combineLatest } from 'rxjs';
-import { map, shareReplay, switchMap, takeUntil, tap, startWith } from 'rxjs/operators';
+import { FormControl, FormGroup } from '@angular/forms';
+import { Observable, Subject, combineLatest } from 'rxjs';
+import { map, shareReplay, startWith, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { AuthService } from '../../core/Auth/service/auth.service';
 import { ProgramModel } from '../../core/models/program.model';
 import { UserDataModel } from '../../core/models/user-data.model';
-import { HomeService } from './home.service';
-import { ReactionsEnum } from '../../shared/enums/reactions.enum';
 import { ModalService } from '../../core/services/modal.service';
+import { ReactionsEnum } from '../../shared/enums/reactions.enum';
 import { SocketService } from '../socket.service';
+import { HomeService } from './home.service';
 
+export enum AvailableLangages {
+  JAVASCRIPT = 'javascript',
+  CPLUSPLUS = 'c++',
+  PHP = 'php',
+  PYTHON = 'python',
+}
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
@@ -20,27 +27,41 @@ export class HomePageComponent implements OnInit, OnDestroy {
     .getUserData()
     .pipe(shareReplay({ refCount: true, bufferSize: 1 }));
 
+  readonly filtersOptionsForm = new FormGroup({
+    searchQuery: new FormControl<string>('', { nonNullable: true }),
+    availableLangages: new FormControl<AvailableLangages[]>([]),
+  });
+
+  readonly availableLangages$: Observable<AvailableLangages[] | null> =
+    this.filtersOptionsForm.controls.availableLangages.valueChanges.pipe(
+      startWith(this.filtersOptionsForm.controls.availableLangages.value),
+    );
+
+  readonly AvailableLangagesE = Object.values(AvailableLangages);
+
   private refreshPrograms$ = new Subject<void>();
-  private selectedLanguages$ = new BehaviorSubject<string[]>([]);
-  private searchQuery$ = new BehaviorSubject<string>('');
 
   readonly componentDestroy$ = new Subject<void>();
 
   readonly programsList$: Observable<ProgramModel[]> = combineLatest([
     this.userData$,
     this.refreshPrograms$.pipe(startWith(undefined)),
-    this.selectedLanguages$,
-    this.searchQuery$.pipe(startWith('')),
+    this.availableLangages$,
+    this.filtersOptionsForm.controls.searchQuery.valueChanges.pipe(startWith('')),
   ]).pipe(
     switchMap(([userData, , selectedLanguages, searchQuery]) =>
       this.homeService.getProgramsList$('public').pipe(
         map((programList) =>
           programList.filter((program) => {
             const matchesUser = program.userId !== userData.userId;
+
+            if (!selectedLanguages) return;
+
             const matchesLanguage =
               selectedLanguages.length === 0 ||
-              selectedLanguages.includes(program.programmingLanguage.toLowerCase());
-            const matchesSearch = program?.description
+              selectedLanguages.includes(program.programmingLanguage);
+
+            const matchesSearch = program.description
               ?.toLowerCase()
               .includes(searchQuery.toLowerCase());
             return matchesUser && matchesLanguage && matchesSearch;
@@ -48,7 +69,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
         ),
       ),
     ),
-    shareReplay({ refCount: true, bufferSize: 1 }),
   );
 
   constructor(
@@ -73,7 +93,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.componentDestroy$.complete();
   }
 
-  likeProgram(event: any): void {
+  likeProgram(event: { programId: string; userId: string }): void {
     this.userData$
       .pipe(
         takeUntil(this.componentDestroy$),
@@ -91,7 +111,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  dislikeProgram(event: any): void {
+  dislikeProgram(event: { programId: string; userId: string }): void {
     this.userData$
       .pipe(
         takeUntil(this.componentDestroy$),
@@ -109,7 +129,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  async deleteProgram(event: string) {
+  async deleteProgram(event: string): Promise<void> {
     const result = await this.modalService.getConfirmationModelResults(
       'delete program',
       'are you sur you want to delete this program?',
@@ -127,20 +147,19 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }
   }
 
-  onLanguageChange(event: any) {
-    const checkbox = event.target as HTMLInputElement;
-    const value = checkbox.value.toLowerCase();
-    const selectedLanguages = this.selectedLanguages$.value;
+  handleAvailableLangage(selectedLangage: AvailableLangages): void {
+    const currentLangages =
+      this.filtersOptionsForm.controls.availableLangages.value || [];
 
-    if (checkbox.checked) {
-      this.selectedLanguages$.next([...selectedLanguages, value]);
+    if (currentLangages.includes(selectedLangage)) {
+      this.filtersOptionsForm.controls.availableLangages.setValue(
+        currentLangages.filter((lang) => lang !== selectedLangage),
+      );
     } else {
-      this.selectedLanguages$.next(selectedLanguages.filter((lang) => lang !== value));
+      this.filtersOptionsForm.controls.availableLangages.setValue([
+        ...currentLangages,
+        selectedLangage,
+      ]);
     }
-  }
-
-  onSearchChange(event: any) {
-    const searchQuery = (event.target as HTMLInputElement).value;
-    this.searchQuery$.next(searchQuery);
   }
 }

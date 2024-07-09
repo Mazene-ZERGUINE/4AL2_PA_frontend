@@ -20,6 +20,7 @@ import { GroupMembersModalComponent } from './modals/group-members-modal/group-m
 import { UserDisplayNamePipe } from '../shared/pipes/user-display-name.pipe';
 import { ShowCodeExecutionResultModalComponent } from './modals/show-code-execution-result-modal/show-code-execution-result-modal.component';
 import { VersionModalComponent } from './modals/version-modal/version-modal.component';
+import { DisplayIconsNavbarComponent } from './components/side-navbar/display-icons-navbar/display-icons-navbar.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { VersionModalComponent } from './modals/version-modal/version-modal.comp
     GroupMembersModalComponent,
     ShowCodeExecutionResultModalComponent,
     VersionModalComponent,
+    DisplayIconsNavbarComponent,
   ],
   imports: [
     CommonModule,

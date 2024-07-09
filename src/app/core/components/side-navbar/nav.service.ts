@@ -12,9 +12,9 @@ export class NavService {
     private readonly notifier: NotifierService,
   ) {}
 
-  private navBarState$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private navBarState$: BehaviorSubject<boolean> = new BehaviorSubject(true);
 
-  get navBarState() {
+  get navBarState(): boolean {
     return this.navBarState$.value;
   }
 

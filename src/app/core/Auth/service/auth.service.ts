@@ -5,7 +5,6 @@ import { CreateUserDto } from '../models/create-user.dto';
 import { LoginDto } from '../models/login.dto';
 import { AccessTokenDto } from '../models/access-token.dto';
 import { UserDataModel } from '../../models/user-data.model';
-import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -29,19 +28,10 @@ export class AuthService {
   }
 
   getUserData(): Observable<UserDataModel> {
-    this.fetchUser().subscribe();
     return this.apiService.getRequest('auth/get_info');
   }
 
   isAuthenticated(): boolean {
     return localStorage.getItem('token') !== null;
-  }
-
-  private fetchUser(): Observable<void> {
-    return this.apiService.getRequest('auth/get_info').pipe(
-      map((user: any) => {
-        this.userDataSubject.next(user);
-      }),
-    );
   }
 }

@@ -1,12 +1,12 @@
 {
   "tagname-lowercase": true,
-  "attr-lowercase": false, // Set to false to allow Angular inputs and outputs
+  "attr-lowercase": false,
   "attr-value-double-quotes": true,
-  "doctype-first": false, // Angular components don't require a doctype
+  "doctype-first": false,
   "tag-pair": true,
   "spec-char-escape": true,
   "id-unique": true,
   "src-not-empty": true,
   "attr-no-duplication": true,
-  "title-require": false // Angular apps might handle titles differently
+  "title-require": false
 }
