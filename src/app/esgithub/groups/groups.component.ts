@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./groups.component.scss'],
 })
 export class GroupsComponent implements OnDestroy, OnInit {
-  componentDestroyer$ = new Subject<void>();
+  readonly componentDestroyer$ = new Subject<void>();
 
   groupsList$ = this.groupsService.getGroupsList$();
   recentGroupsList$: Observable<GroupModel[]> = this.groupsService.getRecentGroups();
