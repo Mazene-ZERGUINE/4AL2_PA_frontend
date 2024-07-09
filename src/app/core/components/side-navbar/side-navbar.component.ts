@@ -23,7 +23,7 @@ export class SideNavbarComponent implements OnInit {
     { name: 'profile', link: '/profile', icon: 'account_circle' },
   ];
 
-  open!: boolean;
+  open: boolean = this.navService.navBarState;
   selectedMenu!: string;
 
   constructor(
@@ -31,8 +31,7 @@ export class SideNavbarComponent implements OnInit {
     private readonly navService: NavService,
   ) {}
 
-  ngOnInit() {
-    this.open = this.navService.navBarState;
+  ngOnInit(): void {
     this.selectedMenu = this.router.url;
   }
 

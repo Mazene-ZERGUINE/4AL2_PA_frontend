@@ -1,51 +1,25 @@
-<div class="flex h-screen bg-gray-100">
-  <div class="z-50">
-    <app-side-navbar></app-side-navbar>
-  </div>
-
+<div class="flex h-screen bg-gray-100" *ngIf="userData$ | async; let currentUser">
   <div class="w-full h-[100vh] overflow-hidden bg-[#1E1F3D]">
     <div
       class="p-4 bg-white opacity-20 shadow-md rounded-lg flex justify-center items-center mt-4 w-[90%] relative left-[5%]"
     >
       <div class="flex flex-row items-center gap-4">
         <div class="flex items-center gap-2">
-          <div class="flex flex-row mr-2 z-10">
-            <input type="checkbox" value="python" (change)="onLanguageChange($event)" />
-            <label class="flex items-center p-1 bg-white text-purple-500 italic font-bold"
-              >Python</label
-            >
-          </div>
-          <div class="flex flex-row mr-2">
+          <div
+            class="flex flex-row mr-2"
+            *ngFor="let availableLangage of AvailableLangagesE"
+          >
             <input
               type="checkbox"
-              value="javascript"
+              [value]="availableLangage"
+              [name]="availableLangage"
               class="p-1 bg-red-700"
-              (change)="onLanguageChange($event)"
+              [checked]="(availableLangages$ | async)?.includes(availableLangage)"
+              (change)="handleAvailableLangage(availableLangage)"
             />
-            <label class="flex items-center p-1 bg-white text-purple-500 italic font-bold"
-              >JavaScript</label
-            >
-          </div>
-          <div class="flex flex-row mr-2">
-            <input
-              type="checkbox"
-              value="c++"
-              class="p-1 bg-red-700"
-              (change)="onLanguageChange($event)"
-            />
-            <label class="flex items-center p-1 bg-white text-purple-500 italic font-bold"
-              >C++</label
-            >
-          </div>
-          <div class="flex flex-row mr-2">
-            <input
-              type="checkbox"
-              value="php"
-              class="p-1 bg-red-700"
-              (change)="onLanguageChange($event)"
-            />
-            <label class="flex items-center p-1 bg-white text-purple-500 italic font-bold"
-              >PHP</label
+            <label
+              class="flex items-center p-1 bg-white text-purple-500 italic font-bold"
+              >{{ availableLangage }}</label
             >
           </div>
         </div>
@@ -54,7 +28,7 @@
             type="text"
             placeholder="Search..."
             class="border p-2 rounded pl-10 border-purple-500 text-black"
-            (input)="onSearchChange($event)"
+            [formControl]="filtersOptionsForm.controls.searchQuery"
           />
           <span class="material-icons absolute left-2 top-2 text-black cursor-pointer"
             >search</span
@@ -65,24 +39,19 @@
     <div
       class="m-10 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-auto relative h-[90%]"
     >
-      <ng-container *ngIf="userData$ | async; let currentUser">
-        <app-program-item-list
-          *ngFor="let program of programsList$ | async"
-          [program]="program"
-          [currentUser]="currentUser"
-          [homePage]="true"
-          (likeClickEvent)="likeProgram($event)"
-          (dislikeClickEvent)="dislikeProgram($event)"
-          (removeClickEvent)="deleteProgram($event)"
-        >
-        </app-program-item-list>
-      </ng-container>
+      <app-program-item-list
+        *ngFor="let program of programsList$ | async"
+        [program]="program"
+        [currentUser]="currentUser"
+        [homePage]="true"
+        (likeClickEvent)="likeProgram($event)"
+        (dislikeClickEvent)="dislikeProgram($event)"
+        (removeClickEvent)="deleteProgram($event)"
+      >
+      </app-program-item-list>
     </div>
   </div>
   <div>
-    <app-side-profile
-      *ngIf="userData$ | async as currentUser"
-      [currentUser]="currentUser"
-    ></app-side-profile>
+    <app-side-profile [currentUser]="currentUser"></app-side-profile>
   </div>
 </div>
