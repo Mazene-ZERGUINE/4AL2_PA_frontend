@@ -147,14 +147,16 @@
   <div class="liner absolute inset-0"></div>
 </div> -->
 
-<a
+<div
   [ngClass]="{
     'bg-[#141414] block rounded-2xl mb-4 p-6': true
   }"
-  [routerLink]="['/program', program.programId]"
 >
   <app-program-header [programIcon]="program.programmingLanguage"></app-program-header>
-  <app-program-user [userProgram]="program"></app-program-user>
+  <app-program-user
+    [userProgram]="program"
+    [isUserConnected]="isUserConnected"
+  ></app-program-user>
 
   <div class="text-white my-7">
     {{ program.description }}
@@ -163,4 +165,12 @@
   <app-program-code [userProgram]="program"></app-program-code>
 
   <app-program-inputs-outputs [userProgram]="program"></app-program-inputs-outputs>
-</a>
+
+  <app-program-actions
+    [numberOfLikes]="(likes$ | async)!"
+    [userReaction]="userReaction?.type!"
+    [programId]="program.programId"
+    [programCommentCount]="(programCommentsCount$ | async)!"
+    (likeClickEvent)="onlikeProgram()"
+  ></app-program-actions>
+</div>

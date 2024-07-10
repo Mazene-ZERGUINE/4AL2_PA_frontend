@@ -6,4 +6,5 @@ export type UserDataModel = {
   email: string;
   bio?: string;
   avatarUrl?: string;
+  disconnectedAt: string | null;
 };

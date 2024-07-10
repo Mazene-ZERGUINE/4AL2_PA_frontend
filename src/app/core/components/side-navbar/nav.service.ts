@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
-import { NotifierService } from '../../services/notifier.service';
+import { ApiService } from '../../services/api.service';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +9,8 @@ import { NotifierService } from '../../services/notifier.service';
 export class NavService {
   constructor(
     private readonly router: Router,
-    private readonly notifier: NotifierService,
+
+    private apiService: ApiService,
   ) {}
 
   private navBarState$: BehaviorSubject<boolean> = new BehaviorSubject(true);
@@ -20,11 +21,5 @@ export class NavService {
 
   set navBarState(state: boolean) {
     this.navBarState$.next(state);
-  }
-
-  logout(): void {
-    localStorage.removeItem('token');
-    this.notifier.showSuccess('you logged out');
-    this.router.navigate(['auth']);
   }
 }

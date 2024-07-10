@@ -33,6 +33,8 @@ import { ProgramUserComponent } from './home-page/program-item-list/program-user
 import { ProgramCodeComponent } from './home-page/program-item-list/program-code/program-code.component';
 import { ProgramInputsOutputsComponent } from './home-page/program-item-list/program-inputs-outputs/program-inputs-outputs.component';
 import { SearchProgramInputComponent } from './home-page/search-program-input/search-program-input.component';
+import { ProgramActionsComponent } from './home-page/program-item-list/program-actions/program-actions.component';
+import { CountDisplayPipe } from '../shared/pipes/count-display.pipe';
 
 @NgModule({
   declarations: [
@@ -58,6 +60,7 @@ import { SearchProgramInputComponent } from './home-page/search-program-input/se
     ProgramCodeComponent,
     ProgramInputsOutputsComponent,
     SearchProgramInputComponent,
+    ProgramActionsComponent,
   ],
   imports: [
     CommonModule,
@@ -73,6 +76,7 @@ import { SearchProgramInputComponent } from './home-page/search-program-input/se
     ReactiveFormsModule,
     UserDisplayNamePipe,
     NgOptimizedImage,
+    CountDisplayPipe,
   ],
 })
 export class EsgithubModule {}
