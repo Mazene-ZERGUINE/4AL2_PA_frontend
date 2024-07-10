@@ -1,7 +1,9 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavService } from './nav.service';
+import { Subject, switchMap, takeUntil } from 'rxjs';
+import { AuthService } from '../../Auth/service/auth.service';
 
 @Component({
   selector: 'app-side-navbar',
@@ -14,7 +16,9 @@ import { NavService } from './nav.service';
     ]),
   ],
 })
-export class SideNavbarComponent {
+export class SideNavbarComponent implements OnDestroy {
+  readonly componentDestroyed$ = new Subject<void>();
+
   menus = [
     { name: 'Home', link: '/home', icon: 'home' },
     { name: 'groups', link: '/groups', icon: 'view_list' },
@@ -29,6 +33,7 @@ export class SideNavbarComponent {
   constructor(
     private readonly router: Router,
     private readonly navService: NavService,
+    private authService: AuthService,
   ) {}
 
   toggleOpen(): void {
@@ -40,7 +45,18 @@ export class SideNavbarComponent {
     this.router.navigate([url]);
   }
 
+  ngOnDestroy(): void {
+    this.componentDestroyed$.next();
+    this.componentDestroyed$.complete();
+  }
+
   onLogoutClick(): void {
-    this.navService.logout();
+    this.authService
+      .getUserData()
+      .pipe(
+        switchMap((currentUser) => this.authService.logout(currentUser.userId)),
+        takeUntil(this.componentDestroyed$),
+      )
+      .subscribe();
   }
 }

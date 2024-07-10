@@ -40,7 +40,6 @@ export class ProgramCodeComponent implements AfterViewInit {
       showGutter: false,
       highlightActiveLine: false,
       readOnly: true,
-      useWrapMode: false,
     });
 
     this.aceEditor.clearSelection();

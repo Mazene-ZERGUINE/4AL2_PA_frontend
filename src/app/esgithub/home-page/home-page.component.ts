@@ -1,7 +1,15 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Observable, Subject, combineLatest } from 'rxjs';
-import { map, shareReplay, startWith, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { Observable, Subject, combineLatest, interval } from 'rxjs';
+import {
+  distinctUntilChanged,
+  map,
+  shareReplay,
+  startWith,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 import { AuthService } from '../../core/Auth/service/auth.service';
 import { ProgramModel } from '../../core/models/program.model';
 import { UserDataModel } from '../../core/models/user-data.model';
@@ -16,6 +24,8 @@ export enum AvailableLangages {
   PHP = 'php',
   PYTHON = 'python',
 }
+
+export const INTERVAL_REFRESH_TIME = 5000;
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
@@ -44,12 +54,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
   readonly componentDestroy$ = new Subject<void>();
 
   readonly programsList$: Observable<ProgramModel[]> = combineLatest([
+    interval(INTERVAL_REFRESH_TIME).pipe(startWith(0)),
     this.userData$,
     this.refreshPrograms$.pipe(startWith(undefined)),
     this.availableLangages$,
     this.filtersOptionsForm.controls.searchQuery.valueChanges.pipe(startWith('')),
   ]).pipe(
-    switchMap(([userData, , selectedLanguages, searchQuery]) =>
+    switchMap(([, userData, , selectedLanguages, searchQuery]) =>
       this.homeService.getProgramsList$('public').pipe(
         map((programList) =>
           programList.filter((program) => {
@@ -69,6 +80,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         ),
       ),
     ),
+    distinctUntilChanged(),
   );
 
   constructor(

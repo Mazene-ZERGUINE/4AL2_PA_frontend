@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { AuthService } from '../../../core/Auth/service/auth.service';
+import { Observable, Subject, map, takeUntil } from 'rxjs';
 import { ProgramModel } from '../../../core/models/program.model';
 import { ReactionModel } from '../../../core/models/reaction.model';
 import { UserDataModel } from '../../../core/models/user-data.model';
 import { ReactionsEnum } from '../../../shared/enums/reactions.enum';
+import { HomeService } from '../home.service';
+import { ProgramListService } from './program-list.service';
 import { ReactionService } from './reaction.service';
 
 @Component({
@@ -18,25 +19,25 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
   @Input() program!: ProgramModel;
   @Input() currentUser!: UserDataModel;
   @Input() homePage!: boolean;
-  @Input() imageUrl!: string;
   @Input() isGroupOwner!: boolean;
   @Input() isProfileOwner?: boolean;
 
-  @Output() likeClickEvent = new EventEmitter<{ programId: string; userId: string }>();
   @Output() dislikeClickEvent = new EventEmitter<{ programId: string; userId: string }>();
   @Output() removeClickEvent = new EventEmitter<string>();
 
+  isUserConnected!: boolean | null;
+  programCommentsCount$: Observable<number> | undefined;
   isProgramOwner: boolean = false;
   userReaction?: ReactionModel;
   likes$!: Observable<number>;
   dislikes$!: Observable<number>;
-  protected readonly ReactionsEnum = ReactionsEnum;
 
-  selectedBgImageUrl!: string;
+  readonly ReactionsEnum = ReactionsEnum;
 
   constructor(
-    private readonly authService: AuthService,
     private reactionService: ReactionService,
+    private homeService: HomeService,
+    private programListService: ProgramListService,
   ) {}
 
   ngOnInit(): void {
@@ -49,6 +50,10 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
 
       this.likes$ = this.reactionService.getLikes$(this.program.programId);
       this.dislikes$ = this.reactionService.getDislikes$(this.program.programId);
+
+      this.programCommentsCount$ = this.setProgramCommentCount(this.program.programId);
+
+      this.isUserConnected = this.setIsUserConnected(this.program.user.disconnectedAt);
     }
   }
 
@@ -79,11 +84,24 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
     return this.program.user.userId === user.userId;
   }
 
-  onLikeBtnClick(): void {
-    this.likeClickEvent.emit({
-      userId: this.currentUser.userId,
-      programId: this.program.programId,
-    });
+  private setProgramCommentCount(programId: string): Observable<number> | undefined {
+    return this.programListService.getProgramComments$(programId).pipe(
+      map(
+        (comments) =>
+          comments.filter((comment) => comment.codeLineNumber !== null).length,
+      ),
+      takeUntil(this.componentDestroyer$),
+    );
+  }
+
+  private setIsUserConnected(userDisconnectedAt: string | null): boolean {
+    console.log(userDisconnectedAt);
+    if (!userDisconnectedAt) return false;
+    const now = new Date();
+    const disconnectedTime = new Date(userDisconnectedAt);
+    const timeDiff = (now.getTime() - disconnectedTime.getTime()) / 1000;
+    console.log(timeDiff < 300);
+    return timeDiff < 300;
   }
 
   onDislikeBtnClick(): void {
@@ -95,5 +113,16 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
 
   onDeleteBtnClick(): void {
     this.removeClickEvent.emit(this.program.programId);
+  }
+
+  onlikeProgram(): void {
+    this.homeService
+      .likeOrDislikeProgram(
+        ReactionsEnum.LIKE,
+        this.program.programId,
+        this.currentUser.userId,
+      )
+      .pipe(takeUntil(this.componentDestroyer$))
+      .subscribe();
   }
 }

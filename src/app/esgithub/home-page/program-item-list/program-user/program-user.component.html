@@ -4,6 +4,10 @@
 >
   <img
     class="h-16 w-16 rounded-full mr-6"
+    [ngClass]="{
+      'is-user-connected': isUserConnected,
+      'user-not-connected': !isUserConnected
+    }"
     [src]="
       userProgram.user.avatarUrl
         ? 'http://' + userProgram.user.avatarUrl
