@@ -28,6 +28,11 @@ import { GroupeHomeComponent } from './groups/groupe-home/groupe-home.component'
 import { EditUserProgramComponent } from './edit-user-program/edit-user-program.component';
 import { CollaborativeCodingComponent } from './collaboratif-coding/collaborative-coding.component';
 import { PipelinesComponent } from './piplines/pipelines.component';
+import { ProgramHeaderComponent } from './home-page/program-item-list/program-header/program-header.component';
+import { ProgramUserComponent } from './home-page/program-item-list/program-user/program-user.component';
+import { ProgramCodeComponent } from './home-page/program-item-list/program-code/program-code.component';
+import { ProgramInputsOutputsComponent } from './home-page/program-item-list/program-inputs-outputs/program-inputs-outputs.component';
+import { SearchProgramInputComponent } from './home-page/search-program-input/search-program-input.component';
 
 @NgModule({
   declarations: [
@@ -48,6 +53,11 @@ import { PipelinesComponent } from './piplines/pipelines.component';
     EditUserProgramComponent,
     CollaborativeCodingComponent,
     PipelinesComponent,
+    ProgramHeaderComponent,
+    ProgramUserComponent,
+    ProgramCodeComponent,
+    ProgramInputsOutputsComponent,
+    SearchProgramInputComponent,
   ],
   imports: [
     CommonModule,

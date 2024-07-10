@@ -1,5 +1,5 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavService } from './nav.service';
 
@@ -14,7 +14,7 @@ import { NavService } from './nav.service';
     ]),
   ],
 })
-export class SideNavbarComponent implements OnInit {
+export class SideNavbarComponent {
   menus = [
     { name: 'Home', link: '/home', icon: 'home' },
     { name: 'groups', link: '/groups', icon: 'view_list' },
@@ -24,16 +24,12 @@ export class SideNavbarComponent implements OnInit {
   ];
 
   open: boolean = this.navService.navBarState;
-  selectedMenu!: string;
+  selectedMenu = '';
 
   constructor(
     private readonly router: Router,
     private readonly navService: NavService,
   ) {}
-
-  ngOnInit(): void {
-    this.selectedMenu = this.router.url;
-  }
 
   toggleOpen(): void {
     this.open = !this.open;
