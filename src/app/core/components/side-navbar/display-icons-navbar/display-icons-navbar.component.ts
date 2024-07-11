@@ -7,4 +7,5 @@ import { Component, Input } from '@angular/core';
 })
 export class DisplayIconsNavbarComponent {
   @Input() iconName!: string;
+  @Input() isCurrentNav!: boolean;
 }

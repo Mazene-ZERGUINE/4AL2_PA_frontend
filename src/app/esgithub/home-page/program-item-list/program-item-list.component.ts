@@ -53,7 +53,10 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
 
       this.programCommentsCount$ = this.setProgramCommentCount(this.program.programId);
 
-      this.isUserConnected = this.setIsUserConnected(this.program.user.disconnectedAt);
+      this.isUserConnected = this.setIsUserConnected(
+        this.program.user.disconnectedAt,
+        this.program.user.connectedAt,
+      );
     }
   }
 
@@ -94,14 +97,15 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
     );
   }
 
-  private setIsUserConnected(userDisconnectedAt: string | null): boolean {
-    console.log(userDisconnectedAt);
+  private setIsUserConnected(
+    userDisconnectedAt: string | null,
+    userConnectedAt: string | null,
+  ): boolean {
     if (!userDisconnectedAt) return false;
     const now = new Date();
     const disconnectedTime = new Date(userDisconnectedAt);
     const timeDiff = (now.getTime() - disconnectedTime.getTime()) / 1000;
-    console.log(timeDiff < 300);
-    return timeDiff < 300;
+    return timeDiff < 300 || userConnectedAt !== null;
   }
 
   onDislikeBtnClick(): void {
