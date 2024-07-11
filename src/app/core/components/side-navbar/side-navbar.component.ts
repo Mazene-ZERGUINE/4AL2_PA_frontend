@@ -1,9 +1,10 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
-import { NavService } from './nav.service';
-import { Subject, switchMap, takeUntil } from 'rxjs';
+import { NavigationEnd, Router, Event as RouterEvent } from '@angular/router';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { AuthService } from '../../Auth/service/auth.service';
+import { NavService } from './nav.service';
 
 @Component({
   selector: 'app-side-navbar',
@@ -19,7 +20,20 @@ import { AuthService } from '../../Auth/service/auth.service';
 export class SideNavbarComponent implements OnDestroy {
   readonly componentDestroyed$ = new Subject<void>();
 
-  menus = [
+  readonly currentUrl$ = new BehaviorSubject<string>(this.router.url);
+
+  readonly shouldDisplayNavBar$: Observable<boolean> = this.router.events.pipe(
+    filter(
+      (event: RouterEvent): event is NavigationEnd => event instanceof NavigationEnd,
+    ),
+    tap((event) => this.currentUrl$.next((event as NavigationEnd).url)),
+    map((routerEvent) => {
+      const basePath = routerEvent.url.split('/')[1];
+      return !['auth', 'collaborate'].includes(basePath);
+    }),
+  );
+
+  readonly menus = [
     { name: 'Home', link: '/home', icon: 'home' },
     { name: 'groups', link: '/groups', icon: 'view_list' },
     { name: 'code', link: '/coding', icon: 'code' },
@@ -28,7 +42,6 @@ export class SideNavbarComponent implements OnDestroy {
   ];
 
   open: boolean = this.navService.navBarState;
-  selectedMenu = '';
 
   constructor(
     private readonly router: Router,
@@ -39,10 +52,6 @@ export class SideNavbarComponent implements OnDestroy {
   toggleOpen(): void {
     this.open = !this.open;
     this.navService.navBarState = this.open;
-  }
-
-  navigateToUrl(url: string): void {
-    this.router.navigate([url]);
   }
 
   ngOnDestroy(): void {
