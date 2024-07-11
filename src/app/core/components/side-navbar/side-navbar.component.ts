@@ -28,7 +28,7 @@ export class SideNavbarComponent implements OnDestroy {
     ),
     tap((event) => this.currentUrl$.next((event as NavigationEnd).url)),
     map((routerEvent) => {
-      const basePath = routerEvent.url.split('/')[1];
+      const basePath = routerEvent.urlAfterRedirects.split('/')[1];
       return !['auth', 'collaborate'].includes(basePath);
     }),
   );
