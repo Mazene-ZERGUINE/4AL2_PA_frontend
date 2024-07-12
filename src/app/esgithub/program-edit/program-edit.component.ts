@@ -35,6 +35,7 @@ import {
   ProgramVersionModel,
   VersionModel,
 } from '../../core/models/program-version.model';
+import { AvailableLangages } from '../home-page/home-page.component';
 
 @Component({
   selector: 'app-program-edit',
@@ -154,7 +155,7 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
           this.aceEditor = ace.edit(this.editor.nativeElement);
           this.aceEditor.setTheme('ace/theme/nord_dark');
           this.aceEditor.session.setMode('ace/mode/' + this.program.programmingLanguage);
-          if (programDetails.programmingLanguage === 'c++') {
+          if (programDetails.programmingLanguage === AvailableLangages.CPLUSPLUS) {
             this.aceEditor.session.setMode('ace/mode/c_cpp');
           }
           this.aceEditor.setOptions({

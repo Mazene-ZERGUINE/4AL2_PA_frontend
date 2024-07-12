@@ -170,22 +170,26 @@
                     >
                       <img
                         class="h-8 w-8 rounded-full"
-                        *ngIf="program.programmingLanguage === 'javascript'"
+                        *ngIf="
+                          program.programmingLanguage === AvailableLangages.JAVASCRIPT
+                        "
                         src="assets/images/icons/javascript-svgrepo-com.svg"
                       />
                       <img
                         class="h-8 w-8 rounded-full"
-                        *ngIf="program.programmingLanguage === 'python'"
+                        *ngIf="program.programmingLanguage === AvailableLangages.PYTHON"
                         src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg"
                       />
                       <img
                         class="h-8 w-8 rounded-full"
-                        *ngIf="program.programmingLanguage === 'php'"
+                        *ngIf="program.programmingLanguage === AvailableLangages.PHP"
                         src="https://upload.wikimedia.org/wikipedia/commons/3/31/Webysther_20160423_-_Elephpant.svg"
                       />
                       <img
                         class="h-8 w-8 rounded-full"
-                        *ngIf="program.programmingLanguage === 'c++'"
+                        *ngIf="
+                          program.programmingLanguage === AvailableLangages.CPLUSPLUS
+                        "
                         src="https://upload.wikimedia.org/wikipedia/commons/3/32/C%2B%2B_logo.png"
                       />
                       <div class="text-white italic font-bold text-lg ml-4">

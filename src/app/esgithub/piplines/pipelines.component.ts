@@ -15,6 +15,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { CodingProcessorService } from '../coding-page/coding-processor.service';
 import { Router } from '@angular/router';
+import { AvailableLangages } from '../home-page/home-page.component';
 
 @Component({
   selector: 'app-piplines',
@@ -57,6 +58,8 @@ export class PipelinesComponent implements OnInit, OnDestroy {
     xlsx: 'https://upload.wikimedia.org/wikipedia/commons/c/c6/.csv_icon.svg',
     txt: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Text-txt.svg',
   };
+
+  readonly AvailableLangages = AvailableLangages;
 
   protected programsList$: Observable<ProgramModel[]> = combineLatest([
     this.refreshPrograms$.pipe(startWith(undefined)),

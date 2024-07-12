@@ -35,6 +35,7 @@ import { ProgramInputsOutputsComponent } from './home-page/program-item-list/pro
 import { SearchProgramInputComponent } from './home-page/search-program-input/search-program-input.component';
 import { ProgramActionsComponent } from './home-page/program-item-list/program-actions/program-actions.component';
 import { CountDisplayPipe } from '../shared/pipes/count-display.pipe';
+import { ProgramFilterPopOverComponent } from './home-page/program-filter-pop-over/program-filter-pop-over.component';
 
 @NgModule({
   declarations: [
@@ -61,6 +62,7 @@ import { CountDisplayPipe } from '../shared/pipes/count-display.pipe';
     ProgramInputsOutputsComponent,
     SearchProgramInputComponent,
     ProgramActionsComponent,
+    ProgramFilterPopOverComponent,
   ],
   imports: [
     CommonModule,

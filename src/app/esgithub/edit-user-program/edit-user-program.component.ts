@@ -26,6 +26,7 @@ import {
   ProgramVersionModel,
   VersionModel,
 } from '../../core/models/program-version.model';
+import { AvailableLangages } from '../home-page/home-page.component';
 
 @Component({
   selector: 'app-edit-user-program',
@@ -42,6 +43,8 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
   isLoading = false;
   codeOutput!: { output: string; status: number };
   fileTypes = ['md', 'txt', 'csv', 'json', 'xlsx', 'yml', 'pdf', 'png', 'jpg', 'jpeg'];
+
+  readonly AvailableLangages = AvailableLangages;
   protected selectedInputFiles: File[] = [];
   private selectedOutputFormats: string[] = [];
   private programmingLanguage!: string;
