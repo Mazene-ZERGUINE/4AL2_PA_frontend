@@ -80,13 +80,16 @@ export class ApiService {
   }
 
   downloadFile(path: string): Observable<Blob> {
-    return this.httpClient.get<Blob>(path, {
-      responseType: 'blob' as 'json',
+    return this.httpClient.get(path, {
+      responseType: 'blob',
+      withCredentials: false,
+      headers: {
+        Authorization: '',
+      },
     });
   }
 
   //#endregion  UPDATE methods
-
   private getPath(_path: string, id?: number | string): string {
     const path = `${this._apiUrl}/${_path}`;
 
