@@ -1,62 +1,15 @@
 <div class="flex h-screen bg-gray-100" *ngIf="userData$ | async; let currentUser">
   <div class="w-full h-screen p-10 overflow-y-auto bg-[#212121]">
-    <div class="flex items-start gap-2">
+    <div class="flex items-start justify-center gap-2">
       <app-search-program-input
         [searchControl]="filtersOptionsForm.controls.searchQuery"
       ></app-search-program-input>
 
-      <button class="bg-[#333333] h-14 px-6 rounded-lg">
-        <svg
-          width="26"
-          height="28"
-          viewBox="0 0 26 28"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M12.6667 24.2083H1M24.3333 3.79166H19.9583M24.3333 24.2083H18.5M14.125 3.79166H1M5.375 14H1M24.3333 14L11.2083 14"
-            stroke="white"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-          <path
-            d="M18.5003 24.2083C18.5003 22.5975 17.1945 21.2917 15.5837 21.2917C13.9728 21.2917 12.667 22.5975 12.667 24.2083C12.667 25.8192 13.9728 27.125 15.5837 27.125C17.1945 27.125 18.5003 25.8192 18.5003 24.2083Z"
-            stroke="white"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-          <path
-            d="M11.2083 14C11.2083 12.3892 9.9025 11.0833 8.29167 11.0833C6.68084 11.0833 5.375 12.3892 5.375 14C5.375 15.6108 6.68084 16.9167 8.29167 16.9167C9.9025 16.9167 11.2083 15.6108 11.2083 14Z"
-            stroke="white"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-          <path
-            d="M19.9583 3.79166C19.9583 2.18083 18.6525 0.874995 17.0417 0.874995C15.4308 0.874995 14.125 2.18083 14.125 3.79166C14.125 5.40249 15.4308 6.70833 17.0417 6.70833C18.6525 6.70833 19.9583 5.40249 19.9583 3.79166Z"
-            stroke="white"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-        </svg>
-      </button>
-
-      <!-- <div
-            class="flex flex-row mr-2"
-            *ngFor="let availableLangage of AvailableLangagesE"
-          >
-            <input
-              type="checkbox"
-              [value]="availableLangage"
-              [name]="availableLangage"
-              class="p-1 bg-red-700"
-              [checked]="(availableLangages$ | async)?.includes(availableLangage)"
-              (change)="handleAvailableLangage(availableLangage)"
-            />
-            <label
-              class="flex items-center p-1 bg-white text-purple-500 italic font-bold"
-              >{{ availableLangage }}</label
-            >
-          </div> -->
+      <app-program-filter-pop-over
+        [availableLangagesControl]="filtersOptionsForm.controls.availableLangages"
+        [inputFilesControl]="filtersOptionsForm.controls.inputFiles"
+        [outputFilesControl]="filtersOptionsForm.controls.outputFiles"
+      ></app-program-filter-pop-over>
     </div>
     <ng-container *ngIf="programsList$ | async as programsList">
       <div *ngIf="programsList.length === 0" class="text-white">
@@ -85,7 +38,6 @@
           [program]="program"
           [currentUser]="currentUser"
           [homePage]="true"
-          (dislikeClickEvent)="dislikeProgram($event)"
           (removeClickEvent)="deleteProgram($event)"
         >
         </app-program-item-list>
