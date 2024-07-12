@@ -26,6 +26,7 @@ export class NavigationService {
     );
   }
 
+<<<<<<< HEAD
   getParamValueFromActivatedRoute$<T extends string = string>(
     activatedRoute: ActivatedRoute,
     param: string,
@@ -36,6 +37,8 @@ export class NavigationService {
     );
   }
 
+=======
+>>>>>>> 7e2f862 (adding filter popover)
   addQueriesToCurrentUrl(queryParams: Record<string, unknown>): void {
     this.router.navigate([], {
       relativeTo: this.activatedRoute,

@@ -36,8 +36,11 @@ import { SearchProgramInputComponent } from './home-page/search-program-input/se
 import { ProgramActionsComponent } from './home-page/program-item-list/program-actions/program-actions.component';
 import { CountDisplayPipe } from '../shared/pipes/count-display.pipe';
 import { ProgramFilterPopOverComponent } from './home-page/program-filter-pop-over/program-filter-pop-over.component';
+<<<<<<< HEAD
 import { FollowingComponent } from './side-profile/following/following.component';
 import { GroupItemComponent } from './groups/group-item/group-item.component';
+=======
+>>>>>>> 7e2f862 (adding filter popover)
 
 @NgModule({
   declarations: [
@@ -65,8 +68,11 @@ import { GroupItemComponent } from './groups/group-item/group-item.component';
     SearchProgramInputComponent,
     ProgramActionsComponent,
     ProgramFilterPopOverComponent,
+<<<<<<< HEAD
     FollowingComponent,
     GroupItemComponent,
+=======
+>>>>>>> 7e2f862 (adding filter popover)
   ],
   imports: [
     CommonModule,

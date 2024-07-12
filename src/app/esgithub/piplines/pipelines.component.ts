@@ -15,8 +15,8 @@ import { ChangeDetectorRef } from '@angular/core';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { CodingProcessorService } from '../coding-page/coding-processor.service';
 import { Router } from '@angular/router';
-import { AvailableLangages } from '../home-page/home-page.component';
 import { environment } from '../../../environment/environment';
+import { AvailableLangages } from '../home-page/home-page.component';
 
 @Component({
   selector: 'app-piplines',
