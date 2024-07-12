@@ -191,34 +191,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-<<<<<<< HEAD
-  // dislikeProgram(event: any): void {
-  //   this.userData$
-  //     .pipe(
-  //       takeUntil(this.componentDestroy$),
-  //       switchMap((user) =>
-  //         this.homeService.likeOrDislikeProgram(
-  //           ReactionsEnum.DISLIKE,
-  //           event.programId,
-  //           user.userId,
-  //         ),
-  //       ),
-  //       tap(() => {
-  //         this.socketService.on(
-  //           ReactionsEnum.LIKE,
-  //           (data: { postId: event.programId }) => {
-  //             this.refreshPrograms$.next();
-  //           },
-  //         );
-  //       }),
-  //     )
-  //     .subscribe();
-  // }
-
-  async deleteProgram(event: string) {
-=======
   async deleteProgram(event: string): Promise<void> {
->>>>>>> 7e2f862 (adding filter popover)
     const result = await this.modalService.getConfirmationModelResults(
       'delete program',
       'are you sur you want to delete this program?',
