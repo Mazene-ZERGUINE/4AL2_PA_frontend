@@ -141,6 +141,17 @@ export class HomePageComponent implements OnInit, OnDestroy {
         ),
     ),
     distinctUntilChanged(),
+    shareReplay({ refCount: true, bufferSize: 1 }),
+  );
+
+  readonly currentUserProgramCount$: Observable<number> = combineLatest([
+    this.userData$,
+    this.programsList$,
+  ]).pipe(
+    map(
+      ([userData, programList]) =>
+        programList.filter((program) => program.user.userId === userData.userId).length,
+    ),
   );
 
   constructor(

@@ -1,11 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { AuthService } from 'src/app/core/Auth/service/auth.service';
-import { NotifierService } from 'src/app/core/services/notifier.service';
-import { ProfileService } from '../profile/profile.service';
-import { Observable } from 'rxjs';
+import { Observable, interval, startWith, switchMap } from 'rxjs';
 import { UserDataModel } from 'src/app/core/models/user-data.model';
 import { UserFollowersModel } from 'src/app/core/models/user-followers.model';
+import { ProfileService } from '../profile/profile.service';
+import { INTERVAL_REFRESH_TIME } from '../home-page/home-page.component';
 
 @Component({
   selector: 'app-side-profile',
@@ -15,23 +13,22 @@ import { UserFollowersModel } from 'src/app/core/models/user-followers.model';
 })
 export class SideProfileComponent implements OnInit {
   @Input() currentUser!: UserDataModel;
+  @Input() currentUserProgramCount!: number;
 
   userFollowersAndFollowings$!: Observable<UserFollowersModel>;
 
   readonly anonymousImageUrl =
     'https://thumbs.dreamstime.com/b/default-profile-picture-avatar-photo-placeholder-vector-illustration-default-profile-picture-avatar-photo-placeholder-vector-189495158.jpg';
 
-  constructor(
-    private readonly profileService: ProfileService,
-    private readonly authService: AuthService,
-    private readonly notifier: NotifierService,
-    private readonly route: ActivatedRoute,
-  ) {}
+  constructor(private readonly profileService: ProfileService) {}
 
   ngOnInit(): void {
     if (this.currentUser) {
-      this.userFollowersAndFollowings$ = this.profileService.getFollowersAndFollowings(
-        this.currentUser.userId,
+      this.userFollowersAndFollowings$ = interval(INTERVAL_REFRESH_TIME).pipe(
+        startWith(0),
+        switchMap(() =>
+          this.profileService.getFollowersAndFollowings(this.currentUser.userId),
+        ),
       );
     }
   }

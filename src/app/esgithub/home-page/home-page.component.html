@@ -45,6 +45,9 @@
     </ng-container>
   </div>
   <div>
-    <app-side-profile [currentUser]="currentUser"></app-side-profile>
+    <app-side-profile
+      [currentUser]="currentUser"
+      [currentUserProgramCount]="(currentUserProgramCount$ | async)!"
+    ></app-side-profile>
   </div>
 </div>

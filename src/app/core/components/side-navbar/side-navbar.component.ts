@@ -40,7 +40,7 @@ export class SideNavbarComponent implements OnDestroy {
     { name: 'groups', link: '/groups', icon: 'view_list' },
     { name: 'code', link: '/coding', icon: 'code' },
     { name: 'pipelines', link: '/pipelines', icon: 'webhook' },
-    { name: 'profile', link: '/profile', icon: 'account_circle' },
+    // { name: 'profile', link: '/profile', icon: 'account_circle' },
   ];
 
   open: boolean = this.navService.navBarState;

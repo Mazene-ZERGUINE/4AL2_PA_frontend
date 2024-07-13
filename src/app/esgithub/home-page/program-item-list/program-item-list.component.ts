@@ -7,6 +7,7 @@ import { ReactionsEnum } from '../../../shared/enums/reactions.enum';
 import { HomeService } from '../home.service';
 import { ProgramListService } from './program-list.service';
 import { ReactionService } from './reaction.service';
+import { UserUtils } from 'src/app/core/Auth/utils/user.utils';
 
 @Component({
   selector: 'app-program-item-list',
@@ -53,7 +54,7 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
 
       this.programCommentsCount$ = this.setProgramCommentCount(this.program.programId);
 
-      this.isUserConnected = this.setIsUserConnected(
+      this.isUserConnected = UserUtils.setIsUserConnected(
         this.program.user.disconnectedAt,
         this.program.user.connectedAt,
       );
@@ -95,17 +96,6 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
       ),
       takeUntil(this.componentDestroyer$),
     );
-  }
-
-  private setIsUserConnected(
-    userDisconnectedAt: string | null,
-    userConnectedAt: string | null,
-  ): boolean {
-    if (!userDisconnectedAt) return false;
-    const now = new Date();
-    const disconnectedTime = new Date(userDisconnectedAt);
-    const timeDiff = (now.getTime() - disconnectedTime.getTime()) / 1000;
-    return timeDiff < 300 || userConnectedAt !== null;
   }
 
   onDislikeBtnClick(): void {

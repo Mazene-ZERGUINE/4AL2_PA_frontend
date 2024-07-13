@@ -19,7 +19,7 @@ import { EditProfileComponent } from './profile/edit-profile/edit-profile.compon
 import { FollowersListComponent } from './profile/followers-list/followers-list.component';
 import { FollowingListComponent } from './profile/following-list/following-list.component';
 import { SideProfileComponent } from './side-profile/side-profile.component';
-import { FollowerFollowingComponent } from './side-profile/follower-following/follower-following.component';
+import { FollowerFollowingComponent } from './side-profile/follower/follower.component';
 import { ProgramEditComponent } from './program-edit/program-edit.component';
 import { UserDisplayNamePipe } from '../shared/pipes/user-display-name.pipe';
 import { GroupsComponent } from './groups/groups.component';
@@ -36,6 +36,7 @@ import { SearchProgramInputComponent } from './home-page/search-program-input/se
 import { ProgramActionsComponent } from './home-page/program-item-list/program-actions/program-actions.component';
 import { CountDisplayPipe } from '../shared/pipes/count-display.pipe';
 import { ProgramFilterPopOverComponent } from './home-page/program-filter-pop-over/program-filter-pop-over.component';
+import { FollowingComponent } from './side-profile/following/following.component';
 
 @NgModule({
   declarations: [
@@ -63,6 +64,7 @@ import { ProgramFilterPopOverComponent } from './home-page/program-filter-pop-ov
     SearchProgramInputComponent,
     ProgramActionsComponent,
     ProgramFilterPopOverComponent,
+    FollowingComponent,
   ],
   imports: [
     CommonModule,
