@@ -120,6 +120,8 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
           error: () => this.handleError(),
         });
     }
+
+    localStorage.setItem('code', this.aceEditor.getValue());
   }
 
   onClearFilesClick(): void {
@@ -269,24 +271,29 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
   private setDefaultCode(language: string): void {
     if (language === 'python') {
       this.aceEditor.setValue(`def hello():
-  print("hello world")
-`);
+      print("hello world")
+    `);
     } else if (language === 'javascript') {
       this.aceEditor.setValue(`function hello() {
-  console.log("Hello, world!");
-}`);
+      console.log("Hello, world!");
+    }`);
     } else if (language === 'c++') {
       this.aceEditor.setValue(`#include <iostream>
-using namespace std;
-
-int main() {
-  cout << "Hello, world!" << endl;
-  return 0;
-}`);
+    using namespace std;
+    int main() {
+      cout << "Hello, world!" << endl;
+      return 0;
+    }`);
     } else if (language === 'php') {
       this.aceEditor.setValue(`<?php
-echo "Hello, world!";
-?>`);
+    echo "Hello, world!";
+    ?>`);
+    }
+
+    const code = localStorage.getItem('code');
+
+    if (code) {
+      this.aceEditor.setValue(code);
     }
   }
 }

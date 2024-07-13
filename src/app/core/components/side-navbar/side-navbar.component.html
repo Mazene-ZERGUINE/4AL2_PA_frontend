@@ -1,7 +1,7 @@
-<section class="flex gap-6" *ngIf="shouldDisplayNavBar$ | async">
+<section class="flex gap-6 h-full" *ngIf="shouldDisplayNavBar$ | async">
   <div
     [ngClass]="{ 'w-[330px]': open, 'w-16': !open }"
-    class="bg-[#141414] min-h-screen duration-500 text-gray-100"
+    class="bg-[#141414] flex flex-col duration-500 text-gray-100"
   >
     <div class="flex py-3 px-4 justify-end">
       <button class="hidden sm:inline-block" (click)="toggleOpen()">
@@ -60,44 +60,61 @@
         <path d="M115.919 24.7727V21.8182H111.986V24.7727H115.919Z" fill="white" />
       </svg>
     </div>
-    <div
-      class="mt-4 flex flex-col gap-4 relative"
-      *ngIf="currentUrl$ | async as currentUrl"
-    >
-      <a
-        *ngFor="let menu of menus; let i = index"
-        [routerLink]="menu.link"
-        class="group flex items-center text-lg gap-2 font-light py-2 hover:bg-[#212121] mx-6 cursor-pointer rounded-md"
-        [ngClass]="{ 'bg-[#212121]': currentUrl === menu.link, 'px-6 ': open }"
+    <div class="flex-grow">
+      <div
+        class="mt-4 flex flex-col gap-4 relative"
+        *ngIf="currentUrl$ | async as currentUrl"
       >
-        <app-display-icons-navbar
-          [iconName]="menu.icon"
-          [isCurrentNav]="currentUrl === menu.link"
-        ></app-display-icons-navbar>
-        <h2
-          [style.transitionDelay]="i + 3 + '00ms'"
-          [ngClass]="{
-            'whitespace-pre duration-500 p-1': open,
-            'opacity-0  translate-x-28 overflow-hidden  p-0 m-0 w-0': !open
-          }"
+        <a
+          *ngFor="let menu of menus; let i = index"
+          [routerLink]="menu.link"
+          class="group flex items-center text-lg gap-2 font-light py-2 hover:bg-[#212121] mx-6 cursor-pointer rounded-md"
+          [ngClass]="{ 'bg-[#212121]': currentUrl === menu.link, 'px-6 ': open }"
         >
-          {{ menu.name }}
-        </h2>
-      </a>
+          <app-display-icons-navbar
+            [iconName]="menu.icon"
+            [isCurrentNav]="currentUrl === menu.link"
+          ></app-display-icons-navbar>
+          <h2
+            [style.transitionDelay]="i + 3 + '00ms'"
+            [ngClass]="{
+              'whitespace-pre duration-500 p-1': open,
+              'opacity-0  translate-x-28 overflow-hidden  p-0 m-0 w-0': !open
+            }"
+          >
+            {{ menu.name }}
+          </h2>
+        </a>
+      </div>
     </div>
-    <div class="mt-4 flex flex-col gap-4 relative">
+    <div>
       <a
         (click)="onLogoutClick()"
-        class="group flex items-center text-sm gap-3.5 font-medium hover:bg-gray-800 rounded-md p-4"
+        class="group flex items-center px-6 text-lg gap-2 font-light py-2 hover:bg-[#212121] mx-6 mb-28 cursor-pointer rounded-md"
       >
-        <div style="margin-top: -17px"><mat-icon>logout</mat-icon></div>
+        <div class="flex items-center justify-center">
+          <svg
+            width="30"
+            height="30"
+            viewBox="0 0 30 30"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8.375 9.0625C6.30388 10.9165 5 13.3758 5 16.375C5 17.7046 5.26189 19.0212 5.77072 20.2497C6.27955 21.4781 7.02535 22.5943 7.96554 23.5345C8.90574 24.4746 10.0219 25.2205 11.2503 25.7293C12.4788 26.2381 13.7954 26.5 15.125 26.5C16.4546 26.5 17.7712 26.2381 18.9997 25.7293C20.2281 25.2205 21.3443 24.4746 22.2845 23.5345C23.2246 22.5943 23.9705 21.4781 24.4793 20.2497C24.9881 19.0212 25.25 17.7046 25.25 16.375C25.25 13.3758 23.9461 10.9165 21.875 9.0625M15.125 4V14.125M15.125 4C14.3375 4 12.866 6.24325 12.3125 6.8125M15.125 4C15.9125 4 17.384 6.24325 17.9375 6.8125"
+              stroke="white"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
         <h2
-          style="margin-top: -20px"
           [style.transitionDelay]="9 + '00ms'"
           [ngClass]="{ 'opacity-0 translate-x-28 overflow-hidden': !open }"
           class="whitespace-pre duration-500 p-1"
         >
-          Logout
+          Log Out
         </h2>
       </a>
     </div>
