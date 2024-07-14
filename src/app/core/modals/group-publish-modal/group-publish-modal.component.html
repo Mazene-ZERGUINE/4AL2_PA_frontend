@@ -1,43 +1,41 @@
-<div class="p-6 bg-white rounded-lg shadow-lg">
-  <h2 class="text-xl font-bold mb-4">Select File and Language</h2>
+<div class="p-6 bg-[#212121] rounded-lg shadow-lg">
+  <h2 class="text-xl font-bold mb-4 text-white">Select File and Language</h2>
 
   <div class="mb-4">
-    <label for="file" class="block text-md font-medium text-gray-700">Select File</label>
+    <label for="file" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+      >Select File</label
+    >
     <input
       type="file"
       id="file"
       (change)="onFileChange($event)"
-      class="mt-2 p-2 border border-gray-300 rounded-md w-full"
+      class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
     />
   </div>
 
   <div class="mb-4">
-    <label class="block text-md font-medium text-gray-700">Select Language</label>
-    <div class="mt-2 space-y-2">
-      <label *ngFor="let language of languages" class="flex items-center">
-        <input
-          type="radio"
-          [value]="language"
-          name="language"
-          [(ngModel)]="selectedLanguage"
-          class="form-radio h-4 w-4 text-indigo-600"
-        />
-        <span class="ml-2">{{ language }}</span>
-      </label>
-    </div>
+    <p class="text-md font-medium text-white mb-4">Select Language</p>
+    <label
+      *ngFor="let language of languages"
+      class="block relative pl-8 cursor-pointer items-center checkbox-container mb-3"
+    >
+      <input
+        type="radio"
+        [value]="language"
+        name="language"
+        [(ngModel)]="selectedLanguage"
+        class="form-radio h-4 w-4 text-indigo-600"
+      />
+      <span class="checkmark"></span>
+      <span class="text-white">{{ language }}</span>
+    </label>
   </div>
 
   <div class="flex justify-end space-x-2">
-    <button
-      (click)="onCancel()"
-      class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
-    >
+    <button (click)="onCancel()" class="px-4 py-2 bg-[#9D3F3F] text-white rounded">
       Cancel
     </button>
-    <button
-      (click)="onSubmit()"
-      class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-    >
+    <button (click)="onSubmit()" class="px-4 py-2 bg-[#333333] text-white rounded">
       Submit
     </button>
   </div>

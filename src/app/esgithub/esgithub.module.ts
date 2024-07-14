@@ -24,7 +24,7 @@ import { ProgramEditComponent } from './program-edit/program-edit.component';
 import { UserDisplayNamePipe } from '../shared/pipes/user-display-name.pipe';
 import { GroupsComponent } from './groups/groups.component';
 import { GroupListItemComponent } from './groups/group-list-item/group-list-item.component';
-import { GroupeHomeComponent } from './groups/groupe-home/groupe-home.component';
+import { GroupeDetailsComponent } from './groups/groupe-details/groupe-details.component';
 import { EditUserProgramComponent } from './edit-user-program/edit-user-program.component';
 import { CollaborativeCodingComponent } from './collaboratif-coding/collaborative-coding.component';
 import { PipelinesComponent } from './piplines/pipelines.component';
@@ -37,6 +37,7 @@ import { ProgramActionsComponent } from './home-page/program-item-list/program-a
 import { CountDisplayPipe } from '../shared/pipes/count-display.pipe';
 import { ProgramFilterPopOverComponent } from './home-page/program-filter-pop-over/program-filter-pop-over.component';
 import { FollowingComponent } from './side-profile/following/following.component';
+import { GroupItemComponent } from './groups/group-item/group-item.component';
 
 @NgModule({
   declarations: [
@@ -53,7 +54,7 @@ import { FollowingComponent } from './side-profile/following/following.component
     ProgramEditComponent,
     GroupsComponent,
     GroupListItemComponent,
-    GroupeHomeComponent,
+    GroupeDetailsComponent,
     EditUserProgramComponent,
     CollaborativeCodingComponent,
     PipelinesComponent,
@@ -65,6 +66,7 @@ import { FollowingComponent } from './side-profile/following/following.component
     ProgramActionsComponent,
     ProgramFilterPopOverComponent,
     FollowingComponent,
+    GroupItemComponent,
   ],
   imports: [
     CommonModule,

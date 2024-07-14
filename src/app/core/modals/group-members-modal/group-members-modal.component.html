@@ -1,22 +1,24 @@
-<div class="h-[800px] bg-[#1E1F3D] overflow-auto relative">
+<div class="h-[720px] bg-[#212121] overflow-auto relative">
   <div
-    *ngFor="let member of data.members | async"
-    class="flex items-center mt-5 mx-4 bg-[#555881] rounded-lg p-3 relative"
+    *ngFor="let member of groupMembers$ | async"
+    class="flex items-center justify-between mt-5 mx-4 bg-[#141414] rounded-lg p-3 relative"
   >
-    <a
-      class="flex items-center cursor-pointer"
-      (click)="onViewMemberClick(member.userId)"
-    >
-      <img
-        class="w-[54px] h-[54px] rounded-full object-cover me-5"
-        [src]="member.avatarUrl ? 'http://' + member.avatarUrl : anonymousImageUrl"
-      />
-      <div>
-        <p class="text-white">{{ member | userDisplayName }}</p>
-      </div>
-    </a>
+    <p>
+      <a
+        class="flex items-center cursor-pointer"
+        (click)="onViewMemberClick(member.userId)"
+      >
+        <img
+          class="w-[54px] h-[54px] rounded-full object-cover me-5"
+          [src]="member.avatarUrl ? 'http://' + member.avatarUrl : anonymousImageUrl"
+        />
+        <div>
+          <p class="text-white">{{ member | userDisplayName }}</p>
+        </div>
+      </a>
+    </p>
     <button
-      class="absolute right-4 text-white bg-[#1E1F3D] rounded-lg p-2"
+      class="text-white bg-[#482424] rounded-sm border border-red-700 h-10 px-6"
       (click)="onRemoveMemberClick(member.userId)"
     >
       Remove

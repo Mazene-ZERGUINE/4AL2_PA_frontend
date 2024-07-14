@@ -6,7 +6,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { AuthGuard } from '../core/guards/auth.guard';
 import { ProgramEditComponent } from './program-edit/program-edit.component';
 import { GroupsComponent } from './groups/groups.component';
-import { GroupeHomeComponent } from './groups/groupe-home/groupe-home.component';
+import { GroupeDetailsComponent } from './groups/groupe-details/groupe-details.component';
 import { EditUserProgramComponent } from './edit-user-program/edit-user-program.component';
 import { CollaborativeCodingComponent } from './collaboratif-coding/collaborative-coding.component';
 import { SessionGuard } from '../core/guards/session.guard';
@@ -24,7 +24,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   { path: 'groups', component: GroupsComponent, canActivate: [AuthGuard] },
-  { path: 'group/:groupId', component: GroupeHomeComponent, canActivate: [AuthGuard] },
+  { path: 'group/:groupId', component: GroupeDetailsComponent, canActivate: [AuthGuard] },
   {
     path: 'program/edit/:programId',
     component: EditUserProgramComponent,

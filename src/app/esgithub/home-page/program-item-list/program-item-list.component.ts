@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { Observable, Subject, map, takeUntil } from 'rxjs';
+import { Observable, Subject, map, takeUntil, tap } from 'rxjs';
 import { ProgramModel } from '../../../core/models/program.model';
 import { ReactionModel } from '../../../core/models/reaction.model';
 import { UserDataModel } from '../../../core/models/user-data.model';
@@ -22,6 +22,8 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
   @Input() homePage!: boolean;
   @Input() isGroupOwner!: boolean;
   @Input() isProfileOwner?: boolean;
+
+  @Output() programHasBeenLiked = new EventEmitter<void>();
 
   @Output() dislikeClickEvent = new EventEmitter<{ programId: string; userId: string }>();
   @Output() removeClickEvent = new EventEmitter<string>();
@@ -116,7 +118,10 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
         this.program.programId,
         this.currentUser.userId,
       )
-      .pipe(takeUntil(this.componentDestroyer$))
+      .pipe(
+        takeUntil(this.componentDestroyer$),
+        tap(() => this.programHasBeenLiked.emit()),
+      )
       .subscribe();
   }
 }

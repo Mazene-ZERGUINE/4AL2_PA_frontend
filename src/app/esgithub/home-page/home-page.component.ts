@@ -163,10 +163,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.socketService.on(ReactionsEnum.LIKE, () => {
-      this.refreshPrograms$.next();
-    });
-
     this.socketService.on(ReactionsEnum.DISLIKE, () => {
       this.refreshPrograms$.next();
     });
@@ -195,7 +191,30 @@ export class HomePageComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  async deleteProgram(event: string): Promise<void> {
+  // dislikeProgram(event: any): void {
+  //   this.userData$
+  //     .pipe(
+  //       takeUntil(this.componentDestroy$),
+  //       switchMap((user) =>
+  //         this.homeService.likeOrDislikeProgram(
+  //           ReactionsEnum.DISLIKE,
+  //           event.programId,
+  //           user.userId,
+  //         ),
+  //       ),
+  //       tap(() => {
+  //         this.socketService.on(
+  //           ReactionsEnum.LIKE,
+  //           (data: { postId: event.programId }) => {
+  //             this.refreshPrograms$.next();
+  //           },
+  //         );
+  //       }),
+  //     )
+  //     .subscribe();
+  // }
+
+  async deleteProgram(event: string) {
     const result = await this.modalService.getConfirmationModelResults(
       'delete program',
       'are you sur you want to delete this program?',

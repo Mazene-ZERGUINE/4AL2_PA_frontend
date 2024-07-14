@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
+import { AvailableLangages } from 'src/app/esgithub/home-page/home-page.component';
 
 @Component({
   selector: 'app-select-file-language-modal',
@@ -11,7 +12,7 @@ export class GroupPublishModalComponent {
   fileContent: string = '';
   selectedLanguage: string = '';
 
-  languages = ['python', 'c++', 'php', 'javascript'];
+  readonly languages = Object.values(AvailableLangages);
 
   constructor(public dialogRef: MatDialogRef<GroupPublishModalComponent>) {}
 

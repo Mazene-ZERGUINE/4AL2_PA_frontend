@@ -1,5 +1,6 @@
 import { UserDataModel } from './user-data.model';
 import { ProgramModel } from './program.model';
+import { VisibilityEnum } from 'src/app/shared/enums/visibility.enum';
 
 export class GroupModel {
   groupId!: string;
@@ -9,6 +10,6 @@ export class GroupModel {
   members!: UserDataModel[];
   created_at!: Date;
   imageUrl?: string;
-  visibility?: string;
+  visibility?: VisibilityEnum;
   programs?: ProgramModel[];
 }

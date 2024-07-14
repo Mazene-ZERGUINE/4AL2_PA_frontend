@@ -1,4 +1,4 @@
-<section class="flex gap-6 h-full" *ngIf="shouldDisplayNavBar$ | async">
+<section class="flex gap-6 h-full min-h-screen" *ngIf="shouldDisplayNavBar$ | async">
   <div
     [ngClass]="{ 'w-[330px]': open, 'w-16': !open }"
     class="bg-[#141414] flex flex-col duration-500 text-gray-100"
