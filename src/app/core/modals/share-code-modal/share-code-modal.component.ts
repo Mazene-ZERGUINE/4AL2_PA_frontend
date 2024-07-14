@@ -12,12 +12,13 @@ export class ShareCodeModalComponent {
   visibility!: string;
   description!: string;
   selectedProgramFile?: File;
-  inputFileTypeOptions = Object.values(FileTypesEnum).map((value) => ({
+
+  readonly inputFileTypeOptions = Object.values(FileTypesEnum).map((value) => ({
     value,
     checked: false,
   }));
 
-  outputFileTypeOptions = Object.values(FileTypesEnum).map((value) => ({
+  readonly outputFileTypeOptions = Object.values(FileTypesEnum).map((value) => ({
     value,
     checked: false,
   }));

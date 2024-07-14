@@ -1,0 +1,308 @@
+<div
+  class="flex justify-between h-screen bg-[#212121]"
+  *ngIf="userData$ | async as currentUser"
+>
+  <!-- <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex flex-col mt-8 w-[90%] relative left-[5%] p-4 h-full">
+      <div
+        class="relative w-full h-[300px] bg-center bg-cover rounded-lg"
+        style="
+          background-image: url('https://s3-alpha-sig.figma.com/img/c01e/cd3b/2eade497c17451ac7a44827ec0397188?Expires=1719792000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=Vg6FMuno6a-CK1vO5qCBe1-Tzr0SrXph6Z8ffRcTwnOaVxeaiIXIQ5SBIHWUsNV4ExIW-xt7VTHU~8x9AElV--8H5xpDZkbdKRcwj8ONZwE-mn~6fSIDjB41C9DeZjvTbYryjeKvMONm94OI2w3FAZbhJ8G-qA5-EJBe4UTYL3OQYpMLLPWeTyPlZnNymb08NVshjOv6hgw-W97RBK8c6AbJBez34FoMJCgfQp4TfeLjGdOELi2KBUcKE4GEVDC8w6fatk292Ruxmrxt7cTvVdI8kE0jF78YHuFLVlVq2oRI-oYA~QDxf2pt3mbUNBvoWG9NJyXpacvkwceLYWh~jw__');
+        "
+      >
+        <div
+          class="absolute inset-0 bg-black bg-opacity-10 backdrop-blur-sm rounded-lg"
+        ></div>
+        <div class="absolute inset-0 flex items-center justify-center rounded-Flg">
+          <h1 class="text-white text-4xl font-bold italic">Programs</h1>
+        </div>
+      </div>
+      <div class="w-full flex flex-row mt-8 h-full overflow-hidden">
+        <div
+          *ngIf="groupDetails$ | async as group"
+          class="w-full md:w-1/3 lg:w-4/12 h-full overflow-hidden"
+        >
+          <div
+            class="relative rounded-lg shadow-lg p-4 bg-[#3B3D5E] bg-opacity-20 backdrop-blur-md flex flex-col items-center"
+          >
+            <img
+              [src]="group.imageUrl ? 'http://' + group.imageUrl : anonymousGroupImage"
+              alt="Group Logo"
+              class="w-24 h-24 object-cover rounded-full"
+            />
+            <div class="p-4 text-center">
+              <h2 class="text-purple-500 text-3xl italic font-bold">{{ group.name }}</h2>
+              <div class="mt-2 text-gray-700">
+                <span class="font-semibold text-white italic">Owner:</span>
+                {{ group.owner | userDisplayName }}
+              </div>
+              <div class="mt-2 flex items-center justify-center">
+                <img
+                  [src]="
+                    group.owner.avatarUrl
+                      ? 'http://' + group.owner.avatarUrl
+                      : anonymousGroupImage
+                  "
+                  class="w-6 h-6 rounded-full mr-2"
+                  alt="Owner Avatar"
+                />
+                <span
+                  class="ml-4 text-sm italic font-bold hover:text-purple-500 cursor-pointer text-gray-600"
+                  >{{ group.owner.userName }}</span
+                >
+              </div>
+              <div class="mt-2 text-gray-600 overflow-auto h-[80px]">
+                <span class="font-semibold text-white italic">Description:</span>
+                {{ group.description }}
+              </div>
+              <div class="text-gray-600">
+                <span class="font-semibold text-white italic">members:</span>
+                {{ group.members.length + 1 }}
+              </div>
+            </div>
+            <div class="w-full mt-4" *ngIf="isGroupOwner">
+              <ul class="text-center space-y-2">
+                <li>
+                  <div
+                    (click)="onViewMembersClick()"
+                    class="text-purple-500 hover:underline cursor-pointer font-bold italic"
+                  >
+                    View Members
+                  </div>
+                </li>
+                <li>
+                  <div
+                    (click)="onChangeVisibilityClick()"
+                    class="text-purple-500 hover:underline cursor-pointer font-bold italic"
+                  >
+                    Edit Visibility
+                  </div>
+                </li>
+                <li>
+                  <div
+                    class="text-red-700 hover:underline cursor-pointer font-bold italic"
+                    (click)="onDeleteGroupClick()"
+                  >
+                    Delete Group
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="w-full" *ngIf="isVisible">
+            <button
+              class="bg-black text-white font-bold py-1 px-4 rounded w-full mt-2"
+              (click)="onPublishProgramClick()"
+            >
+              Publish
+            </button>
+            <button
+              *ngIf="group.visibility === 'private' && !isGroupOwner"
+              class="bg-red-900 text-white font-bold py-1 px-4 rounded w-full mt-2"
+              (click)="onLeaveGroupClick()"
+            >
+              Leave Group
+            </button>
+          </div>
+        </div>
+        <div *ngIf="!isVisible" class="h-full w-9/12 overflow-hidden relative ml-4">
+          <div
+            class="p-4 relative rounded-lg shadow-lg bg-[#3B3D5E] bg-opacity-20 backdrop-blur-md flex flex-col items-center"
+          >
+            <div class="p-2 mb-4 text-white font-bold italic text-xl">
+              <button>this is a private group please join to proceed</button>
+            </div>
+            <div
+              (click)="onJoinGroupClick()"
+              class="text-purple-500 hover:underline cursor-pointer font-bold italic p-2"
+            >
+              Join now
+            </div>
+          </div>
+        </div>
+        <div *ngIf="isVisible" class="h-full w-full overflow-auto relative ml-8">
+          <div class="w-full">
+            <app-program-item-list
+              *ngFor="let program of groupPrograms$ | async"
+              [program]="program"
+              [homePage]="false"
+              [isGroupOwner]="isGroupOwner"
+              (dislikeClickEvent)="dislikeProgram($event)"
+              (removeClickEvent)="deleteProgram($event)"
+              class="mb-4"
+            ></app-program-item-list>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+  <div class="p-8 overflow-auto">
+    <app-search-program-input
+      class="flex justify-center"
+      [searchControl]="filtersOptionsForm.controls.searchQuery"
+    ></app-search-program-input>
+    <div
+      class="flex bg-[#141414] p-6 rounded-2xl mb-8"
+      *ngIf="groupDetails$ | async; let groupDetails"
+    >
+      <div
+        class="mr-6 rounded-2xl w-[434px] h-[388px] bg-cover bg-no-repeat bg-center"
+        [style.background-image]="
+          'url(' +
+          (groupDetails.imageUrl
+            ? 'http://' + groupDetails.imageUrl
+            : anonymousGroupImage) +
+          ')'
+        "
+      ></div>
+
+      <div class="w-[437px] flex flex-col justify-between">
+        <div>
+          <h1 class="text-white text-2xl font-bold">{{ groupDetails.name }}</h1>
+          <div class="flex">
+            <p class="text-[#6C6C6C] text-xl mr-3">{{ groupDetails.visibility }}</p>
+
+            <button *ngIf="isGroupOwner$ | async" (click)="onChangeVisibilityClick()">
+              <svg
+                width="31"
+                height="30"
+                viewBox="0 0 31 30"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13.6864 21.708C13.547 21.8474 13.3728 21.9868 13.2332 22.0914C13.0938 22.1612 12.9196 22.2655 12.7452 22.3005L8.73727 23.3461C8.52808 23.4159 8.31911 23.4159 8.17972 23.3809V23.3461C8.00554 23.3113 7.86615 23.2415 7.76155 23.1369C7.65695 22.9975 7.58737 22.8929 7.55236 22.7187C7.48255 22.5095 7.48255 22.2655 7.55236 21.9868L8.52829 18.2576C8.5981 18.0834 8.66768 17.909 8.77228 17.7348C8.87689 17.5606 8.98148 17.3862 9.15566 17.212L9.19045 17.1773V17.1425L18.8449 7.48797C19.1935 7.1744 19.6117 7 20.0649 7C20.483 7 20.9362 7.17418 21.2498 7.48797L23.3759 9.61405C23.6895 9.96263 23.8639 10.3808 23.8639 10.834C23.8639 11.2521 23.6897 11.7053 23.3759 12.0189L13.6864 21.708ZM12.815 21.3944L12.8162 21.3936C12.9204 21.3241 13.0245 21.2546 13.0938 21.1504L13.1636 21.1156L22.8181 11.4611C22.9923 11.2869 23.0621 11.043 23.0621 10.8338C23.0621 10.5898 22.9923 10.3458 22.8181 10.1716L20.692 8.08051C20.5178 7.90632 20.2739 7.80173 20.0647 7.80173C19.8207 7.80173 19.6115 7.90633 19.4373 8.08051L9.7828 17.735L9.71299 17.7698C9.64319 17.8744 9.53881 17.979 9.469 18.1184C9.3992 18.223 9.3644 18.3624 9.32961 18.467L8.35368 22.1962C8.31889 22.3355 8.28387 22.4401 8.31889 22.5097C8.31889 22.5445 8.31889 22.5795 8.35368 22.5795H8.38847H8.52786L12.5358 21.534C12.6404 21.4992 12.7104 21.464 12.815 21.3944Z"
+                  fill="white"
+                />
+                <path
+                  d="M12.815 21.3944L12.8162 21.3936C12.9204 21.3241 13.0245 21.2546 13.0938 21.1504L13.1636 21.1156L22.8181 11.4611C22.9923 11.2869 23.0621 11.043 23.0621 10.8338C23.0621 10.5898 22.9923 10.3458 22.8181 10.1716L20.692 8.08051C20.5178 7.90632 20.2739 7.80173 20.0647 7.80173C19.8207 7.80173 19.6115 7.90633 19.4373 8.08051L9.7828 17.735L9.71299 17.7698C9.64319 17.8744 9.53881 17.979 9.469 18.1184C9.3992 18.223 9.3644 18.3624 9.32961 18.467L8.35368 22.1962C8.31889 22.3355 8.28387 22.4401 8.31889 22.5097C8.31889 22.5445 8.31889 22.5795 8.35368 22.5795H8.38847H8.52786L12.5358 21.534C12.6404 21.4992 12.7104 21.464 12.815 21.3944Z"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div class="flex items-center py-4">
+            <p>
+              <img
+                [src]="'http://' + groupDetails.owner.avatarUrl"
+                [ngClass]="{
+                  'is-user-connected': isOwnerConnected$ | async,
+                  'user-not-connected': !(isOwnerConnected$ | async)
+                }"
+                class="w-8 h-8 object-cover rounded-full"
+                alt="owner profile avatar"
+              />
+            </p>
+            <p class="text-white mx-4">{{ groupDetails.owner.firstName }}</p>
+
+            <p
+              class="border text-[#6C6C6C] rounded-md px-2"
+              *ngIf="groupIdParam$ | async"
+            >
+              Owner
+            </p>
+          </div>
+
+          <div class="text-white pb-4 h-28">
+            {{ groupDetails.description }}
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-around">
+            <div
+              *ngIf="groupDetails.visibility !== GroupVisibility.PUBLIC"
+              [ngClass]="{ 'cursor-pointer': isGroupOwner$ | async }"
+              (click)="onViewMembersClick()"
+            >
+              <p class="text-2xl font-bold text-white text-center">
+                {{ groupMembersCount$ | async }}
+              </p>
+              <p class="text-[#6C6C6C]">Members</p>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-white text-center">
+                {{ groupPublicationCount$ | async }}
+              </p>
+              <p class="text-[#6C6C6C]">Publications</p>
+            </div>
+          </div>
+          <button
+            *ngIf="(isGroupOwner$ | async) && (groupMembersCount$ | async) === 0"
+            class="text-white bg-[#9D3F3F] text-center w-full py-4 rounded-lg mt-4"
+            (click)="onDeleteGroupClick()"
+          >
+            Delete the group
+          </button>
+          <button
+            *ngIf="!(isUserTheOwnerOrMember$ | async)"
+            class="text-white bg-[#141414] border text-center w-full py-4 rounded-lg mt-4"
+            (click)="onJoinGroupClick()"
+          >
+            Join the group
+          </button>
+
+          <button
+            *ngIf="
+              groupDetails.visibility === GroupVisibility.PRIVATE &&
+              (isUserTheOwnerOrMember$ | async) &&
+              !(isGroupOwner$ | async)
+            "
+            class="text-white bg-[#9D3F3F] text-center w-full py-4 rounded-lg mt-4"
+            (click)="onLeaveGroupClick()"
+          >
+            Leave the group
+          </button>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="isUserTheOwnerOrMember$ | async">
+      <button
+        *ngIf="isUserTheOwnerOrMember$ | async"
+        class="flex items-center text-white bg-[#141414] justify-center w-48 h-14 mb-8 rounded-md"
+        (click)="onPublishProgramClick()"
+      >
+        <span class="mr-3">
+          <svg
+            width="30"
+            height="30"
+            viewBox="0 0 30 30"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect width="30" height="30" rx="4" fill="#333333" />
+            <path
+              d="M14.8714 6.99963C15.2896 6.99963 15.6286 7.41871 15.6286 7.75836V23.23C15.6286 23.6491 15.2896 23.9888 14.8714 23.9888C14.4532 23.9888 14.1143 23.5697 14.1143 23.23V7.75836C14.1143 7.33928 14.4532 6.99963 14.8714 6.99963Z"
+              fill="white"
+            />
+            <path
+              d="M6.37988 15.4946C6.37988 15.0764 6.79896 14.7374 7.13861 14.7374H22.6103C23.0294 14.7374 23.369 15.0764 23.369 15.4946C23.369 15.9127 22.9499 16.2517 22.6103 16.2517H7.13861C6.71953 16.2517 6.37988 15.9127 6.37988 15.4946Z"
+              fill="white"
+            />
+          </svg>
+        </span>
+        Publish a program
+      </button>
+      <ng-container *ngIf="groupPrograms$ | async; let groupPrograms">
+        <div class="w-full">
+          <app-program-item-list
+            *ngFor="let program of groupPrograms"
+            [program]="program"
+            [currentUser]="currentUser"
+            [homePage]="false"
+            [isGroupOwner]="(isGroupOwner$ | async)!"
+            (removeClickEvent)="deleteProgram($event)"
+            class="mb-4"
+          ></app-program-item-list>
+        </div>
+        <p class="text-white text-center" *ngIf="groupPrograms.length === 0">
+          No program published for now
+        </p>
+      </ng-container>
+    </div>
+  </div>
+  <app-side-profile
+    [currentUser]="currentUser"
+    [currentUserProgramCount]="(userProgramCount$ | async)!"
+  ></app-side-profile>
+</div>

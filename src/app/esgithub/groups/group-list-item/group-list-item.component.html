@@ -1,4 +1,4 @@
-<div
+<!-- <div
   class="rounded-lg shadow-lg border backdrop-blur-lg border-transparent overflow-hidden text-white relative w-full max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg aspect-square m-4"
 >
   <img
@@ -37,4 +37,7 @@
       ></path>
     </svg>
   </div>
+</div> -->
+<div *ngFor="let group of groups">
+  <app-group-item [group]="group"></app-group-item>
 </div>

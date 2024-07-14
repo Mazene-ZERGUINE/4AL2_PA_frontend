@@ -26,6 +26,16 @@ export class NavigationService {
     );
   }
 
+  getParamValueFromActivatedRoute$<T extends string = string>(
+    activatedRoute: ActivatedRoute,
+    param: string,
+  ): Observable<T | null> {
+    return activatedRoute.params.pipe(
+      map((params: Params) => params[param] ?? null),
+      distinctUntilChanged(),
+    );
+  }
+
   addQueriesToCurrentUrl(queryParams: Record<string, unknown>): void {
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
