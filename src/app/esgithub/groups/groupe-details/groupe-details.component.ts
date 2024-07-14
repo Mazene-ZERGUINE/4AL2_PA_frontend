@@ -14,6 +14,7 @@ import {
   shareReplay,
   startWith,
   switchMap,
+  take,
   takeUntil,
   tap,
 } from 'rxjs';
@@ -306,12 +307,14 @@ export class GroupeDetailsComponent implements OnDestroy {
   }
 
   onViewMembersClick(): void {
-    combineLatest([this.groupIdParam$])
+    combineLatest([this.isGroupOwner$.pipe(take(1)), this.groupIdParam$])
       .pipe(
-        map(([groupIdParam]) => {
-          this.modalService.openDialog(GroupMembersModalComponent, 700, {
-            groupId: groupIdParam,
-          });
+        map(([isGroupOwner, groupIdParam]) => {
+          if (isGroupOwner) {
+            this.modalService.openDialog(GroupMembersModalComponent, 700, {
+              groupId: groupIdParam,
+            });
+          }
         }),
         takeUntil(this.componentDestroy$),
       )

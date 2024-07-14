@@ -11,8 +11,7 @@ export class UserDisplayNamePipe implements PipeTransform {
     }
     const lastName = user.lastName ? user.lastName.toUpperCase() : '';
     const firstName = user.firstName ? user.firstName : '';
-    const userName = user.userName ? `(${user.userName})` : '';
 
-    return `${lastName} ${firstName} ${userName}`.trim();
+    return `${lastName} ${firstName}`.trim();
   }
 }
