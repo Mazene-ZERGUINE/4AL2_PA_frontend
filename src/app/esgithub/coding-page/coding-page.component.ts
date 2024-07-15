@@ -24,6 +24,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/Auth/service/auth.service';
 import { UserDataModel } from '../../core/models/user-data.model';
 import { CodePageUseGuidModalComponent } from '../../core/modals/code-page-use-guid-modal/code-page-use-guid-modal.component';
+import { AvailableLangages } from '../home-page/home-page.component';
 
 @Component({
   selector: 'app-coding-page',
@@ -35,7 +36,8 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
   @ViewChild('inputSelect', { static: false }) inputSelect!: ElementRef<HTMLInputElement>;
 
   aceEditor!: Ace.Editor;
-  selectedLanguage = 'javascript';
+  selectedLanguage =
+    localStorage.getItem('selectedLanguage') ?? AvailableLangages.JAVASCRIPT;
   isLoading = false;
   codeOutput!: { output: string; status: number };
   private userId!: string;
@@ -71,17 +73,27 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
       readOnly: false,
       useWrapMode: true,
     });
-    this.setDefaultCode(this.selectedLanguage);
+    this.loadCodeFromLocalStorage();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.runCodeSubscription.unsubscribe();
     this.getUserDataSubscription.unsubscribe();
   }
 
   onSelectedLanguageUpdate(): void {
-    this.setDefaultCode(this.selectedLanguage);
+    localStorage.setItem('selectedLanguage', this.selectedLanguage);
+    this.loadCodeFromLocalStorage();
     this.aceEditor.session.setMode('ace/mode/' + this.getAceMode(this.selectedLanguage));
+  }
+
+  private loadCodeFromLocalStorage(): void {
+    const code = localStorage.getItem('code_' + this.selectedLanguage);
+    if (code) {
+      this.aceEditor.setValue(code);
+    } else {
+      this.setDefaultCode(this.selectedLanguage);
+    }
   }
 
   onFileSelected(event: Event): void {
@@ -121,7 +133,8 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
         });
     }
 
-    localStorage.setItem('code', this.aceEditor.getValue());
+    const code = this.aceEditor.getValue();
+    localStorage.setItem('code_' + this.selectedLanguage, code);
   }
 
   onClearFilesClick(): void {
@@ -288,12 +301,8 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
       this.aceEditor.setValue(`<?php
     echo "Hello, world!";
     ?>`);
-    }
-
-    const code = localStorage.getItem('code');
-
-    if (code) {
-      this.aceEditor.setValue(code);
+    } else {
+      this.loadCodeFromLocalStorage();
     }
   }
 }
