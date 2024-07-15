@@ -136,7 +136,7 @@
         <p *ngIf="groupsList.length === 0" class="text-white">No group found</p>
         <app-group-list-item
           *ngIf="groupsList.length > 0"
-          class="flex w-[980px] h-[540px] overflow-auto"
+          class="flex w-[980px] h-[540px] overflow-auto min-w-full"
           [groups]="groupsList"
         ></app-group-list-item>
       </ng-container>

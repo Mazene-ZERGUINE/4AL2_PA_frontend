@@ -44,7 +44,7 @@ export class AuthService {
   logout(userId: string): Observable<void> {
     return this.apiService.getRequest('auth/logout/' + userId).pipe(
       map(() => {
-        localStorage.removeItem('token');
+        localStorage.clear();
         this.notifier.showSuccess('you logged out');
         this.router.navigate(['auth']);
       }),
