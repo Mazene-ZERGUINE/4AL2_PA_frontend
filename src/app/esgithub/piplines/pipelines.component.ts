@@ -16,6 +16,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { CodingProcessorService } from '../coding-page/coding-processor.service';
 import { Router } from '@angular/router';
 import { AvailableLangages } from '../home-page/home-page.component';
+import { environment } from '../../../environment/environment';
 
 @Component({
   selector: 'app-piplines',
@@ -226,9 +227,9 @@ export class PipelinesComponent implements OnInit, OnDestroy {
         .runPipeLinesWithFiles(formData)
         .pipe(
           takeUntil(this.componentDestroyer$),
-          tap((response: { success: boolean; outputFiles: string[]; error?: string }) => {
+          tap((response: { success: boolean; outputLinks: string[]; error?: string }) => {
             if (response.success) {
-              this.generatedFiles = response.outputFiles;
+              this.generatedFiles = response.outputLinks;
               this.notifierService.showSuccess('pipeline executed successfully.');
             } else {
               this.outputError = response.error;
@@ -251,7 +252,8 @@ export class PipelinesComponent implements OnInit, OnDestroy {
   }
 
   protected onGeneratedFileClick(filePath: string): void {
-    this.codeProcessorService.downloadOutputFile(filePath);
+    const url = environment.baseUrl.replace('/api/v1', '/') + filePath.trim();
+    this.codeProcessorService.downloadOutputFile(url);
   }
 
   protected getFileIcon(fileName: string): string {
