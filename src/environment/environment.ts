@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  baseUrl: 'http://api.esgithub.org/api/v1',
+  baseUrl: 'https://api.esgithub.org/api/v1',
 };

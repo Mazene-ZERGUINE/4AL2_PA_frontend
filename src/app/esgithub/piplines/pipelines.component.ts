@@ -226,6 +226,7 @@ export class PipelinesComponent implements OnInit, OnDestroy {
           takeUntil(this.componentDestroyer$),
           tap((response: { success: boolean; outputLinks: string[]; error?: string }) => {
             if (response.success) {
+              console.log(response);
               this.generatedFiles = response.outputLinks;
               this.notifierService.showSuccess('pipeline executed successfully.');
             } else {

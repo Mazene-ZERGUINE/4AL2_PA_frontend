@@ -138,7 +138,8 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
   }
 
   private initializeWebSocketConnection(): void {
-    this.socket = io('http://localhost:3000/collaboratif-coding', {
+    const url = environment.baseUrl.replace('/api/v1', '') + '/collaboratif-coding';
+    this.socket = io(url, {
       withCredentials: true,
     });
 
