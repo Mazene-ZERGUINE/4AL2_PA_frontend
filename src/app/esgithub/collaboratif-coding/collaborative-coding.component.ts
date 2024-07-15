@@ -26,6 +26,7 @@ import { map } from 'rxjs/operators';
 import { ModalService } from '../../core/services/modal.service';
 import { ConfirmationModalComponent } from '../../core/modals/conifrmatio-modal/confirmation-modal.component';
 import { UserDataModel } from '../../core/models/user-data.model';
+import { environment } from '../../../environment/environment';
 
 interface CodeChangePayload {
   code: string;
@@ -81,7 +82,8 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
   ngOnInit(): void {
     this.ownerId = this.activatedRoute.snapshot.params['ownerId'];
     this.sessionId = this.activatedRoute.snapshot.params['sessionId'];
-    this.sessionUrl = `localhost:4200/collaborate/${this.sessionId}/${this.ownerId}`;
+    const apiUrl = environment.baseUrl.replace('/api/v1', '');
+    this.sessionUrl = `${apiUrl}/collaborate/${this.sessionId}/${this.ownerId}`;
     this.checkUserRole();
     this.userAccess = this.activatedRoute.snapshot.queryParams['access'];
     this.initializeWebSocketConnection();
