@@ -1,5 +1,5 @@
-<div class="bg-[#313234] mt-4 p-8 rounded-md">
-  <h1 class="text-2xl items-center italic font-bold flex justify-center text-white">
+<div class="bg-[#141414] mt-4 p-8 rounded-md">
+  <h1 class="text-2xl items-center font-bold flex justify-center text-white">
     Edit profile
   </h1>
   <form [formGroup]="editProfileForm">
@@ -48,18 +48,27 @@
       <textarea matInput required formControlName="bio"></textarea>
     </mat-form-field>
 
-    <button
-      (click)="onEditAccountClick()"
-      type="button"
-      class="text-[#E2E2E2] bg-[#6C6C6C] hover:bg-[#6C6C66] text-md p-4 w-full rounded-lg font-bold"
-    >
-      <span>Edit</span>
-    </button>
+    <div class="flex">
+      <button
+        (click)="this.profileUpdated.emit()"
+        type="button"
+        class="text-[#E2E2E2] bg-[#212121] mr-3 hover:bg-[#6C6C66] text-md p-4 w-full rounded-lg font-bold"
+      >
+        <span>Cancel</span>
+      </button>
+      <button
+        (click)="onEditAccountClick()"
+        type="button"
+        class="text-[#E2E2E2] bg-[#212121] hover:bg-[#6C6C66] text-md p-4 w-full rounded-lg font-bold"
+      >
+        <span>Edit</span>
+      </button>
+    </div>
   </form>
 </div>
 
-<div class="bg-[#313234] mt-4 p-8 rounded-md">
-  <h1 class="text-2xl items-center italic font-bold flex justify-center text-white">
+<div class="bg-[#141414] mt-4 p-8 rounded-md">
+  <h1 class="text-2xl items-center font-bold flex justify-center text-white">
     Edit password
   </h1>
 
@@ -106,7 +115,7 @@
     <button
       (click)="onEditPasswordClick()"
       type="button"
-      class="text-[#E2E2E2] bg-[#6C6C6C] hover:bg-[#6C6C66] text-md p-4 w-full rounded-lg font-bold"
+      class="text-[#E2E2E2] bg-[#212121] hover:bg-[#6C6C66] text-md p-4 w-full rounded-lg font-bold"
     >
       <span>Edit</span>
     </button>

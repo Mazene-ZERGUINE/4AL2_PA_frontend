@@ -109,7 +109,7 @@
         </p>
         <app-group-list-item
           *ngIf="popularGroupsList.length > 0"
-          class="flex w-[980px] h-[540px] overflow-auto mb-6"
+          class="flex w-[980px] h-[540px] overflow-auto mb-6 min-w-full"
           [groups]="popularGroupsList"
         ></app-group-list-item>
       </ng-container>
@@ -145,6 +145,5 @@
   <app-side-profile
     *ngIf="userData$ | async as currentUser"
     [currentUser]="currentUser"
-    [currentUserProgramCount]="(userProgramCount$ | async)!"
   ></app-side-profile>
 </div>

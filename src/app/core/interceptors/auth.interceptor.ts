@@ -10,6 +10,15 @@ import { Observable } from 'rxjs';
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    if (req.url.includes('https://code-runner-service-bucket')) {
+      const modifiedReq = req.clone({
+        setHeaders: {
+          Authorization: '',
+        },
+      });
+      return next.handle(modifiedReq);
+    }
+
     const token = localStorage.getItem('token');
 
     if (token) {

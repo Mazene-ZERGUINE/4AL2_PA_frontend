@@ -1,10 +1,18 @@
-import { Component, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
-import { ProfileService } from '../profile.service';
-import { AuthService } from '../../../core/Auth/service/auth.service';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Subject, takeUntil, tap } from 'rxjs';
+import { AuthService } from '../../../core/Auth/service/auth.service';
 import { UserDataModel } from '../../../core/models/user-data.model';
-import { Subscription, switchMap, tap } from 'rxjs';
 import { NotifierService } from '../../../core/services/notifier.service';
+import { ProfileService } from '../profile.service';
 
 export type UpdatePasswordDto = {
   currentPassword: string;
@@ -16,17 +24,23 @@ export type UpdatePasswordDto = {
   templateUrl: './edit-profile.component.html',
   styleUrls: ['./edit-profile.component.scss'],
 })
-export class EditProfileComponent implements OnInit, OnDestroy {
+export class EditProfileComponent implements OnChanges, OnDestroy {
+  @Input() currentUserInfo: UserDataModel | undefined;
+
+  @Output() profileUpdated = new EventEmitter<void>();
+
+  readonly componentDestroyed$ = new Subject<void>();
+
   private readonly _editProfileForm = new FormGroup({
-    email: new FormControl('', [Validators.email]),
-    firstName: new FormControl(''),
-    lastName: new FormControl(''),
-    userName: new FormControl(''),
-    bio: new FormControl(''),
+    email: new FormControl<string>('', [Validators.email]),
+    firstName: new FormControl<string>(''),
+    lastName: new FormControl<string>(''),
+    userName: new FormControl<string>(''),
+    bio: new FormControl<string>(''),
   });
 
   get editProfileForm(): FormGroup {
-    return this._editProfileForm as FormGroup;
+    return this._editProfileForm;
   }
 
   private readonly _editPasswordForm: FormGroup = new FormGroup({
@@ -38,40 +52,15 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     return this._editPasswordForm as FormGroup;
   }
 
-  @Output() profileUpdated = new EventEmitter<void>();
-
-  getUserDataSubscription = new Subscription();
-  editAccountSubscription = new Subscription();
-  userId!: string;
-
-  constructor(
-    private readonly profileService: ProfileService,
-    private readonly authService: AuthService,
-    private readonly notifierService: NotifierService,
-  ) {}
-
-  ngOnInit() {
-    this.getUserDataSubscription = this.authService
-      .getUserData()
-      .subscribe((user: UserDataModel) => {
-        this.editProfileForm.patchValue(user);
-        this.userId = user.userId;
-      });
-  }
-
-  ngOnDestroy() {
-    this.getUserDataSubscription.unsubscribe();
-    this.editAccountSubscription.unsubscribe();
-  }
   onEditAccountClick(): void {
-    if (this.editProfileForm.valid) {
+    if (this.editPasswordForm.value && this.currentUserInfo) {
       const payload: UserDataModel = this.editProfileForm.value;
-      this.editAccountSubscription = this.profileService
-        .editAccount(payload, this.userId)
+
+      this.profileService
+        .editAccount(payload, this.currentUserInfo.userId)
         .pipe(
-          switchMap(() => this.authService.getUserData()),
-          tap((user: UserDataModel) => {
-            this.editProfileForm.patchValue(user);
+          takeUntil(this.componentDestroyed$),
+          tap(() => {
             this.notifierService.showSuccess('account updated');
             this.profileUpdated.emit();
           }),
@@ -79,14 +68,37 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         .subscribe();
     }
   }
+
   onEditPasswordClick(): void {
-    if (this.editPasswordForm.valid) {
+    if (this.editPasswordForm.valid && this.currentUserInfo) {
       const payload: UpdatePasswordDto = this.editPasswordForm.value;
-      this.profileService.updatePassword(payload, this.userId).subscribe(() => {
-        this.notifierService.showSuccess('password updated');
-      });
-    } else {
-      this.editPasswordForm.markAllAsTouched();
+      this.profileService
+        .updatePassword(payload, this.currentUserInfo.userId)
+        .pipe(
+          takeUntil(this.componentDestroyed$),
+          tap(() => {
+            this.notifierService.showSuccess('password updated');
+            this.profileUpdated.emit();
+          }),
+        )
+        .subscribe();
     }
+  }
+
+  constructor(
+    private readonly profileService: ProfileService,
+    private readonly authService: AuthService,
+    private readonly notifierService: NotifierService,
+  ) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['currentUserInfo'] && this.currentUserInfo) {
+      this.editProfileForm.patchValue(this.currentUserInfo);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.componentDestroyed$.next();
+    this.componentDestroyed$.complete();
   }
 }

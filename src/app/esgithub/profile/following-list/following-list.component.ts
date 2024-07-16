@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Observable } from 'rxjs';
 import { UserFollowersModel } from '../../../core/models/user-followers.model';
 
 @Component({
@@ -8,9 +7,13 @@ import { UserFollowersModel } from '../../../core/models/user-followers.model';
   styleUrls: ['./following-list.component.scss'],
 })
 export class FollowingListComponent {
-  @Input() followingsList!: Observable<UserFollowersModel>;
+  @Input() followingsList: UserFollowersModel | undefined;
+
   @Input() isOwner!: boolean;
+
   @Output() removeFollowingEvent: EventEmitter<string> = new EventEmitter();
+
+  readonly customBgColor = '141414';
 
   onRemoveClick(relationId: string): void {
     this.removeFollowingEvent.emit(relationId);

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { UserUtils } from 'src/app/core/Auth/utils/user.utils';
 import { Following } from 'src/app/core/models/user-followers.model';
 
@@ -9,6 +9,13 @@ import { Following } from 'src/app/core/models/user-followers.model';
 })
 export class FollowingComponent {
   @Input() following!: Following;
+
+  @Input() customBgcolor = '333333';
+
+  @Input() isOwner!: boolean;
+
+  @Output() removeFollowerEvent = new EventEmitter<string>();
+
   readonly anonymousImageUrl =
     'https://thumbs.dreamstime.com/b/default-profile-picture-avatar-photo-placeholder-vector-illustration-default-profile-picture-avatar-photo-placeholder-vector-189495158.jpg';
 
@@ -27,5 +34,11 @@ export class FollowingComponent {
         this.following.following.disconnectedAt,
       );
     }
+  }
+
+  onRemoveClick(event: MouseEvent, relationId: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.removeFollowerEvent.emit(relationId);
   }
 }

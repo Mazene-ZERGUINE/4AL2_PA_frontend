@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { Observable, interval, startWith, switchMap } from 'rxjs';
+import { ProgramModel } from 'src/app/core/models/program.model';
 import { UserDataModel } from 'src/app/core/models/user-data.model';
 import { UserFollowersModel } from 'src/app/core/models/user-followers.model';
-import { ProfileService } from '../profile/profile.service';
 import { INTERVAL_REFRESH_TIME } from '../home-page/home-page.component';
+import { ProfileService } from '../profile/profile.service';
 
 @Component({
   selector: 'app-side-profile',
@@ -13,7 +14,6 @@ import { INTERVAL_REFRESH_TIME } from '../home-page/home-page.component';
 })
 export class SideProfileComponent implements OnInit {
   @Input() currentUser!: UserDataModel;
-  @Input() currentUserProgramCount!: number;
 
   userFollowersAndFollowings$!: Observable<UserFollowersModel>;
 
@@ -22,8 +22,14 @@ export class SideProfileComponent implements OnInit {
 
   constructor(private readonly profileService: ProfileService) {}
 
+  userProgramList$: Observable<ProgramModel[]> | undefined;
+
   ngOnInit(): void {
     if (this.currentUser) {
+      this.userProgramList$ = this.profileService.getUserPrograms(
+        this.currentUser.userId,
+      );
+
       this.userFollowersAndFollowings$ = interval(INTERVAL_REFRESH_TIME).pipe(
         startWith(0),
         switchMap(() =>

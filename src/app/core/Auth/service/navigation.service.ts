@@ -50,9 +50,9 @@ export class NavigationService {
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
       queryParams: { [paramKey]: null },
-      queryParamsHandling: 'merge',
+      queryParamsHandling: 'preserve',
       preserveFragment: true,
-      replaceUrl: false,
+      replaceUrl: true,
     });
   }
 
@@ -86,5 +86,13 @@ export class NavigationService {
       ),
       distinctUntilChanged(),
     );
+  }
+
+  addFragment(fragment: string): void {
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      fragment: fragment,
+      replaceUrl: true,
+    });
   }
 }
