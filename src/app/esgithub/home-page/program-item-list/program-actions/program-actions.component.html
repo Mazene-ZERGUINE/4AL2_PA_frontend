@@ -34,7 +34,7 @@
         </svg>
       </span>
     </div>
-    {{ numberOfLikes ? (numberOfLikes | countDisplay) : 0 }} Likes
+    {{ numberOfLikes | countDisplay }} Likes
   </button>
   <button
     class="text-white flex items-center px-20 py-3 bg-[#333333] rounded-lg"
@@ -55,7 +55,7 @@
         />
       </svg>
     </div>
-    {{ programCommentCount ?? 0 }} Comments
+    {{ programCommentCount }} Comments
   </button>
   <button
     class="text-white flex items-center px-20 bg-[#333333] rounded-lg"
@@ -76,5 +76,26 @@
       </svg>
     </div>
     View
+  </button>
+  <button
+    *ngIf="isProgramOwner"
+    class="text-white flex items-center px-20 bg-[#333333] rounded-lg"
+    [routerLink]="['/program/edit', programId]"
+  >
+    <div class="mr-3">
+      <svg
+        width="30"
+        height="30"
+        viewBox="0 0 30 30"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M19.3808 5.99456C19.6827 5.68302 20.0436 5.43465 20.4424 5.26392C20.8412 5.09319 21.27 5.00351 21.7038 5.0001C22.1376 4.99669 22.5677 5.07962 22.9692 5.24405C23.3706 5.40849 23.7353 5.65115 24.0421 5.9579C24.3488 6.26466 24.5915 6.62937 24.7559 7.03082C24.9204 7.43226 25.0033 7.86241 24.9999 8.29621C24.9965 8.73001 24.9068 9.1588 24.7361 9.5576C24.5653 9.95641 24.317 10.3173 24.0054 10.6192L22.7245 11.9001L18.0999 7.27547L19.3808 5.99456ZM17.2183 8.15714L7.08157 18.2938C6.7156 18.6598 6.44943 19.1139 6.3097 19.613L5.02296 24.2085C4.99323 24.315 4.99236 24.4275 5.02043 24.5345C5.0485 24.6415 5.10451 24.7391 5.18271 24.8173C5.26092 24.8955 5.35851 24.9515 5.46549 24.9796C5.57246 25.0076 5.68498 25.0068 5.79151 24.977L10.3862 23.6903C10.8856 23.5516 11.3404 23.2856 11.7062 22.9184L21.8437 12.7826L17.2183 8.15714Z"
+          fill="white"
+        />
+      </svg>
+    </div>
+    edit
   </button>
 </div>

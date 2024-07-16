@@ -39,6 +39,7 @@
           [currentUser]="currentUser"
           [homePage]="true"
           (removeClickEvent)="deleteProgram($event)"
+          (programHasBeenLiked)="refreshPrograms$.next()"
         >
         </app-program-item-list>
       </div>
