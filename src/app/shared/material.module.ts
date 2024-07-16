@@ -18,6 +18,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @NgModule({
   exports: [
@@ -35,6 +36,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
     MatTableModule,
     MatFormFieldModule,
     MatInputModule,
+    MatTabsModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatStepperModule,

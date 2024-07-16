@@ -79,6 +79,10 @@ export class ApiService {
     return this.httpClient.patch<T>(this.getPath(path), payload);
   }
 
+  putRequest<T, P>(path: string, payload: P): Observable<T> {
+    return this.httpClient.put<T>(this.getPath(path), payload);
+  }
+
   downloadFile(path: string): Observable<Blob> {
     return this.httpClient.get(path, {
       responseType: 'blob',

@@ -1,16 +1,10 @@
-<div
-  *ngIf="(followingsList | async)?.followings as followingsData"
-  class="overflow-hidden"
->
+<div *ngIf="followingsList?.followings as followingsData" class="overflow-hidden">
   <div
-    class="w-full flex flex-col h-[87vh] bg-[#424244] p-2 border rounded-md overflow-auto mt-4"
+    class="w-full flex flex-col rounded-md overflow-auto mt-4"
     *ngIf="followingsData.length > 0"
   >
-    <div
-      *ngFor="let follower of (followingsList | async)?.followings"
-      class="h-24 flex flex-row p-4 border border-black shadow-md rounded-md w-full bg-[#6C6C6C] mt-4"
-    >
-      <div class="w-1/6 rounded-full">
+    <div *ngFor="let followig of followingsList?.followings">
+      <!-- <div class="w-1/6 rounded-full">
         <img
           *ngIf="follower.following.avatarUrl === null"
           src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Circle-icons-profile.svg"
@@ -36,12 +30,19 @@
           <span class="relative p-1 bottom-1.5 italic">Remove</span>
         </button>
       </div>
+    </div> -->
+      <app-following
+        [following]="followig"
+        [customBgcolor]="customBgColor"
+        [isOwner]="isOwner"
+        (removeFollowerEvent)="onRemoveClick(followig.relationId)"
+      ></app-following>
     </div>
-  </div>
-  <div
-    *ngIf="followingsData.length === 0"
-    class="w-full flex justify-center text-white items-center italic font-bold bg-[#424244] p-2 border rounded-md overflow-auto mt-4"
-  >
-    No followings found
+    <div
+      *ngIf="followingsData.length === 0"
+      class="w-full flex justify-center text-white items-center italic font-bold bg-[#424244] p-2 border rounded-md overflow-auto mt-4"
+    >
+      No followings found
+    </div>
   </div>
 </div>

@@ -32,7 +32,7 @@ export class ProgramItemListComponent implements OnInit, OnDestroy {
   programCommentsCount$: Observable<number> | undefined;
   isProgramOwner: boolean = false;
   userReaction?: ReactionModel;
-  likes$!: Observable<number>;
+  likes$: Observable<number> | undefined;
   dislikes$!: Observable<number>;
 
   readonly ReactionsEnum = ReactionsEnum;

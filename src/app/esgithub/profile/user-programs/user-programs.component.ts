@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Observable } from 'rxjs';
+import { ReactionsEnum } from 'src/app/shared/enums/reactions.enum';
 import { ProgramModel } from '../../../core/models/program.model';
 
 @Component({
@@ -8,6 +8,9 @@ import { ProgramModel } from '../../../core/models/program.model';
   styleUrls: ['./user-programs.component.scss'],
 })
 export class UserProgramsComponent {
-  @Input() programsList$!: Observable<ProgramModel[]>;
-  @Input() profileOwner!: boolean;
+  @Input() programsList: ProgramModel[] | undefined;
+
+  @Input() profileOwner: boolean | undefined;
+
+  readonly ReactionsEnum = ReactionsEnum;
 }

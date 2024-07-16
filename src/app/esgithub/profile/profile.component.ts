@@ -1,13 +1,39 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ProfileService } from './profile.service';
-import { forkJoin, Observable, of, Subscription } from 'rxjs';
-import { UserDataModel } from '../../core/models/user-data.model';
-import { ProgramModel } from '../../core/models/program.model';
-import { NotifierService } from '../../core/services/notifier.service';
-import { ActivatedRoute } from '@angular/router';
-import { map, switchMap } from 'rxjs/operators';
-import { Follower, UserFollowersModel } from '../../core/models/user-followers.model';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  combineLatest,
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  first,
+  interval,
+  map,
+  scan,
+  shareReplay,
+  startWith,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { AuthService } from 'src/app/core/Auth/service/auth.service';
+import { NavigationService } from 'src/app/core/Auth/service/navigation.service';
+import { ProgramModel } from 'src/app/core/models/program.model';
+import { UserDataModel } from 'src/app/core/models/user-data.model';
+import { Follower, UserFollowersModel } from 'src/app/core/models/user-followers.model';
+import { NotifierService } from 'src/app/core/services/notifier.service';
+import { INTERVAL_REFRESH_TIME } from '../home-page/home-page.component';
+import { ProfileService } from './profile.service';
+
+export enum ProfileTabFragment {
+  PUBLICATIONS = 'publications',
+  FOLLOWERS = 'followers',
+  FOLLOWINGS = 'followings',
+}
+
+type ActivatedTabs = Set<ProfileTabFragment>;
 
 @Component({
   selector: 'app-profile',
@@ -15,144 +41,207 @@ import { AuthService } from 'src/app/core/Auth/service/auth.service';
   styleUrls: ['./profile.component.scss'],
 })
 export class ProfileComponent implements OnInit, OnDestroy {
-  followUserSubscription = new Subscription();
-  unfollowUserSubscription = new Subscription();
+  activeTab$: Observable<ProfileTabFragment> | undefined;
 
-  @ViewChild('fileInput') fileInput!: ElementRef;
-  userData$!: Observable<UserDataModel>;
-  selectedMenuItem: string = 'programs';
-  programsList$!: Observable<ProgramModel[]>;
-  isProfileOwner!: boolean;
-  userFollowersAndFollowings!: Observable<UserFollowersModel>;
-  isFollowing: boolean = false;
-  followerId!: string;
-  followingId!: string;
-  relationId!: string;
+  activatedTabs$: Observable<ActivatedTabs> | undefined;
 
-  constructor(
-    private readonly profileService: ProfileService,
-    private readonly authService: AuthService,
-    private readonly notifier: NotifierService,
-    private readonly route: ActivatedRoute,
-  ) {}
+  readonly shouldReloadPersonalInfo$ = new Subject<void>();
 
-  ngOnInit(): void {
-    this.route.params.pipe(map((params) => params['userId'])).subscribe((userId) => {
-      if (!userId) {
-        this.isProfileOwner = true;
-        this.loadCurrentUserProfileData();
-      } else {
-        this.followingId = userId;
-        this.loadUserProfileData(userId);
+  readonly editProfilView$ = new BehaviorSubject<boolean>(false);
+
+  readonly userIdQueryParam$: Observable<string | null> =
+    this.navigationService.getParamValueFromActivatedRoute$(this.activedRoute, 'userId');
+
+  readonly currentUser$ = this.shouldReloadPersonalInfo$.pipe(
+    startWith(undefined),
+    switchMap(() => this.authService.getUserData()),
+  );
+
+  readonly componentDestroyed$ = new Subject<void>();
+
+  readonly ProfileTabFragment = ProfileTabFragment;
+
+  readonly isItMyProfil$ = new BehaviorSubject<boolean>(false);
+
+  readonly defaultProfileTab = ProfileTabFragment.PUBLICATIONS;
+
+  readonly shouldReloadUserFollowersAndFollowings$ = new Subject<void>();
+
+  readonly userData$: Observable<UserDataModel> = this.userIdQueryParam$.pipe(
+    switchMap((userIdQueryParam) => {
+      if (userIdQueryParam) {
+        return this.profileService.getUserInfo(userIdQueryParam);
       }
-    });
-  }
+      this.isItMyProfil$.next(true);
 
-  loadUserProfileData(userId: string): void {
-    forkJoin({
-      userData: this.profileService.getUserInfo(userId),
-      followersAndFollowings: this.profileService.getFollowersAndFollowings(userId),
-      userPrograms: this.profileService.getUserPrograms(userId),
-      currentUser: this.authService.getUserData(),
-    })
-      .pipe(
-        map(({ userData, followersAndFollowings, userPrograms, currentUser }) => {
-          this.followerId = currentUser.userId;
-          this.isProfileOwner = false;
-          this.userData$ = of(userData);
-          this.userFollowersAndFollowings = of(followersAndFollowings);
-          const relation: Follower = followersAndFollowings.followers.find(
-            (follower: Follower) => follower.follower.userId === currentUser.userId,
-          );
-          if (relation) {
-            this.isFollowing = true;
-            this.relationId = relation.relationId;
-          }
-          return userPrograms.filter((program) => {
-            return (
-              program.visibility === 'public' ||
-              (this.isFollowing && program.visibility === 'only_followers')
-            );
-          });
-        }),
-      )
-      .subscribe((programsList: ProgramModel[]) => {
-        this.programsList$ = of(programsList);
-      });
-  }
+      return this.currentUser$;
+    }),
+    shareReplay({ refCount: true, bufferSize: 1 }),
+  );
 
-  loadCurrentUserProfileData(): void {
-    this.loadUserData();
-    this.programsList$.subscribe((programsList: ProgramModel[]) => {
-      this.programsList$ = of(programsList);
-    });
-  }
+  readonly userFollowersAndFollowing$: Observable<UserFollowersModel> = combineLatest([
+    this.userData$,
+    this.shouldReloadUserFollowersAndFollowings$.pipe(startWith(undefined)),
+    interval(INTERVAL_REFRESH_TIME).pipe(startWith(0)),
+  ]).pipe(
+    switchMap(([userData]) =>
+      this.profileService.getFollowersAndFollowings(userData.userId),
+    ),
+    shareReplay({ refCount: true, bufferSize: 1 }),
+  );
 
-  ngOnDestroy(): void {
-    this.followUserSubscription.unsubscribe();
-    this.unfollowUserSubscription.unsubscribe();
-  }
+  readonly userProgramList$: Observable<ProgramModel[]> = combineLatest([
+    this.userData$,
+  ]).pipe(
+    switchMap(([userData]) => this.profileService.getUserPrograms(userData.userId)),
+  );
 
-  loadUserData(): void {
-    this.userData$ = this.authService.getUserData();
-    this.programsList$ = this.userData$.pipe(
-      switchMap((userData) => this.profileService.getUserPrograms(userData.userId)),
-    );
-    this.userFollowersAndFollowings = this.userData$.pipe(
-      switchMap((userData) =>
-        this.profileService.getFollowersAndFollowings(userData.userId),
+  readonly currentUserFollowingOrFollowerData$: Observable<Follower | undefined> =
+    combineLatest([this.userFollowersAndFollowing$, this.currentUser$]).pipe(
+      map(([userFollowersAndFollowing, currentUser]) =>
+        userFollowersAndFollowing.followers.find(
+          (follower) => follower.follower.userId === currentUser.userId,
+        ),
       ),
     );
+
+  readonly isCurrentUserFollowingTheUserSpected$: Observable<boolean> =
+    this.currentUserFollowingOrFollowerData$.pipe(
+      map((currentUserFollowingOrFollowerData) => !!currentUserFollowingOrFollowerData),
+    );
+
+  readonly anonymousGroupImage =
+    'https://cdn.discordapp.com/attachments/1057643423546482699/1262421845358022727/64b2ca20d03275743621149c0b69157b.png?ex=66968976&is=669537f6&hm=bf79cefa9971c1614915abe114499d51c7c0ff0c0bf9128955752e05e2872dc0&';
+
+  private getActiveTab(): Observable<ProfileTabFragment> {
+    return this.activedRoute.fragment.pipe(
+      map((urlFragment) => {
+        if (urlFragment) {
+          return urlFragment as ProfileTabFragment;
+        }
+        return ProfileTabFragment.PUBLICATIONS;
+      }),
+    );
   }
 
-  onMenuItemClick(item: string): void {
-    this.selectedMenuItem = item;
+  private getActivatedTabs$(
+    activeTab$: Observable<ProfileTabFragment>,
+  ): Observable<ActivatedTabs> {
+    return activeTab$.pipe(
+      scan(
+        (activatedTabs, currentActiveTab) => activatedTabs.add(currentActiveTab),
+        new Set<ProfileTabFragment>(),
+      ),
+      distinctUntilChanged((prev, curr) => prev.size === curr.size),
+    );
   }
 
-  onProfileUpdated(): void {
-    this.loadUserData();
+  profileEdited(): void {
+    this.editProfilView$.next(false);
+    this.shouldReloadPersonalInfo$.next();
   }
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      this.profileService.uploadAvatar(file).subscribe(() => {
-        this.onProfileUpdated();
-        this.loadUserData();
-        this.notifier.showSuccess('Profile image updated');
-      });
-    }
+  onUnFollowClick(): void {
+    this.currentUserFollowingOrFollowerData$
+      .pipe(
+        first(),
+        filter(
+          (
+            currentUserFollowingOrFollowerData,
+          ): currentUserFollowingOrFollowerData is Follower =>
+            currentUserFollowingOrFollowerData !== undefined,
+        ),
+        switchMap((followerOrFollowing) =>
+          this.profileService
+            .unfollow(followerOrFollowing.relationId)
+            .pipe(takeUntil(this.componentDestroyed$)),
+        ),
+        tap(() => {
+          this.shouldReloadUserFollowersAndFollowings$.next();
+        }),
+      )
+      .subscribe();
+  }
+
+  onHandleRemoveFollowing(followingId: string): void {
+    this.profileService
+      .unfollow(followingId)
+      .pipe(
+        takeUntil(this.componentDestroyed$),
+        tap(() => this.shouldReloadUserFollowersAndFollowings$.next()),
+      )
+      .subscribe();
   }
 
   onFollowClick(): void {
-    const payload = {
-      followerId: this.followerId,
-      followingId: this.followingId,
-    };
-    this.followUserSubscription = this.profileService.follow(payload).subscribe(() => {
-      this.isFollowing = true;
-      this.loadUserProfileData(this.followingId);
-    });
+    combineLatest([this.currentUser$, this.userData$])
+      .pipe(
+        first(),
+        filter(([currentUser, userData]) => currentUser.userId !== userData.userId),
+        exhaustMap(([currentUser, userData]) => {
+          const payload = {
+            followerId: currentUser.userId,
+            followingId: userData.userId,
+          };
+          return this.profileService.follow(payload);
+        }),
+        tap(() => {
+          this.shouldReloadUserFollowersAndFollowings$.next();
+        }),
+        takeUntil(this.componentDestroyed$),
+      )
+      .subscribe();
   }
 
-  onUnfollowClick(event?: string): void {
-    const relationId = event !== undefined ? event : this.relationId;
-    if (event === undefined) {
-      this.unfollowUserSubscription = this.profileService
-        .unfollow(relationId as string)
-        .subscribe(() => {
-          this.isFollowing = false;
-          this.loadUserProfileData(this.followingId);
-        });
-    }
-    if (event !== undefined) {
-      this.unfollowUserSubscription = this.profileService
-        .unfollow(relationId as string)
-        .subscribe(() => {
-          this.isFollowing = false;
-          this.loadUserData();
-        });
+  onPictureSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    const file = input.files ? input.files[0] : null;
+
+    if (file) {
+      this.profileService
+        .uploadAvatar(file)
+        .pipe(
+          takeUntil(this.componentDestroyed$),
+          tap(() => {
+            this.notifier.showSuccess('Profile image updated');
+            this.shouldReloadPersonalInfo$.next();
+          }),
+        )
+        .subscribe();
     }
   }
+
+  private navigateToProfileIfUserIsTheCurrentUser(): void {
+    combineLatest([this.currentUser$, this.userIdQueryParam$])
+      .pipe(
+        map(([currentUser, userIdQueryParam]) => {
+          if (userIdQueryParam && currentUser.userId === userIdQueryParam) {
+            this.router.navigate(['/profile']);
+          }
+        }),
+        takeUntil(this.componentDestroyed$),
+      )
+      .subscribe();
+  }
+
+  ngOnInit(): void {
+    this.navigateToProfileIfUserIsTheCurrentUser();
+    this.activeTab$ = this.getActiveTab();
+    this.activatedTabs$ = this.getActivatedTabs$(this.activeTab$);
+  }
+
+  ngOnDestroy(): void {
+    this.componentDestroyed$.next();
+    this.componentDestroyed$.complete();
+  }
+
+  constructor(
+    readonly navigationService: NavigationService,
+    readonly authService: AuthService,
+    readonly activedRoute: ActivatedRoute,
+    readonly profileService: ProfileService,
+    readonly notifier: NotifierService,
+    readonly router: Router,
+  ) {}
 }

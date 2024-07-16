@@ -34,7 +34,7 @@
         </svg>
       </span>
     </div>
-    {{ numberOfLikes | countDisplay }} Likes
+    {{ numberOfLikes ? (numberOfLikes | countDisplay) : 0 }} Likes
   </button>
   <button
     class="text-white flex items-center px-20 py-3 bg-[#333333] rounded-lg"
@@ -55,7 +55,7 @@
         />
       </svg>
     </div>
-    {{ programCommentCount }} Comments
+    {{ programCommentCount ?? 0 }} Comments
   </button>
   <button
     class="text-white flex items-center px-20 bg-[#333333] rounded-lg"

@@ -10,7 +10,7 @@
       <a [routerLink]="'/profile/' + currentUser.userId" class="text-white"
         >{{ currentUser.firstName }} {{ currentUser.lastName }}</a
       >
-      <p class="text-[#6C6C6C] w-80 text-center my-5">
+      <p class="text-[#6C6C6C] w-80 text-center my-5 break-words h-10 truncate">
         {{ currentUser.bio }}
       </p>
 
@@ -23,8 +23,11 @@
         </div>
 
         <div>
-          <p class="text-white text-2xl font-bold text-center">
-            {{ currentUserProgramCount }}
+          <p
+            class="text-white text-2xl font-bold text-center"
+            *ngIf="userProgramList$ | async as userProgramList"
+          >
+            {{ userProgramList.length }}
           </p>
           <p class="text-[#6C6C6C]">Publications</p>
         </div>
@@ -39,12 +42,12 @@
 
     <div class="flex justify-around mt-10">
       <div>
-        <a href="" class="text-white"
-          >Followers({{ userFollowersAndFollowings.followers.length }})</a
+        <span class="text-white"
+          >Followers({{ userFollowersAndFollowings.followers.length }})</span
         >
       </div>
       <div>
-        <a href="" class="text-white">See all</a>
+        <a class="text-white" routerLink="/profile" fragment="followers">See all</a>
       </div>
     </div>
 
@@ -65,12 +68,12 @@
 
     <div class="flex justify-around mt-10">
       <div>
-        <a href="" class="text-white"
-          >Following({{ userFollowersAndFollowings.followings.length }})</a
+        <span href="" class="text-white"
+          >Following({{ userFollowersAndFollowings.followings.length }})</span
         >
       </div>
       <div>
-        <a href="" class="text-white">See all</a>
+        <a routerLink="/profile" fragment="followings" class="text-white">See all</a>
       </div>
     </div>
     <div class="h-52 overflow-auto">
