@@ -7,10 +7,11 @@ import { ReactionsEnum } from 'src/app/shared/enums/reactions.enum';
   styleUrls: ['./program-actions.component.scss'],
 })
 export class ProgramActionsComponent {
-  @Input() numberOfLikes: number | undefined;
+  @Input() numberOfLikes!: number;
   @Input() userReaction!: ReactionsEnum;
   @Input() programId!: string;
-  @Input() programCommentCount: number | undefined;
+  @Input() programCommentCount!: number;
+  @Input() isProgramOwner!: boolean;
 
   @Output() likeClickEvent = new EventEmitter<void>();
 

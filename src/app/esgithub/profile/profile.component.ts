@@ -26,6 +26,7 @@ import { Follower, UserFollowersModel } from 'src/app/core/models/user-followers
 import { NotifierService } from 'src/app/core/services/notifier.service';
 import { INTERVAL_REFRESH_TIME } from '../home-page/home-page.component';
 import { ProfileService } from './profile.service';
+import { HomeService } from '../home-page/home.service';
 
 export enum ProfileTabFragment {
   PUBLICATIONS = 'publications',
@@ -49,6 +50,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   readonly editProfilView$ = new BehaviorSubject<boolean>(false);
 
+  readonly programVisibility$ = new BehaviorSubject<'public' | 'only_followers'>(
+    'public',
+  );
+
   readonly userIdQueryParam$: Observable<string | null> =
     this.navigationService.getParamValueFromActivatedRoute$(this.activedRoute, 'userId');
 
@@ -66,6 +71,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   readonly defaultProfileTab = ProfileTabFragment.PUBLICATIONS;
 
   readonly shouldReloadUserFollowersAndFollowings$ = new Subject<void>();
+
+  readonly shoulRealoadUserPrograms$ = new Subject<void>();
 
   readonly userData$: Observable<UserDataModel> = this.userIdQueryParam$.pipe(
     switchMap((userIdQueryParam) => {
@@ -90,10 +97,26 @@ export class ProfileComponent implements OnInit, OnDestroy {
     shareReplay({ refCount: true, bufferSize: 1 }),
   );
 
+  readonly combinedProgramsList$: Observable<ProgramModel[]> = combineLatest([
+    this.homeService.getProgramsList$('public'),
+    this.homeService.getProgramsList$('only_followers'),
+  ]).pipe(
+    map(([publicPrograms, followerPrograms]) => [...publicPrograms, ...followerPrograms]),
+  );
+
   readonly userProgramList$: Observable<ProgramModel[]> = combineLatest([
-    this.userData$,
+    this.currentUser$,
+    this.shoulRealoadUserPrograms$.pipe(startWith(undefined)),
   ]).pipe(
     switchMap(([userData]) => this.profileService.getUserPrograms(userData.userId)),
+  );
+
+  readonly spectedUserProgram$: Observable<ProgramModel[]> = combineLatest([
+    this.programVisibility$,
+  ]).pipe(
+    switchMap(([programVisibility]) =>
+      this.homeService.getProgramsList$(programVisibility),
+    ),
   );
 
   readonly currentUserFollowingOrFollowerData$: Observable<Follower | undefined> =
@@ -109,6 +132,35 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.currentUserFollowingOrFollowerData$.pipe(
       map((currentUserFollowingOrFollowerData) => !!currentUserFollowingOrFollowerData),
     );
+
+  readonly programList$ = combineLatest([
+    this.isItMyProfil$,
+    this.userIdQueryParam$,
+    this.isCurrentUserFollowingTheUserSpected$,
+    this.shoulRealoadUserPrograms$.pipe(startWith(undefined)),
+  ]).pipe(
+    switchMap(([isItMyProfile, userIdParam, isCurrentUserFollowingTheUserSpected]) => {
+      if (isItMyProfile) {
+        return this.userProgramList$;
+      }
+      if (isCurrentUserFollowingTheUserSpected) {
+        return this.combinedProgramsList$.pipe(
+          map((spectedUserPrograms) =>
+            spectedUserPrograms.filter(
+              (spectedUserPrograms) => spectedUserPrograms.user.userId === userIdParam,
+            ),
+          ),
+        );
+      }
+      return this.spectedUserProgram$.pipe(
+        map((spectedUserPrograms) =>
+          spectedUserPrograms.filter(
+            (spectedUserPrograms) => spectedUserPrograms.user.userId === userIdParam,
+          ),
+        ),
+      );
+    }),
+  );
 
   readonly anonymousGroupImage =
     'https://cdn.discordapp.com/attachments/1057643423546482699/1262421845358022727/64b2ca20d03275743621149c0b69157b.png?ex=66968976&is=669537f6&hm=bf79cefa9971c1614915abe114499d51c7c0ff0c0bf9128955752e05e2872dc0&';
@@ -158,6 +210,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         ),
         tap(() => {
           this.shouldReloadUserFollowersAndFollowings$.next();
+          this.programVisibility$.next('public');
         }),
       )
       .subscribe();
@@ -187,6 +240,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         }),
         tap(() => {
           this.shouldReloadUserFollowersAndFollowings$.next();
+          this.programVisibility$.next('only_followers');
         }),
         takeUntil(this.componentDestroyed$),
       )
@@ -240,6 +294,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     readonly navigationService: NavigationService,
     readonly authService: AuthService,
     readonly activedRoute: ActivatedRoute,
+    readonly homeService: HomeService,
     readonly profileService: ProfileService,
     readonly notifier: NotifierService,
     readonly router: Router,

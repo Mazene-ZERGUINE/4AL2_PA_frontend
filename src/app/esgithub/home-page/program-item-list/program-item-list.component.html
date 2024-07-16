@@ -123,7 +123,7 @@
           class="material-icons text-white text-3xl font-bold cursor-pointer z-10"
         >
           remove_red_eye
-        </i>
+        </i
       </div>
       <div class="flex flex-row p-3 z-10" *ngIf="isProfileOwner">
         <i
@@ -172,5 +172,6 @@
     [programId]="program.programId"
     [programCommentCount]="(programCommentsCount$ | async)!"
     (likeClickEvent)="onlikeProgram()"
+    [isProgramOwner]="isProfileOwner!"
   ></app-program-actions>
 </div>

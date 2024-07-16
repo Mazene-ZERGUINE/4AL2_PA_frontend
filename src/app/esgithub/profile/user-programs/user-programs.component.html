@@ -3,5 +3,7 @@
     [program]="program"
     [homePage]="false"
     [isProfileOwner]="profileOwner"
+    [currentUser]="currentUser!"
+    (programHasBeenLiked)="userProgramHasBeenLiked.emit()"
   ></app-program-item-list>
 </div>

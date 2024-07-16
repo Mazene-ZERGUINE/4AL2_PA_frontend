@@ -82,7 +82,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         }),
       );
 
-  private refreshPrograms$ = new Subject<void>();
+  readonly refreshPrograms$ = new Subject<void>();
 
   readonly componentDestroy$ = new Subject<void>();
 
