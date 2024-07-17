@@ -56,11 +56,16 @@
   box-shadow: inset 0 0 0 2px #212121; /* Adjust the shadow size to control the space */
   background-color: #6c6c6c;
 }
-.is-user-connected {
-  border: 2px solid #32af3f;
-  padding: 2px;
-}
+.is-user-connected,
 .user-not-connected {
-  border: 2px solid #919191;
-  padding: 2px;
+  border: 2px solid;
+  box-shadow: inset 0 0 0 2px #212121;
+}
+
+.is-user-connected {
+  border-color: #32af3f;
+}
+
+.user-not-connected {
+  border-color: #919191;
 }

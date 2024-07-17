@@ -109,6 +109,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.shoulRealoadUserPrograms$.pipe(startWith(undefined)),
   ]).pipe(
     switchMap(([userData]) => this.profileService.getUserPrograms(userData.userId)),
+    tap(console.log),
   );
 
   readonly spectedUserProgram$: Observable<ProgramModel[]> = combineLatest([

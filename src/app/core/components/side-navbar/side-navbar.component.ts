@@ -2,7 +2,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { Component, OnDestroy } from '@angular/core';
 import { NavigationEnd, Router, Event as RouterEvent } from '@angular/router';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../Auth/service/auth.service';
 import { NavService } from './nav.service';
 
@@ -26,10 +26,8 @@ export class SideNavbarComponent implements OnDestroy {
     filter(
       (event: RouterEvent): event is NavigationEnd => event instanceof NavigationEnd,
     ),
-    tap((event) =>
-      this.currentUrl$.next((event as NavigationEnd).urlAfterRedirects.split('?')[0]),
-    ),
     map((routerEvent) => {
+      this.currentUrl$.next(routerEvent.urlAfterRedirects.split('?')[0]);
       const basePath = routerEvent.urlAfterRedirects.split('/')[1];
       return !['auth', 'collaborate'].includes(basePath);
     }),

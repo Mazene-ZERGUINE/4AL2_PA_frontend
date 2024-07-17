@@ -1,30 +1,41 @@
 import {
-  Component,
-  ViewChild,
-  ElementRef,
   AfterViewInit,
+  Component,
+  ElementRef,
   OnDestroy,
+  ViewChild,
 } from '@angular/core';
-import * as ace from 'ace-builds';
-import 'ace-builds/src-noconflict/theme-nord_dark';
-import 'ace-builds/src-noconflict/mode-javascript';
-import 'ace-builds/src-noconflict/mode-python';
-import 'ace-builds/src-noconflict/mode-c_cpp';
-import 'ace-builds/src-noconflict/mode-php';
-import { Ace } from 'ace-builds';
-import { RunCodeRequestDto } from './models/RunCodeRequestDto';
-import { CodingProcessorService } from './coding-processor.service';
-import { RunCodeResponseDto } from './models/RunCodeResponseDto';
-import { NotifierService } from '../../core/services/notifier.service';
-import { filter, Observable, Subscription, switchMap, take, tap } from 'rxjs';
-import { ModalService } from '../../core/services/modal.service';
-import { ShareCodeModalComponent } from '../../core/modals/share-code-modal/share-code-modal.component';
-import { CreateProgramDto } from './models/CreateProgramDto';
 import { Router } from '@angular/router';
+import * as ace from 'ace-builds';
+import { Ace } from 'ace-builds';
+import 'ace-builds/src-noconflict/mode-c_cpp';
+import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/mode-php';
+import 'ace-builds/src-noconflict/mode-python';
+import 'ace-builds/src-noconflict/theme-nord_dark';
+import {
+  BehaviorSubject,
+  Observable,
+  Subscription,
+  filter,
+  switchMap,
+  take,
+  tap,
+} from 'rxjs';
+import { FileTypesEnum } from 'src/app/shared/enums/FileTypesEnum';
 import { AuthService } from '../../core/Auth/service/auth.service';
+import { ShareCodeModalComponent } from '../../core/modals/share-code-modal/share-code-modal.component';
 import { UserDataModel } from '../../core/models/user-data.model';
-import { CodePageUseGuidModalComponent } from '../../core/modals/code-page-use-guid-modal/code-page-use-guid-modal.component';
+import { ModalService } from '../../core/services/modal.service';
+import { NotifierService } from '../../core/services/notifier.service';
 import { AvailableLangages } from '../home-page/home-page.component';
+import { CodingProcessorService } from './coding-processor.service';
+import { CreateProgramDto } from './models/CreateProgramDto';
+import { RunCodeRequestDto } from './models/RunCodeRequestDto';
+import { RunCodeResponseDto } from './models/RunCodeResponseDto';
+import { CategorizedFiles, CodingPageUtils } from './coding-page-utils';
+import { DomSanitizer } from '@angular/platform-browser';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-coding-page',
@@ -36,16 +47,37 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
   @ViewChild('inputSelect', { static: false }) inputSelect!: ElementRef<HTMLInputElement>;
 
   aceEditor!: Ace.Editor;
+
   selectedLanguage =
     localStorage.getItem('selectedLanguage') ?? AvailableLangages.JAVASCRIPT;
+
   isLoading = false;
-  codeOutput!: { output: string; status: number };
+
+  codeOutput!: { output: string; status: number; output_file_paths?: string[] };
+
+  fileContents: { [key: string]: string } = {};
+
+  categorizedFiles!: CategorizedFiles;
+
+  readonly isPageLoading$ = new BehaviorSubject<boolean>(false);
+
+  readonly AvailableLangages = AvailableLangages;
+
   private userId!: string;
-  fileTypes = ['md', 'txt', 'csv', 'json', 'xlsx', 'yml', 'pdf', 'png', 'jpg', 'jpeg'];
+
+  image =
+    'https://code-runner-service-bucket.s3.eu-west-1.amazonaws.com/bd47de4f-73e6-4ea1-beba-26a900dafb9a/out/output_file_bd47de4f-73e6-4ea1-beba-26a900dafb9a_0.jpg';
+
+  readonly fileTypes = Object.values(FileTypesEnum);
+
   protected selectedInputFiles: File[] = [];
+
   private selectedOutputFormats: string[] = [];
+
   readonly userData$: Observable<UserDataModel> = this.authService.getUserData();
+
   private runCodeSubscription = new Subscription();
+
   private getUserDataSubscription = new Subscription();
 
   constructor(
@@ -54,10 +86,11 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
     private readonly modalService: ModalService,
     private readonly router: Router,
     private readonly authService: AuthService,
+    private readonly sanitizer: DomSanitizer,
+    private http: HttpClient,
   ) {}
 
   ngAfterViewInit(): void {
-    this.modalService.openDialog(CodePageUseGuidModalComponent, 700).subscribe();
     this.getUserDataSubscription = this.authService
       .getUserData()
       .subscribe((user: UserDataModel) => {
@@ -81,9 +114,14 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
     this.getUserDataSubscription.unsubscribe();
   }
 
-  onSelectedLanguageUpdate(): void {
-    localStorage.setItem('selectedLanguage', this.selectedLanguage);
+  onSelectedLanguageUpdate(language: AvailableLangages): void {
+    this.selectedLanguage = language;
+    localStorage.setItem('selectedLanguage', language);
     this.loadCodeFromLocalStorage();
+    this.updateAceEditorLanguage();
+  }
+
+  updateAceEditorLanguage(): void {
     this.aceEditor.session.setMode('ace/mode/' + this.getAceMode(this.selectedLanguage));
   }
 
@@ -143,7 +181,6 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.selectedInputFiles = [];
-    this.notifier.showSuccess('files cleared.');
   }
 
   onShareClick(): void {
@@ -168,10 +205,6 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
       .subscribe();
   }
 
-  onShowGuideClick(): void {
-    this.modalService.openDialog(CodePageUseGuidModalComponent, 700).subscribe();
-  }
-
   onAddFormatClick(format: string): void {
     this.selectedOutputFormats.push(format);
   }
@@ -190,6 +223,13 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  loadFileContent(filePath: string): void {
+    this.http.get(filePath, { responseType: 'text' }).subscribe(
+      (content) => (this.fileContents[filePath] = content),
+      (error) => console.error('Error loading file content', error),
+    );
+  }
+
   onInviteUsersClick(): void {
     this.codeProcessorService
       .generateCodingSession()
@@ -199,8 +239,11 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
           this.notifier.showSuccess(
             'creating the new coding session you will be redirected soon',
           );
+          this.isPageLoading$.next(true);
           // eslint-disable-next-line angular/timeout-service
           setTimeout(() => {
+            this.isPageLoading$.next(false);
+
             this.router.navigate(['collaborate', session.sessionId, this.userId]);
           }, 4000);
         }),
@@ -236,14 +279,13 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
       this.codeOutput = {
         output: response.result.stdout,
         status: response.result.returncode,
+        output_file_paths: response.result.output_file_paths,
       };
       const files = response.result.output_file_paths;
-      if (files && files.length > 0) {
-        if (files.length === 1) {
-          this.codeProcessorService.downloadOutputFile(files[0]);
-        } else {
-          this.codeProcessorService.downloadFilesAsZip(files);
-        }
+      this.categorizedFiles = CodingPageUtils.categorizeFiles(files);
+
+      if (files && files.length > 1) {
+        this.codeProcessorService.downloadFilesAsZip(files);
       }
       this.notifier.showSuccess('code executed successfully');
     } else {
@@ -282,22 +324,22 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
   }
 
   private setDefaultCode(language: string): void {
-    if (language === 'python') {
+    if (language === AvailableLangages.PYTHON) {
       this.aceEditor.setValue(`def hello():
       print("hello world")
     `);
-    } else if (language === 'javascript') {
+    } else if (language === AvailableLangages.JAVASCRIPT) {
       this.aceEditor.setValue(`function hello() {
       console.log("Hello, world!");
     }`);
-    } else if (language === 'c++') {
+    } else if (language === AvailableLangages.CPLUSPLUS) {
       this.aceEditor.setValue(`#include <iostream>
     using namespace std;
     int main() {
       cout << "Hello, world!" << endl;
       return 0;
     }`);
-    } else if (language === 'php') {
+    } else if (language === AvailableLangages.PHP) {
       this.aceEditor.setValue(`<?php
     echo "Hello, world!";
     ?>`);
