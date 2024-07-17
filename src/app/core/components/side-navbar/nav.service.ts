@@ -13,7 +13,7 @@ export class NavService {
     private apiService: ApiService,
   ) {}
 
-  private navBarState$: BehaviorSubject<boolean> = new BehaviorSubject(true);
+  private navBarState$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   get navBarState(): boolean {
     return this.navBarState$.value;

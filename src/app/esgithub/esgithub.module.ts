@@ -34,10 +34,14 @@ import { ProgramCodeComponent } from './home-page/program-item-list/program-code
 import { ProgramInputsOutputsComponent } from './home-page/program-item-list/program-inputs-outputs/program-inputs-outputs.component';
 import { SearchProgramInputComponent } from './home-page/search-program-input/search-program-input.component';
 import { ProgramActionsComponent } from './home-page/program-item-list/program-actions/program-actions.component';
-import { CountDisplayPipe } from '../shared/pipes/count-display.pipe';
 import { ProgramFilterPopOverComponent } from './home-page/program-filter-pop-over/program-filter-pop-over.component';
 import { FollowingComponent } from './side-profile/following/following.component';
 import { GroupItemComponent } from './groups/group-item/group-item.component';
+import { CodingPageLangagesSelectionComponent } from './coding-page/coding-page-langages-selection/coding-page-langages-selection.component';
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { CountDisplayPipe } from '../shared/pipes/count-display.pipe';
+import { FormatFilenamePipe } from '../shared/pipes/Format-filename.pipe';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [
@@ -67,6 +71,7 @@ import { GroupItemComponent } from './groups/group-item/group-item.component';
     ProgramFilterPopOverComponent,
     FollowingComponent,
     GroupItemComponent,
+    CodingPageLangagesSelectionComponent,
   ],
   imports: [
     CommonModule,
@@ -82,7 +87,10 @@ import { GroupItemComponent } from './groups/group-item/group-item.component';
     ReactiveFormsModule,
     UserDisplayNamePipe,
     NgOptimizedImage,
+    NgxExtendedPdfViewerModule,
     CountDisplayPipe,
+    MatProgressSpinnerModule,
+    FormatFilenamePipe,
   ],
 })
 export class EsgithubModule {}
