@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CodePageUseGuidModalComponent } from 'src/app/core/modals/code-page-use-guid-modal/code-page-use-guid-modal.component';
 import { ModalService } from 'src/app/core/services/modal.service';
 import { AvailableLangages } from '../../home-page/home-page.component';
@@ -10,6 +10,8 @@ import { AvailableLangages } from '../../home-page/home-page.component';
 })
 export class CodingPageLangagesSelectionComponent {
   @Output() langageChanged = new EventEmitter<AvailableLangages>();
+
+  @Input() programLangage: AvailableLangages | undefined;
 
   readonly AvailableLangages = AvailableLangages;
 

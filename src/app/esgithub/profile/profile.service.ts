@@ -17,8 +17,7 @@ export class ProfileService {
   }
 
   editAccount(payload: UserDataModel, userId: string): Observable<void> {
-    console.log(payload);
-    return this.apiService.putRequest('users/update/' + userId, payload);
+    return this.apiService.patchRequest('users/update/' + userId, payload);
   }
 
   uploadAvatar(file: File): Observable<{ url: string }> {

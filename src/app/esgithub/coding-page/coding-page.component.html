@@ -402,7 +402,7 @@
 
           <div *ngFor="let fileInput of selectedInputFiles">
             <p
-              class="bg-[#6C6C6C] relative py-2 px-1 ml-2 rounded text-[8px] text-[#212121]"
+              class="bg-[#6C6C6C] relative py-1 px-1 ml-2 rounded text-[8px] text-[#212121]"
             >
               {{ fileInput.name | formatFilename }}
             </p>
@@ -458,7 +458,6 @@
 
             <ng-container *ngIf="categorizedFiles.imageFiles; let imagesOutputFiles">
               <div *ngFor="let imageFileOuput of imagesOutputFiles">
-                <p>{{ imageFileOuput }}</p>
                 <img [src]="imageFileOuput" alt="result" />
               </div>
             </ng-container>
