@@ -5,7 +5,7 @@
   "doctype-first": false,
   "tag-pair": true,
   "spec-char-escape": true,
-  "id-unique": true,
+  "id-unique": false,
   "src-not-empty": true,
   "attr-no-duplication": true,
   "title-require": false

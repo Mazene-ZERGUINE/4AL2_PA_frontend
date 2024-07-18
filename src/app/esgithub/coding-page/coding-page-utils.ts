@@ -6,6 +6,9 @@ export interface CategorizedFiles {
 
 export class CodingPageUtils {
   static categorizeFiles(filePaths: string[]): CategorizedFiles {
+    if (!filePaths) {
+      return { otherFiles: [], imageFiles: [], pdfFiles: [] };
+    }
     const imageFiles: string[] = [];
     const pdfFiles: string[] = [];
     const otherFiles: string[] = [];

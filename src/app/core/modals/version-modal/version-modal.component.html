@@ -1,12 +1,12 @@
 <div class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-  <div class="bg-white rounded-lg shadow-lg overflow-hidden w-full max-w-md">
+  <div class="bg-[#121212] rounded-lg shadow-lg overflow-hidden w-full max-w-md">
     <div class="px-4 py-5 sm:px-6">
-      <h3 class="text-lg leading-6 font-medium text-gray-900">Enter Version</h3>
+      <h3 class="text-lg leading-6 font-medium text-white">Enter Version</h3>
     </div>
     <div class="px-4 py-5 sm:p-6">
       <form (submit)="submit()">
         <div class="mb-4">
-          <label for="versionLabel" class="block text-sm font-medium text-gray-700"
+          <label for="versionLabel" class="block text-sm font-medium text-white"
             >Version Label</label
           >
           <input
@@ -14,14 +14,14 @@
             name="versionLabel"
             [(ngModel)]="versionLabel"
             type="text"
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
+            class="mt-1 block w-full h-10 bg-[#333] border outline-none text-white pl-2 border-zinc-300 rounded-md shadow-sm"
           />
         </div>
         <div class="flex justify-end">
           <button
             type="submit"
             [disabled]="!versionLabel"
-            class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            class="ml-2 px-4 py-2 bg-[#333] text-white rounded-md shadow-sm outline-none"
           >
             Submit
           </button>

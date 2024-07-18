@@ -181,6 +181,7 @@ export class CodingPageComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this.selectedInputFiles = [];
+    this.selectedOutputFormats = [];
   }
 
   onShareClick(): void {

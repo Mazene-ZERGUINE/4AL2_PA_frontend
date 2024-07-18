@@ -20,13 +20,17 @@ import { RunCodeResponseDto } from '../coding-page/models/RunCodeResponseDto';
 import { NotifierService } from '../../core/services/notifier.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { io, Socket } from 'socket.io-client';
-import { BehaviorSubject, debounceTime, Observable, Subject, take } from 'rxjs';
+import { BehaviorSubject, debounceTime, Observable, Subject } from 'rxjs';
 import { AuthService } from '../../core/Auth/service/auth.service';
-import { map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { ModalService } from '../../core/services/modal.service';
 import { ConfirmationModalComponent } from '../../core/modals/conifrmatio-modal/confirmation-modal.component';
 import { UserDataModel } from '../../core/models/user-data.model';
 import { environment } from '../../../environment/environment';
+import { AvailableLangages } from '../home-page/home-page.component';
+import { FileTypesEnum } from 'src/app/shared/enums/FileTypesEnum';
+import { CategorizedFiles, CodingPageUtils } from '../coding-page/coding-page-utils';
+import { HttpClient } from '@angular/common/http';
 
 interface CodeChangePayload {
   code: string;
@@ -46,27 +50,43 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
   @ViewChild('inputSelect', { static: false }) inputSelect!: ElementRef<HTMLInputElement>;
 
   aceEditor!: Ace.Editor;
-  selectedLanguage = 'javascript';
+  selectedLanguage = AvailableLangages.JAVASCRIPT;
+
   isLoading = false;
-  codeOutput!: { output: string; status: number };
-  fileTypes = ['md', 'txt', 'csv', 'json', 'xlsx', 'yml', 'pdf', 'png', 'jpg', 'jpeg'];
+
+  codeOutput!: { output: string; status: number; output_file_paths?: string[] };
+
+  fileTypes = Object.values(FileTypesEnum);
+
   protected selectedInputFiles: File[] = [];
+
   private selectedOutputFormats: string[] = [];
+
   protected sessionUrl!: string;
+
   private socket!: Socket;
+
   private codeChange$ = new Subject<CodeChangePayload>();
+
   private cursorChange$ = new Subject<CursorChangePayload>();
+
   private isInternalChange: boolean = false;
 
   private ownerId!: string;
+
   private sessionId!: string;
   protected userAccess!: string;
+
   protected isWaitingForApproval: boolean = false;
 
   protected userTmpName: string = '';
 
   private userDataSubject = new BehaviorSubject<UserDataModel | null>(null);
   userData$: Observable<UserDataModel | null> = this.userDataSubject.asObservable();
+
+  fileContents: { [key: string]: string } = {};
+
+  categorizedFiles!: CategorizedFiles;
 
   constructor(
     private readonly codeProcessorService: CodingProcessorService,
@@ -77,6 +97,7 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly modalService: ModalService,
+    private readonly http: HttpClient,
   ) {}
 
   ngOnInit(): void {
@@ -171,7 +192,9 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
   }
 
   private checkUserAccess(): void {
+    console.log(this.userAccess);
     if (this.userAccess === 'owner') {
+      this.isWaitingForApproval = false;
       this.socket.emit('joinSession', this.sessionId);
     } else {
       this.isWaitingForApproval = true;
@@ -202,7 +225,8 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
     this.cursorChange$.unsubscribe();
   }
 
-  onSelectedLanguageUpdate(): void {
+  onSelectedLanguageUpdate(language: AvailableLangages): void {
+    this.selectedLanguage = language;
     this.setDefaultCode(this.selectedLanguage);
     this.aceEditor.session.setMode('ace/mode/' + this.getAceMode(this.selectedLanguage));
   }
@@ -251,6 +275,24 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
     }
   }
 
+  copySessionUrl(): void {
+    navigator.clipboard
+      .writeText(this.sessionUrl)
+      .then(() => {
+        this.notifier.showSuccess('URL copied to clipboard!');
+      })
+      .catch(() => {
+        this.notifier.showError('Failed to copy: ');
+      });
+  }
+
+  loadFileContent(filePath: string): void {
+    this.http.get(filePath, { responseType: 'text' }).subscribe(
+      (content) => (this.fileContents[filePath] = content),
+      (error) => console.error('Error loading file content', error),
+    );
+  }
+
   private checkUserRole(): void {
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['collaborate/', this.sessionId, this.ownerId], {
@@ -260,7 +302,7 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
       this.authService
         .getUserData()
         .pipe(
-          take(1),
+          first(),
           map((user) => {
             if (user.userId === this.ownerId) {
               this.router.navigate(['collaborate/', this.sessionId, this.ownerId], {
@@ -348,14 +390,13 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
       this.codeOutput = {
         output: response.result.stdout,
         status: response.result.returncode,
+        output_file_paths: response.result.output_file_paths,
       };
       const files = response.result.output_file_paths;
-      if (files && files.length > 0) {
-        if (files.length === 1) {
-          this.codeProcessorService.downloadOutputFile(files[0]);
-        } else {
-          this.codeProcessorService.downloadFilesAsZip(files);
-        }
+      this.categorizedFiles = CodingPageUtils.categorizeFiles(files);
+
+      if (files && files.length > 1) {
+        this.codeProcessorService.downloadFilesAsZip(files);
       }
       this.notifier.showSuccess('code executed successfully');
     } else {

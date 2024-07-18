@@ -4,6 +4,7 @@ import {
   OnDestroy,
   ViewChild,
   AfterViewChecked,
+  OnInit,
 } from '@angular/core';
 import { filter, Observable, of, Subject, switchMap, tap } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -27,46 +28,68 @@ import {
   VersionModel,
 } from '../../core/models/program-version.model';
 import { AvailableLangages } from '../home-page/home-page.component';
+import { FileTypesEnum } from 'src/app/shared/enums/FileTypesEnum';
+import { UserDataModel } from 'src/app/core/models/user-data.model';
+import { CategorizedFiles, CodingPageUtils } from '../coding-page/coding-page-utils';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-edit-user-program',
   templateUrl: './edit-user-program.component.html',
   styleUrls: ['./edit-user-program.component.scss'],
 })
-export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
-  componentDestroyer$ = new Subject<void>();
+export class EditUserProgramComponent implements OnInit, OnDestroy, AfterViewChecked {
+  readonly componentDestroyer$ = new Subject<void>();
 
   @ViewChild('editor') private editor!: ElementRef<HTMLElement>;
   @ViewChild('inputSelect', { static: false }) inputSelect!: ElementRef<HTMLInputElement>;
 
   aceEditor!: Ace.Editor;
+
   isLoading = false;
-  codeOutput!: { output: string; status: number };
-  fileTypes = ['md', 'txt', 'csv', 'json', 'xlsx', 'yml', 'pdf', 'png', 'jpg', 'jpeg'];
+
+  codeOutput!: { output: string; status: number; output_file_paths?: string[] };
+
+  readonly fileTypes = Object.values(FileTypesEnum);
 
   readonly AvailableLangages = AvailableLangages;
+
+  categorizedFiles!: CategorizedFiles;
+
+  fileContents: { [key: string]: string } = {};
+
   protected selectedInputFiles: File[] = [];
+
   private selectedOutputFormats: string[] = [];
+
   private programmingLanguage!: string;
+
   private isProgramVersion: boolean = false;
+
   private programVersionId?: string;
-  protected selectedVersion: VersionModel | ProgramModel | null = null;
+
   private program!: ProgramModel;
 
   protected programId: string = this.route.snapshot.params['programId'];
-  readonly userData$ = this.authService.getUserData().pipe(
+
+  readonly userData$: Observable<UserDataModel> = this.authService.getUserData().pipe(
     shareReplay({
       refCount: true,
       bufferSize: 1,
     }),
   );
-  programData$ = this.programEditService.getProgram(this.programId).pipe(
-    shareReplay({
-      refCount: true,
-      bufferSize: 1,
-    }),
-    map((program: ProgramModel) => program),
-  );
+
+  programData$: Observable<ProgramModel> = this.programEditService
+    .getProgram(this.programId)
+    .pipe(
+      shareReplay({
+        refCount: true,
+        bufferSize: 1,
+      }),
+      map((program: ProgramModel) => program),
+    );
+
+  protected selectedVersion: VersionModel | ProgramModel | null = null;
 
   programVersions$: Observable<ProgramVersionModel> = this.programEditService
     .getProgramVersion(this.programId)
@@ -87,7 +110,21 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
     private readonly notifier: NotifierService,
     private readonly modalService: ModalService,
     private readonly router: Router,
+    private readonly http: HttpClient,
   ) {}
+
+  ngOnInit(): void {
+    this.programData$
+      .pipe(
+        takeUntil(this.componentDestroyer$),
+        map((program) => {
+          this.program = program;
+          this.selectedVersion = program;
+          this.initializeAceEditor();
+        }),
+      )
+      .subscribe();
+  }
 
   ngAfterViewChecked(): void {
     if (!this.aceEditorInitialized && this.editor) {
@@ -222,6 +259,13 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
     }
   }
 
+  loadFileContent(filePath: string): void {
+    this.http.get(filePath, { responseType: 'text' }).subscribe(
+      (content) => (this.fileContents[filePath] = content),
+      (error) => console.error('Error loading file content', error),
+    );
+  }
+
   async onSaveNewVersionClick(): Promise<void> {
     if (this.isProgramVersion) {
       this.notifier.showWarning(
@@ -348,14 +392,13 @@ export class EditUserProgramComponent implements OnDestroy, AfterViewChecked {
       this.codeOutput = {
         output: response.result.stdout,
         status: response.result.returncode,
+        output_file_paths: response.result.output_file_paths,
       };
       const files = response.result.output_file_paths;
-      if (files && files.length > 0) {
-        if (files.length === 1) {
-          this.codeProcessor.downloadOutputFile(files[0]);
-        } else {
-          this.codeProcessor.downloadFilesAsZip(files);
-        }
+      this.categorizedFiles = CodingPageUtils.categorizeFiles(files);
+
+      if (files && files.length > 1) {
+        this.codeProcessor.downloadFilesAsZip(files);
       }
       this.notifier.showSuccess('code executed successfully');
     } else {
