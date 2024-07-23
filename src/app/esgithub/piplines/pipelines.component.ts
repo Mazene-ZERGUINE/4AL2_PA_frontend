@@ -1,22 +1,28 @@
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { Observable, Subject, BehaviorSubject, combineLatest, tap, finalize } from 'rxjs';
-import { map, shareReplay, switchMap, startWith, takeUntil } from 'rxjs/operators';
-import { ProgramModel } from '../../core/models/program.model';
-import { PipelinesService } from './pipelines.service';
-import { NotifierService } from '../../core/services/notifier.service';
-import { ChangeDetectorRef } from '@angular/core';
-import { animate, state, style, transition, trigger } from '@angular/animations';
-import { CodingProcessorService } from '../coding-page/coding-processor.service';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { BehaviorSubject, Observable, Subject, combineLatest, finalize, tap } from 'rxjs';
+import { map, shareReplay, startWith, switchMap, takeUntil } from 'rxjs/operators';
+import { NavigationService } from 'src/app/core/Auth/service/navigation.service';
 import { environment } from '../../../environment/environment';
+import { ProgramModel } from '../../core/models/program.model';
+import { NotifierService } from '../../core/services/notifier.service';
+import { CodingProcessorService } from '../coding-page/coding-processor.service';
 import { AvailableLangages } from '../home-page/home-page.component';
+import { PipelinesService } from './pipelines.service';
+import { CategorizedFiles, CodingPageUtils } from '../coding-page/coding-page-utils';
+import { HttpClient } from '@angular/common/http';
+
+export const availableLangagesQueryParamKey = 'availablelangages';
 
 @Component({
   selector: 'app-piplines',
@@ -35,6 +41,11 @@ export class PipelinesComponent implements OnInit, OnDestroy {
   inputSelect!: ElementRef<HTMLInputElement>;
   @ViewChild('dropZone', { static: false }) dropZone!: ElementRef<HTMLElement>;
 
+  readonly pipelineFormFilter = new FormGroup({
+    availableLangages: new FormControl<AvailableLangages[]>([]),
+    searchQuery: new FormControl<string>('', { nonNullable: true }),
+  });
+
   private componentDestroyer$ = new Subject<void>();
   private refreshPrograms$ = new Subject<void>();
   private selectedLanguages$ = new BehaviorSubject<string[]>([]);
@@ -44,10 +55,14 @@ export class PipelinesComponent implements OnInit, OnDestroy {
 
   protected selectedInputFiles: File[] = [];
   protected droppedPrograms: ProgramModel[] = [];
-  protected isLogin: boolean = false;
-  protected generatedFiles: string[] = [];
+  protected isLoading: boolean = false;
+  protected generatedFiles!: CategorizedFiles;
   protected isRefreshing: boolean = false;
   protected outputError?: string;
+
+  isOutputOpen = false;
+
+  fileContents: { [key: string]: string } = {};
 
   private readonly fileIconMapping: { [key: string]: string } = {
     pdf: 'https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg',
@@ -60,12 +75,24 @@ export class PipelinesComponent implements OnInit, OnDestroy {
     txt: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Text-txt.svg',
   };
 
-  readonly AvailableLangages = AvailableLangages;
+  readonly AvailableLangages = Object.values(AvailableLangages);
+
+  readonly availableLangagesQueryParam$: Observable<AvailableLangages[] | null> =
+    this.navigationService
+      .createQueryParamStream<AvailableLangages>(
+        availableLangagesQueryParamKey,
+        AvailableLangages,
+      )
+      .pipe(
+        tap((selectedLangages) => {
+          this.pipelineFormFilter.controls.availableLangages.setValue(selectedLangages);
+        }),
+      );
 
   protected programsList$: Observable<ProgramModel[]> = combineLatest([
     this.refreshPrograms$.pipe(startWith(undefined)),
-    this.selectedLanguages$,
-    this.searchQuery$.pipe(startWith('')),
+    this.availableLangagesQueryParam$,
+    this.pipelineFormFilter.controls.searchQuery.valueChanges.pipe(startWith('')),
     this.inputFilesFormats$,
     this.latestOutputFilesFormats$,
   ]).pipe(
@@ -75,8 +102,9 @@ export class PipelinesComponent implements OnInit, OnDestroy {
           map((programList) =>
             programList.filter((program) => {
               const matchesLanguage =
-                selectedLanguages.length === 0 ||
-                selectedLanguages.includes(program.programmingLanguage.toLowerCase());
+                selectedLanguages === null ||
+                selectedLanguages.includes(program.programmingLanguage);
+
               const matchesSearch = program.description
                 ?.toLowerCase()
                 .includes(searchQuery.toLowerCase());
@@ -121,6 +149,8 @@ export class PipelinesComponent implements OnInit, OnDestroy {
     private readonly cdr: ChangeDetectorRef,
     private readonly codeProcessorService: CodingProcessorService,
     private readonly router: Router,
+    readonly http: HttpClient,
+    readonly navigationService: NavigationService,
   ) {}
 
   ngOnInit(): void {
@@ -139,11 +169,17 @@ export class PipelinesComponent implements OnInit, OnDestroy {
     this.componentDestroyer$.complete();
   }
 
+  onHanleOpenOutput(): void {
+    this.isOutputOpen = !this.isOutputOpen;
+    console.log(this.isOutputOpen);
+  }
+
   onSelectStartFiles(event: any): void {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       Array.from(input.files).forEach((file) => {
         this.selectedInputFiles.push(file);
+        console.log(file);
         const fileFormat = file.name.split('.').pop()?.toLowerCase() || '';
         if (fileFormat && !this.inputFilesFormats$.value.includes(fileFormat)) {
           this.inputFilesFormats$.next([...this.inputFilesFormats$.value, fileFormat]);
@@ -151,6 +187,22 @@ export class PipelinesComponent implements OnInit, OnDestroy {
       });
       this.inputSelect.nativeElement.value = '';
       this.refreshPrograms$.next();
+    }
+  }
+
+  handleAvailableLangage(selectedLangage: AvailableLangages): void {
+    const currentLangages =
+      this.pipelineFormFilter.controls.availableLangages.value || [];
+    const updatedLangages = currentLangages.includes(selectedLangage)
+      ? currentLangages.filter((lang) => lang !== selectedLangage)
+      : [...currentLangages, selectedLangage];
+
+    if (updatedLangages.length > 0) {
+      this.navigationService.addQueriesToCurrentUrl({
+        [availableLangagesQueryParamKey]: updatedLangages.join(','),
+      });
+    } else {
+      this.navigationService.removeQueryParam(availableLangagesQueryParamKey);
     }
   }
 
@@ -167,14 +219,21 @@ export class PipelinesComponent implements OnInit, OnDestroy {
     this.refreshPrograms$.next();
   }
 
-  onSearchChange(event: any): void {
-    const searchQuery = (event.target as HTMLInputElement).value;
-    this.searchQuery$.next(searchQuery);
-    this.refreshPrograms$.next();
-  }
-
   onDragStart(event: DragEvent, program: ProgramModel): void {
     event.dataTransfer?.setData('application/json', JSON.stringify(program));
+  }
+
+  loadFileContent(filePath: string): void {
+    this.http
+      .get(filePath, { responseType: 'text' })
+      .pipe(
+        takeUntil(this.componentDestroyer$),
+        map((content) => {
+          this.fileContents[filePath] = content;
+          this.cdr.markForCheck();
+        }),
+      )
+      .subscribe();
   }
 
   onDrop(event: DragEvent): void {
@@ -210,12 +269,12 @@ export class PipelinesComponent implements OnInit, OnDestroy {
   }
 
   onRunPipeLineClick(): void {
-    this.isLogin = true;
+    this.isLoading = true;
     if (this.selectedInputFiles.length === 0) {
       this.notifierService.showError(
         'No input file provided. Select a file and try again.',
       );
-      this.isLogin = false;
+      this.isLoading = false;
       return;
     } else {
       const formData = new FormData();
@@ -229,8 +288,12 @@ export class PipelinesComponent implements OnInit, OnDestroy {
           takeUntil(this.componentDestroyer$),
           tap((response: { success: boolean; outputLinks: string[]; error?: string }) => {
             if (response.success) {
-              this.generatedFiles = response.outputLinks;
-              this.notifierService.showSuccess('pipeline executed successfully.');
+              const transformedLinks = response.outputLinks.map((link) =>
+                this.onGeneratedFile(link),
+              );
+              this.isOutputOpen = true;
+              this.generatedFiles = CodingPageUtils.categorizeFiles(transformedLinks);
+              this.notifierService.showSuccess('Pipeline executed successfully.');
             } else {
               this.outputError = response.error;
               this.notifierService.showError('error occurred while running pipelines.');
@@ -243,7 +306,7 @@ export class PipelinesComponent implements OnInit, OnDestroy {
             this.refreshPrograms$.next();
           }),
           finalize(() => {
-            this.isLogin = false;
+            this.isLoading = false;
             this.cdr.markForCheck();
           }),
         )
@@ -251,9 +314,13 @@ export class PipelinesComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected onGeneratedFileClick(filePath: string): void {
-    const url = environment.baseUrl.replace('/api/v1', '/') + filePath.trim();
-    this.codeProcessorService.downloadOutputFile(url);
+  protected onGeneratedFile(filePath: string): string {
+    const segments = filePath.split('/');
+    const startIndex = segments.indexOf('uploads');
+    const url =
+      environment.baseUrl.replace('/api/v1', '/') + segments.slice(startIndex).join('/');
+
+    return url;
   }
 
   protected getFileIcon(fileName: string): string {

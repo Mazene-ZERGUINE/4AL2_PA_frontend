@@ -37,10 +37,10 @@
     {{ numberOfLikes | countDisplay }} Likes
   </button>
   <button
-    class="text-white flex items-center px-20 py-3 bg-[#333333] rounded-lg"
+    class="text-white w-[294px] flex items-center justify-center px-20 py-3 bg-[#333333] rounded-lg"
     [routerLink]="['/program', programId]"
   >
-    <div class="mr-3">
+    <span class="">
       <svg
         width="30"
         height="30"
@@ -54,8 +54,9 @@
           stroke-width="2"
         />
       </svg>
-    </div>
-    {{ programCommentCount }} Comments
+    </span>
+    <span class="w-[25px] h-[25px]">{{ programCommentCount }}</span>
+    Comments
   </button>
   <button
     class="text-white flex items-center px-20 bg-[#333333] rounded-lg"

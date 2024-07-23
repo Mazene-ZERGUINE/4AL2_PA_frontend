@@ -50,7 +50,7 @@ export class NavigationService {
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
       queryParams: { [paramKey]: null },
-      queryParamsHandling: 'preserve',
+      queryParamsHandling: 'merge',
       preserveFragment: true,
       replaceUrl: true,
     });
