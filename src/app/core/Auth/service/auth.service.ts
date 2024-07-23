@@ -53,7 +53,8 @@ export class AuthService {
   }
 
   private launchConfetti(): void {
-    const end = Date.now() + 15 * 1000;
+    const durationInMilliseconds = 6 * 1000;
+    const end = Date.now() + durationInMilliseconds;
     const colors = ['#f93963', '#ffffff'];
 
     const myConfetti = confetti.create(undefined, { resize: true });
