@@ -11,6 +11,7 @@ export class PipelinesService {
   constructor(private readonly apiService: ApiService) {}
 
   runPipeLinesWithFiles(payload: any): Observable<any> {
+    console.log(payload);
     return this.apiService.postRequest('pipelines/file', payload);
   }
 

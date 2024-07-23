@@ -28,7 +28,6 @@ export class ProgramFilterPopOverComponent {
 
   handleAvailableLangage(selectedLangage: AvailableLangages): void {
     const currentLangages = this.availableLangagesControl.value || [];
-    console.log(currentLangages);
     const updatedLangages = currentLangages.includes(selectedLangage)
       ? currentLangages.filter((lang) => lang !== selectedLangage)
       : [...currentLangages, selectedLangage];
