@@ -336,10 +336,7 @@
               [userProgram]="program"
             ></app-program-inputs-outputs>
 
-            <a
-              class="cursor-pointer"
-              [routerLink]="['/program/edit/', program.programId]"
-            >
+            <a class="cursor-pointer" [routerLink]="['/program/', program.programId]">
               <svg
                 width="44"
                 height="44"
@@ -492,7 +489,7 @@
   <div
     [ngClass]="{
       'w-full absolute bottom-0  bg-[#212121] overflow-auto': true,
-      'h-1/3': isOutputOpen,
+      'h-2/3': isOutputOpen,
       'h-14': !isOutputOpen
     }"
   >
