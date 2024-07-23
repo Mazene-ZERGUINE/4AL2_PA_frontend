@@ -7,6 +7,7 @@ import { AccessTokenDto } from '../models/access-token.dto';
 import { UserDataModel } from '../../models/user-data.model';
 import { NotifierService } from '../../services/notifier.service';
 import { Router } from '@angular/router';
+import * as confetti from 'canvas-confetti';
 
 @Injectable({
   providedIn: 'root',
@@ -46,8 +47,36 @@ export class AuthService {
       map(() => {
         localStorage.clear();
         this.notifier.showSuccess('you logged out');
-        this.router.navigate(['auth']);
+        this.router.navigate(['auth']).then(this.launchConfetti);
       }),
     );
+  }
+
+  private launchConfetti(): void {
+    const end = Date.now() + 15 * 1000;
+    const colors = ['#f93963', '#ffffff'];
+
+    const myConfetti = confetti.create(undefined, { resize: true });
+
+    (function frame(): void {
+      myConfetti({
+        particleCount: 2,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors,
+      });
+      myConfetti({
+        particleCount: 2,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors,
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    })();
   }
 }
