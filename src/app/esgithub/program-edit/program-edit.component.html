@@ -545,7 +545,10 @@
         </span>
       </div>
     </div>
-    <div class="p-6 bg-[#141414] flex rounded-lg w-[95%] items-center justify-between">
+    <div
+      *ngIf="program"
+      class="p-6 bg-[#141414] flex rounded-lg w-[95%] items-center justify-between"
+    >
       <div class="w-full rounded-full flex items-center">
         <img
           class="h-[50px] w-[50px] rounded-full"
