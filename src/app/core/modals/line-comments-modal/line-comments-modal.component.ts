@@ -41,8 +41,15 @@ export class LineCommentsModalComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.getLinesCommentsSubscription.unsubscribe();
-    this.onCommentSubscribe.unsubscribe();
+    if (this.getLinesCommentsSubscription) {
+      this.getLinesCommentsSubscription.unsubscribe();
+    }
+    if (this.onCommentSubscribe) {
+      this.onCommentSubscribe.unsubscribe();
+    }
+    if (this.loadCommentsSubscription) {
+      this.loadCommentsSubscription.unsubscribe();
+    }
   }
 
   private loadComments(): void {

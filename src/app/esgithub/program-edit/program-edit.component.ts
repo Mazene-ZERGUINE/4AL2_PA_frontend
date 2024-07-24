@@ -1,3 +1,5 @@
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { HttpClient } from '@angular/common/http';
 import {
   AfterViewInit,
   Component,
@@ -6,39 +8,37 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import * as ace from 'ace-builds';
+import { Ace } from 'ace-builds';
 import {
-  filter,
-  forkJoin,
   Observable,
   Subject,
   Subscription,
+  filter,
+  forkJoin,
   switchMap,
   tap,
 } from 'rxjs';
-import { UserDataModel } from '../../core/models/user-data.model';
-import { AuthService } from '../../core/Auth/service/auth.service';
-import { EditProgramService } from './edit-program.service';
-import { ActivatedRoute } from '@angular/router';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
-import { ProgramModel } from '../../core/models/program.model';
-import * as ace from 'ace-builds';
-import { Ace } from 'ace-builds';
-import { ReactionsEnum } from '../../shared/enums/reactions.enum';
-import { NotifierService } from '../../core/services/notifier.service';
-import { ModalService } from '../../core/services/modal.service';
+import { UserUtils } from 'src/app/core/Auth/utils/user.utils';
+import { AuthService } from '../../core/Auth/service/auth.service';
 import { LineCommentsModalComponent } from '../../core/modals/line-comments-modal/line-comments-modal.component';
-import { animate, state, style, transition, trigger } from '@angular/animations';
-import { CodingProcessorService } from '../coding-page/coding-processor.service';
-import { RunCodeResponseDto } from '../coding-page/models/RunCodeResponseDto';
-import { RunCodeRequestDto } from '../coding-page/models/RunCodeRequestDto';
 import {
   ProgramVersionModel,
   VersionModel,
 } from '../../core/models/program-version.model';
-import { AvailableLangages } from '../home-page/home-page.component';
+import { ProgramModel } from '../../core/models/program.model';
+import { UserDataModel } from '../../core/models/user-data.model';
+import { ModalService } from '../../core/services/modal.service';
+import { NotifierService } from '../../core/services/notifier.service';
+import { ReactionsEnum } from '../../shared/enums/reactions.enum';
 import { CategorizedFiles, CodingPageUtils } from '../coding-page/coding-page-utils';
-import { HttpClient } from '@angular/common/http';
-import { UserUtils } from 'src/app/core/Auth/utils/user.utils';
+import { CodingProcessorService } from '../coding-page/coding-processor.service';
+import { RunCodeRequestDto } from '../coding-page/models/RunCodeRequestDto';
+import { RunCodeResponseDto } from '../coding-page/models/RunCodeResponseDto';
+import { AvailableLangages } from '../home-page/home-page.component';
+import { EditProgramService } from './edit-program.service';
 
 @Component({
   selector: 'app-program-edit',
@@ -149,7 +149,6 @@ export class ProgramEditComponent implements OnInit, AfterViewInit, OnDestroy {
         map((program) => {
           this.program = program;
           this.selectedVersion = program;
-          this.loadProgramDetails();
         }),
       )
       .subscribe();
@@ -229,6 +228,8 @@ export class ProgramEditComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private onGutterClick(e: any): void {
+    e.preventDefault();
+    console.log('object');
     const target = e.domEvent.target;
     if (target.className.indexOf('ace_gutter-cell') === -1) {
       return;
@@ -237,11 +238,14 @@ export class ProgramEditComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.dialogSubscription) {
       this.dialogSubscription.unsubscribe();
     }
-    const dialogRef = this.modalService.openDialog(LineCommentsModalComponent, 900, {
-      lineNumber: row,
-      programId: this.program.programId,
-    });
-    this.dialogSubscription = dialogRef.subscribe(() => this.reloadProgramComments());
+    this.modalService
+      .openDialog(LineCommentsModalComponent, 900, {
+        lineNumber: row,
+        programId: this.program.programId,
+      })
+      .subscribe(() => {
+        this.reloadProgramComments();
+      });
   }
 
   private reloadProgramComments(): void {
