@@ -54,7 +54,12 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
 
   isLoading = false;
 
-  codeOutput!: { output: string; status: number; output_file_paths?: string[] };
+  codeOutput!: {
+    output: string;
+    status: number;
+    output_file_paths?: string[];
+    stderr?: string;
+  };
 
   fileTypes = Object.values(FileTypesEnum);
 
@@ -403,6 +408,7 @@ export class CollaborativeCodingComponent implements AfterViewInit, OnDestroy, O
       this.codeOutput = {
         output: response.result.stderr,
         status: response.result.returncode,
+        stderr: response.result.stderr,
       };
       this.notifier.showError('code returned with error');
     }

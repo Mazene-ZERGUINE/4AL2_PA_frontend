@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   OnDestroy,
+  OnInit,
   ViewChild,
 } from '@angular/core';
 import {
@@ -29,13 +30,15 @@ import { LineCommentsModalComponent } from '../../core/modals/line-comments-moda
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { CodingProcessorService } from '../coding-page/coding-processor.service';
 import { RunCodeResponseDto } from '../coding-page/models/RunCodeResponseDto';
-import { ShowCodeExecutionResultModalComponent } from '../../core/modals/show-code-execution-result-modal/show-code-execution-result-modal.component';
 import { RunCodeRequestDto } from '../coding-page/models/RunCodeRequestDto';
 import {
   ProgramVersionModel,
   VersionModel,
 } from '../../core/models/program-version.model';
 import { AvailableLangages } from '../home-page/home-page.component';
+import { CategorizedFiles, CodingPageUtils } from '../coding-page/coding-page-utils';
+import { HttpClient } from '@angular/common/http';
+import { UserUtils } from 'src/app/core/Auth/utils/user.utils';
 
 @Component({
   selector: 'app-program-edit',
@@ -64,7 +67,7 @@ import { AvailableLangages } from '../home-page/home-page.component';
     ]),
   ],
 })
-export class ProgramEditComponent implements AfterViewInit, OnDestroy {
+export class ProgramEditComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('editor') private editor!: ElementRef<HTMLElement>;
 
   readonly userData$: Observable<UserDataModel> = this.authService.getUserData();
@@ -73,6 +76,19 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
   private loadCommentsSubscription: Subscription = new Subscription();
   private dialogSubscription: Subscription = new Subscription();
   private commentsSubscription: Subscription = new Subscription();
+
+  codeOutput!: {
+    output: string;
+    status: number;
+    output_file_paths?: string[];
+    stderr?: string;
+  };
+
+  categorizedFiles!: CategorizedFiles;
+
+  fileContents: { [key: string]: string } = {};
+
+  isCommentsOpen = false;
 
   programComments!: any[];
   aceEditor!: Ace.Editor;
@@ -88,7 +104,7 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
   protected selectedInputFiles: File[] = [];
   hideButtonText: string = 'Show description';
   @ViewChild('inputSelect', { static: false }) inputSelect!: ElementRef<HTMLInputElement>;
-  @ViewChild('descriptionButton') descriptionButton!: ElementRef<HTMLButtonElement>;
+  // @ViewChild('descriptionButton') descriptionButton!: ElementRef<HTMLButtonElement>;
 
   readonly anonymousImageUrl =
     'http://thumbs.dreamstime.com/b/default-profile-picture-avatar-photo-placeholder-vector-illustration-default-profile-picture-avatar-photo-placeholder-vector-189495158.jpg';
@@ -102,7 +118,19 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
       .getProgramVersion(this.programId)
       .pipe(shareReplay({ refCount: true, bufferSize: 1 }));
 
+  readonly componentDestroyer$ = new Subject<void>();
+
   protected selectedVersion: ProgramModel | VersionModel | null = null;
+
+  programData$: Observable<ProgramModel> = this.editProgramService
+    .getProgram(this.programId)
+    .pipe(
+      shareReplay({
+        refCount: true,
+        bufferSize: 1,
+      }),
+      map((program: ProgramModel) => program),
+    );
 
   constructor(
     private readonly authService: AuthService,
@@ -111,7 +139,21 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
     private readonly notifier: NotifierService,
     private readonly modalService: ModalService,
     private readonly codeProccesorService: CodingProcessorService,
+    readonly http: HttpClient,
   ) {}
+
+  ngOnInit(): void {
+    this.programData$
+      .pipe(
+        takeUntil(this.componentDestroyer$),
+        map((program) => {
+          this.program = program;
+          this.selectedVersion = program;
+          this.loadProgramDetails();
+        }),
+      )
+      .subscribe();
+  }
 
   ngAfterViewInit(): void {
     this.loadProgramDetails();
@@ -154,9 +196,13 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
           ).length;
           this.aceEditor = ace.edit(this.editor.nativeElement);
           this.aceEditor.setTheme('ace/theme/nord_dark');
-          this.aceEditor.session.setMode('ace/mode/' + this.program.programmingLanguage);
+
           if (programDetails.programmingLanguage === AvailableLangages.CPLUSPLUS) {
             this.aceEditor.session.setMode('ace/mode/c_cpp');
+          } else {
+            this.aceEditor.session.setMode(
+              'ace/mode/' + this.program.programmingLanguage,
+            );
           }
           this.aceEditor.setOptions({
             fontSize: '15px',
@@ -188,6 +234,9 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
       return;
     }
     const row = e.getDocumentPosition().row;
+    if (this.dialogSubscription) {
+      this.dialogSubscription.unsubscribe();
+    }
     const dialogRef = this.modalService.openDialog(LineCommentsModalComponent, 900, {
       lineNumber: row,
       programId: this.program.programId,
@@ -246,6 +295,14 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
       type: 'warning',
     }));
     session.setAnnotations(annotations);
+  }
+
+  onHanleOpenComment(): void {
+    this.isCommentsOpen = !this.isCommentsOpen;
+  }
+
+  onFormatCommentAt(comment: string): string {
+    return UserUtils.calculateElapsed(comment);
   }
 
   onLikeClick(): void {
@@ -341,7 +398,7 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
         this.notifier.showWarning(
           'Input files are required for this program check description for more details',
         );
-        this.descriptionButton.nativeElement.focus();
+        // this.descriptionButton.nativeElement.focus();
         return;
       }
 
@@ -349,7 +406,7 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
         this.notifier.showWarning(
           'the number of files you have selected dont match with the required files',
         );
-        this.descriptionButton.nativeElement.focus();
+        // this.descriptionButton.nativeElement.focus();
         return;
       }
       this.isLoading = true;
@@ -375,42 +432,69 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
     };
   }
 
+  // private handleResponse(response: RunCodeResponseDto): void {
+  //   if (response.result.output_file_paths) {
+  //     if (response.result.output_file_paths.length > 0) {
+  //       this.codeOutput = {
+  //         output: response.result.stdout,
+  //         status: response.result.returncode,
+  //         output_file_paths: response.result.output_file_paths,
+  //       };
+  //       this.categorizedFiles = CodingPageUtils.categorizeFiles(
+  //         response.result.output_file_paths,
+  //       );
+  //     }
+  //   }
+  //   const dialog = this.modalService.openDialog(
+  //     ShowCodeExecutionResultModalComponent,
+  //     700,
+  //     {
+  //       code: response.result.returncode,
+  //       stdout: response.result.stdout,
+  //       stderr: response.result.stderr,
+  //     },
+  //   );
+  //   dialog
+  //     .pipe(
+  //       takeUntil(this.componentDestroyes$),
+  //       tap(() => {
+  //         this.notifier.showSuccess('code executed completed successfully.');
+  //         this.cleanAll();
+  //       }),
+  //     )
+  //     .subscribe();
+  //   this.isLoading = false;
+  // }
+
   private handleResponse(response: RunCodeResponseDto): void {
-    if (response.result.output_file_paths) {
-      if (response.result.output_file_paths.length > 0) {
-        this.codeProccesorService.downloadFilesAsZip(response.result.output_file_paths);
-      } else {
-        this.codeProccesorService.downloadOutputFile(
-          response.result.output_file_paths[0],
-        );
-      }
-    }
-    const dialog = this.modalService.openDialog(
-      ShowCodeExecutionResultModalComponent,
-      700,
-      {
-        code: response.result.returncode,
-        stdout: response.result.stdout,
+    if (response.result.returncode === 0) {
+      this.codeOutput = {
+        output: response.result.stdout,
+        status: response.result.returncode,
+        output_file_paths: response.result.output_file_paths,
+      };
+      const files = response.result.output_file_paths;
+      this.categorizedFiles = CodingPageUtils.categorizeFiles(files);
+
+      this.notifier.showSuccess('code executed successfully');
+    } else {
+      this.codeOutput = {
+        output: response.result.stderr,
+        status: response.result.returncode,
         stderr: response.result.stderr,
-      },
-    );
-    dialog
-      .pipe(
-        takeUntil(this.componentDestroyes$),
-        tap(() => {
-          this.notifier.showSuccess('code executed completed successfully.');
-          this.cleanAll();
-        }),
-      )
-      .subscribe();
+      };
+      this.notifier.showError('code returned with error');
+    }
     this.isLoading = false;
+    this.cleanAll();
   }
 
-  private cleanAll(): void {
+  cleanAll(): void {
     this.selectedInputFiles = [];
   }
 
   private handleError(): void {
+    this.isLoading = false;
     this.notifier.showError('Something went wrong!');
   }
 
@@ -426,6 +510,13 @@ export class ProgramEditComponent implements AfterViewInit, OnDestroy {
     formData.append('sourceCode', this.aceEditor.getValue());
 
     return formData;
+  }
+
+  loadFileContent(filePath: string): void {
+    this.http.get(filePath, { responseType: 'text' }).subscribe(
+      (content) => (this.fileContents[filePath] = content),
+      (error) => console.error('Error loading file content', error),
+    );
   }
 
   toggleDescription(): void {

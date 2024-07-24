@@ -439,6 +439,11 @@
             color="accent"
             *ngIf="isLoading"
           ></mat-progress-bar>
+
+          <p *ngIf="codeOutput && codeOutput.status !== 0" class="p-4">
+            <span class="text-white">{{ codeOutput.stderr }}</span>
+          </p>
+
           <p *ngIf="codeOutput && codeOutput.status === 0" class="p-4">
             {{ codeOutput.output }}
 
