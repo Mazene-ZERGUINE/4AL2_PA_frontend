@@ -48,7 +48,12 @@ export class EditUserProgramComponent implements OnInit, OnDestroy, AfterViewChe
 
   isLoading = false;
 
-  codeOutput!: { output: string; status: number; output_file_paths?: string[] };
+  codeOutput!: {
+    output: string;
+    status: number;
+    output_file_paths?: string[];
+    stderr?: string;
+  };
 
   readonly fileTypes = Object.values(FileTypesEnum);
 
@@ -405,6 +410,7 @@ export class EditUserProgramComponent implements OnInit, OnDestroy, AfterViewChe
       this.codeOutput = {
         output: response.result.stderr,
         status: response.result.returncode,
+        stderr: response.result.stderr,
       };
       this.notifier.showError('code returned with error');
     }

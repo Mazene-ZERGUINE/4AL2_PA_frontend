@@ -4,6 +4,7 @@ import { EditProgramService } from '../../../esgithub/program-edit/edit-program.
 import { Subscription, switchMap } from 'rxjs';
 import { AuthService } from '../../Auth/service/auth.service';
 import { map } from 'rxjs/operators';
+import { UserUtils } from '../../Auth/utils/user.utils';
 
 @Component({
   selector: 'app-line-comments-modal',
@@ -35,11 +36,11 @@ export class LineCommentsModalComponent implements OnInit, OnDestroy {
     this.programId = data.programId;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadComments();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.getLinesCommentsSubscription.unsubscribe();
     this.onCommentSubscribe.unsubscribe();
   }
@@ -94,6 +95,10 @@ export class LineCommentsModalComponent implements OnInit, OnDestroy {
         ),
       )
       .subscribe(() => this.loadComments());
+  }
+
+  onFormatCommentAt(comment: string): string {
+    return UserUtils.calculateElapsed(comment);
   }
 
   onCommentClick(): void {
