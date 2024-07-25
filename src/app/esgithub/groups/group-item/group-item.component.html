@@ -5,7 +5,7 @@
   <div
     class="rounded-2xl mb-4 w-[352px] h-[352px] bg-cover bg-no-repeat bg-center"
     [style.background-image]="
-      'url(' + (group.imageUrl ? 'http://' + group.imageUrl : anonymousGroupImage) + ')'
+      'url(' + (group.imageUrl ? replace(group.imageUrl) : anonymousGroupImage) + ')'
     "
   ></div>
 

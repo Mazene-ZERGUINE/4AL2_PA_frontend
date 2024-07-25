@@ -28,4 +28,11 @@ export class GroupItemComponent implements OnInit {
 
     this.numberOfMembers = this.group.members.length;
   }
+  // style =
+  //   'background-image: url(&quot;http://localhost:3000/uploads/avatars/0fdaa2e9-a20b-45c3-9f63-4039927bdbe7.png&quot;);';
+
+  replace(imageUrl: string): string {
+    console.log(imageUrl.replace('localhost:3000/', 'https://api.esgithub.org/'));
+    return imageUrl.replace('http://localhost:3000/', 'https://api.esgithub.org/');
+  }
 }
